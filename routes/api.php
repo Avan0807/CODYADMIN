@@ -25,8 +25,6 @@ use App\Http\Controllers\Api\ApiAppointmentController;
 Route::post('admin/login', [ApiAuthAdminController::class, 'adminLogin']);
 Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middleware('auth:sanctum');
 
-
-
 // =================== DOCTOR AUTHENTICATION ===================
 Route::prefix('doctor')->group(function () {
     Route::post('/login', [ApiDoctorController::class, 'doctorLogin']);
