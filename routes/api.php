@@ -168,3 +168,4 @@ Route::prefix('appointments')->group(function () {
     Route::delete('/delete/{id}', [ApiAppointmentController::class, 'deleteAppointment']);
 });
 
+// ok
