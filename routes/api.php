@@ -22,28 +22,28 @@ use App\Http\Controllers\Api\ApiAuthAdminController;
 use App\Http\Controllers\Api\ApiAppointmentController;
 
 // =================== ADMIN LOGIN ===================
-Route::post('admin/login', [ApiAuthAdminController::class, 'adminLogin']); // Đăng nhập admin
-Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middleware('auth:sanctum'); // Đăng xuất admin
+Route::post('admin/login', [ApiAuthAdminController::class, 'adminLogin']);
+Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middleware('auth:sanctum');
 
 // =================== DOCTOR AUTHENTICATION ===================
 Route::prefix('doctor')->group(function () {
-    Route::post('/login', [ApiDoctorController::class, 'doctorLogin']); // Bác sĩ đăng nhập
+    Route::post('/login', [ApiDoctorController::class, 'doctorLogin']);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']); // Bác sĩ đăng xuất
-        Route::put('/update/{id}', [ApiDoctorController::class, 'update']); // Cập nhật thông tin bác sĩ
+        Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']); 
+        Route::put('/update/{id}', [ApiDoctorController::class, 'update']); 
     });
 });
 
 // =================== ADMIN DOCTOR MANAGEMENT ===================
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
-    Route::post('/create-doctor', [ApiDoctorController::class, 'createDoctor']); // Admin tạo tài khoản bác sĩ
-    Route::delete('/delete-doctor/{id}', [ApiDoctorController::class, 'deleteDoctor']); // Admin xóa tài khoản bác sĩ
+    Route::post('/create-doctor', [ApiDoctorController::class, 'createDoctor']); 
+    Route::delete('/delete-doctor/{id}', [ApiDoctorController::class, 'deleteDoctor']);
 });
 
 // =================== DOCTOR ROUTES ===================
-Route::get('doctors', [ApiDoctorController::class, 'index']); // Lấy danh sách bác sĩ
-Route::get('doctors/{id}', [ApiDoctorController::class, 'show']); // Lấy thông tin bác sĩ theo ID
+Route::get('doctors', [ApiDoctorController::class, 'index']);
+Route::get('doctors/{id}', [ApiDoctorController::class, 'show']);
 
 // =================== AUTH ROUTES ===================
 Route::post('login', [ApiAuthController::class, 'login']);
