@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Notification;
 
 class ApiAppointmentController extends Controller
 {
-    // =================== ĐẶT LỊCH ===================
+    // =================== ĐẶT LỊCH HẸN ===================
     public function createAppointment(Request $request)
     {
         $validator = Validator::make($request->all(), [
