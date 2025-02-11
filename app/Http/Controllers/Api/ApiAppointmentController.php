@@ -43,7 +43,7 @@ class ApiAppointmentController extends Controller
                 'notes' => $request->notes,
             ]);
 
-            // ✅ Lấy danh sách admin
+            /* ✅ Lấy danh sách admin
             $admins = User::where('role', 'admin')->get();
 
             if ($admins->count() > 0) {
@@ -56,7 +56,7 @@ class ApiAppointmentController extends Controller
 
                 // ✅ Gửi thông báo đến tất cả Admin
                 Notification::send($admins, new StatusNotification($details));
-            }
+            }*/
 
             return response()->json([
                 'success' => true,

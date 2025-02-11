@@ -167,5 +167,3 @@ Route::prefix('appointments')->group(function () {
     Route::delete('/cancel/{id}', [ApiAppointmentController::class, 'cancelAppointment']);
     Route::delete('/delete/{id}', [ApiAppointmentController::class, 'deleteAppointment']);
 });
-
-// ok
