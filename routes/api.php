@@ -27,6 +27,8 @@ Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middlewa
 
 // dm may
 
+// resset may cc 
+
 // =================== DOCTOR AUTHENTICATION ===================
 Route::prefix('doctor')->group(function () {
     Route::post('/login', [ApiDoctorController::class, 'doctorLogin']);
