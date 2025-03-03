@@ -24,10 +24,12 @@ class ApiAffiliateController extends Controller
         ])->first();
 
         $affiliate_link = "";
-        $commissionPercentage = 10.00; // Giá trị mặc định, có thể thay đổi nếu cần
+        $commissionPercentage = 0; // Giá trị mặc định
+        $hashRef = ""; // Khởi tạo biến tránh lỗi
 
         if ($existingLink) {
             $affiliate_link = url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$existingLink->hash_ref}");
+            $hashRef = $existingLink->hash_ref; // Lấy hash_ref từ link đã tồn tại
 
             // ✅ Đảm bảo `product_link` luôn có dữ liệu
             if (empty($existingLink->product_link)) {
@@ -54,14 +56,21 @@ class ApiAffiliateController extends Controller
             ]);
         }
 
+        // ✅ Tạo deeplink để mở app
+        $deep_link = "https://toikhoe.vn/deep-link/product/{$product->slug}?ref={$hashRef}";
+        $open_app_link = "yourapp://product/{$product->slug}?ref={$hashRef}";
+        $fallback_url = $affiliate_link;
+
         return response()->json([
             'message' => $existingLink ? 'Link Affiliate đã tồn tại!' : 'Link Affiliate được tạo thành công!',
             'affiliate_link' => $affiliate_link,
+            'deep_link' => $deep_link,
+            'open_app_link' => $open_app_link,
+            'fallback_url' => $fallback_url,
             'commission_percentage' => $commissionPercentage,
             'data' => $existingLink ?? $affiliate
         ], $existingLink ? 200 : 201);
     }
-
 
     public function trackClick(Request $request, $affiliate_code) {
         // Tìm thông tin affiliate link
@@ -114,8 +123,4 @@ class ApiAffiliateController extends Controller
             'points_added' => $pointsAdded
         ], 200);
     }
-
-
-
-
 }
