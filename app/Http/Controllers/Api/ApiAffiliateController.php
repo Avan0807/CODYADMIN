@@ -13,39 +13,39 @@ class ApiAffiliateController extends Controller
 {
     public function generateLink($product_slug) {
         $doctorID = Auth::id();
-
+    
         // ✅ Tìm sản phẩm theo slug
         $product = Product::where('slug', $product_slug)->firstOrFail();
-
+    
         // ✅ Kiểm tra xem link đã tồn tại chưa
         $existingLink = AffiliateLink::where([
             ['doctor_id', $doctorID],
             ['product_id', $product->id]
         ])->first();
-
+    
         $affiliate_link = "";
         $commissionPercentage = 0; // Giá trị mặc định
         $hashRef = ""; // Khởi tạo biến tránh lỗi
-
+    
         if ($existingLink) {
-            $affiliate_link = url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$existingLink->hash_ref}");
             $hashRef = $existingLink->hash_ref; // Lấy hash_ref từ link đã tồn tại
-
+            $affiliate_link = "https://toikhoe.vn/product-detail/{$product->slug}?ref={$hashRef}";
+    
             // ✅ Đảm bảo `product_link` luôn có dữ liệu
             if (empty($existingLink->product_link)) {
                 $existingLink->update([
                     'product_link' => $affiliate_link
                 ]);
             }
-
+    
             $commissionPercentage = $existingLink->commission_percentage;
         } else {
             // ✅ Tạo mã hash_ref mới
             $hashRef = hash('sha256', $doctorID . $product->id . time());
-
+    
             // ✅ Tạo link sản phẩm kèm hash_ref
-            $affiliate_link = url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$hashRef}");
-
+            $affiliate_link = "https://toikhoe.vn/product-detail/{$product->slug}?ref={$hashRef}";
+    
             // ✅ Lưu vào bảng `affiliate_links`
             $affiliate = AffiliateLink::create([
                 'doctor_id' => $doctorID,
@@ -55,22 +55,21 @@ class ApiAffiliateController extends Controller
                 'commission_percentage' => $commissionPercentage
             ]);
         }
-
-        // ✅ Tạo deeplink để mở app
-        $deep_link = "https://toikhoe.vn/deep-link/product/{$product->slug}?ref={$hashRef}";
-        $open_app_link = "yourapp://product/{$product->slug}?ref={$hashRef}";
-        $fallback_url = $affiliate_link;
-
+    
+        // ✅ Tạo open_app_link theo yêu cầu mới
+        $openAppLink = "https://toikhoe.vn/product-detail/{$product->slug}?ref={$hashRef}";
+    
         return response()->json([
             'message' => $existingLink ? 'Link Affiliate đã tồn tại!' : 'Link Affiliate được tạo thành công!',
             'affiliate_link' => $affiliate_link,
-            'deep_link' => $deep_link,
-            'open_app_link' => $open_app_link,
-            'fallback_url' => $fallback_url,
+            'deep_link' => "https://toikhoe.vn/deep-link/product/{$product->slug}?ref={$hashRef}",
+            'open_app_link' => $openAppLink,
+            'fallback_url' => $openAppLink, // Nếu không có app, vẫn mở trên trình duyệt
             'commission_percentage' => $commissionPercentage,
             'data' => $existingLink ?? $affiliate
         ], $existingLink ? 200 : 201);
     }
+    
 
     public function trackClick(Request $request, $affiliate_code) {
         // Tìm thông tin affiliate link

@@ -30,6 +30,7 @@
               <th>Kho</th>
               <th>Ảnh</th>
               <th>Trạng thái</th>
+              <th>Hoa hồng</th>
               <th>Chức năng</th>
             </tr>
           </thead>
@@ -73,12 +74,26 @@
                             <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
                         @endif
                     </td>
+
+
                     <td>
                         @if($product->status=='active')
                             <span class="badge badge-success">{{$product->status}}</span>
                         @else
                             <span class="badge badge-warning">{{$product->status}}</span>
                         @endif
+                    </td>
+                    <td>
+                        <div class="input-group commission-group">
+                            <input type="number" class="form-control commission-input"
+                                  data-id="{{ $product->id }}"
+                                  value="{{ number_format($product->commission_percentage, 2) }}"
+                                  min="0" max="100" step="0.01">
+                            <div class="input-group-append">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <small class="text-success commission-status d-none">✔ Đã lưu</small>
                     </td>
                     <td>
                         <a href="{{route('product.edit',$product->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
@@ -174,4 +189,39 @@
           })
       })
   </script>
+  
+<script>
+    $(document).ready(function () {
+        $('.commission-input').on('change blur keypress', function (event) {
+            if (event.type === "keypress" && event.which !== 13) return;
+
+            let inputField = $(this);
+            let commissionValue = inputField.val();
+            let productId = inputField.data('id');
+            let statusMessage = inputField.closest('td').find('.commission-status');
+            let url = "{{ route('products.update-commission', ':id') }}".replace(':id', productId);
+
+            // Hiện loading khi đang cập nhật
+            inputField.prop('disabled', true);
+            statusMessage.text('⏳ Đang cập nhật...').removeClass('d-none text-success').addClass('text-warning');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    commission_percentage: commissionValue
+                },
+                success: function (response) {
+                    inputField.prop('disabled', false);
+                    statusMessage.text('✔ Đã lưu').removeClass('text-warning').addClass('text-success').fadeIn().delay(1000).fadeOut();
+                },
+                error: function (xhr) {
+                    inputField.prop('disabled', false);
+                    swal("Lỗi!", "Không thể cập nhật hoa hồng, thử lại sau!", "error");
+                }
+            });
+        });
+    });
+</script>
 @endpush

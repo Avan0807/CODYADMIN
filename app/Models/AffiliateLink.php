@@ -20,7 +20,6 @@ class AffiliateLink extends Model
         'product_id',
         'hash_ref',
         'product_link',  // ✅ Thêm trường lưu link sản phẩm
-        'commission_percentage' // ✅ Thêm trường lưu % hoa hồng
     ];
 
     /**
@@ -58,7 +57,6 @@ class AffiliateLink extends Model
             'product_id' => $productId,
             'hash_ref' => $hashRef,
             'product_link' => $productLink,
-            'commission_percentage' => $commissionPercentage
         ]);
     }
 

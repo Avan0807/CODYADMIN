@@ -220,4 +220,21 @@ class ProductController extends Controller
             ], 500);
         }
     }
+    public function updateCommission(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        
+        $request->validate([
+            'commission_percentage' => 'numeric|min:0|max:100'
+        ]);
+
+        $product->commission_percentage = $request->commission_percentage;
+        $product->save();
+
+        return response()->json([
+            'message' => 'Cập nhật hoa hồng thành công!',
+            'commission_percentage' => $product->commission_percentage
+        ]);
+    }
+
 }
