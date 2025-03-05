@@ -5,9 +5,9 @@
   <div class="card-body">
     @if($message)
         @if($message->photo)
-        <img src="{{$message->photo}}" class="rounded-circle " style="margin-left:44%;">
-        @else 
-        <img src="{{asset('backend/img/avatar.png')}}" class="rounded-circle " style="margin-left:44%;">
+        <img src="{{$message->photo}}" class="rounded-circle img-fluid" style="max-width: 150px; height: auto;">
+        @else
+        <img src="{{asset('backend/img/avatar.png')}}" class="rounded-circle " style="max-width: 150px; height: auto;">
         @endif
         <div class="py-4">Từ: <br>
            Tên :{{$message->name}}<br>

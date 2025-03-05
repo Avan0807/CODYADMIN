@@ -32,39 +32,39 @@
             </tr>
           </thead>
           <tbody>
-            @foreach($campaign_notifications as $notification)   
+            @foreach($campaign_notifications as $notification)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $notification->title }}</td>
                     <td>{{ ucfirst($notification->target_audience) }}</td>
-                    <td>{{ $notification->created_at->format('F d, Y h:i A') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($notification->created_at)->format('d-m-Y H:i') }}</td>
                     <td>
-                        <a href="{{ route('campaign_notifications.show', $notification->id) }}" 
-                           class="btn btn-primary btn-sm float-left mr-1" 
-                           style="height:30px; width:30px; border-radius:50%" 
+                        <a href="{{ route('campaign_notifications.show', $notification->id) }}"
+                           class="btn btn-primary btn-sm float-left mr-1"
+                           style="height:30px; width:30px; border-radius:50%"
                            data-toggle="tooltip" title="Xem">
                             <i class="fas fa-eye"></i>
                         </a>
 
-                        <a href="{{ route('campaign_notifications.edit', $notification->id) }}" 
-                           class="btn btn-warning btn-sm float-left mr-1" 
-                           style="height:30px; width:30px; border-radius:50%" 
+                        <a href="{{ route('campaign_notifications.edit', $notification->id) }}"
+                           class="btn btn-warning btn-sm float-left mr-1"
+                           style="height:30px; width:30px; border-radius:50%"
                            data-toggle="tooltip" title="Chỉnh sửa">
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        <form method="POST" action="{{ route('campaign_notifications.destroy', $notification->id) }}" class="delete-form">
-                          @csrf 
+                        <form method="POST" action="{{ route('campaign_notifications.destroy', $notification->id) }}" class="delete-form d-inline">
+                          @csrf
                           @method('delete')
-                          <button type="submit" 
-                                  class="btn btn-danger btn-sm dltBtn" 
-                                  style="height:30px; width:30px; border-radius:50%" 
+                          <button type="submit"
+                                  class="btn btn-danger btn-sm dltBtn"
+                                  style="height:30px; width:30px; border-radius:50%"
                                   data-toggle="tooltip" title="Xóa">
                               <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
                     </td>
-                </tr>  
+                </tr>
             @endforeach
           </tbody>
         </table>
@@ -90,12 +90,31 @@
   <script>
       $(document).ready(function(){
           $('#notification-dataTable').DataTable({
+              "ordering": true,
+              "searching": true,
+              "paging": false,
+              "lengthMenu": [10, 25, 50, 100],
               "columnDefs": [
                   {
                       "orderable": false,
-                      "targets": [4]
+                      "targets": [4] // Không sắp xếp cột hoạt động
                   }
-              ]
+              ],
+              "language": {
+                  "sProcessing":   "Đang xử lý...",
+                  "sLengthMenu":   "Hiển thị _MENU_ dòng",
+                  "sZeroRecords":  "Không tìm thấy dữ liệu phù hợp",
+                  "sInfo":         "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                  "sInfoEmpty":    "Không có dữ liệu",
+                  "sInfoFiltered": "(được lọc từ tổng số _MAX_ mục)",
+                  "sSearch":       "Tìm kiếm:",
+                  "oPaginate": {
+                      "sFirst":    "Đầu",
+                      "sPrevious": "Trước",
+                      "sNext":     "Tiếp",
+                      "sLast":     "Cuối"
+                  }
+              }
           });
 
           $('.dltBtn').click(function(e){
@@ -114,6 +133,7 @@
                       form.submit();
                   } else {
                       swal("Dữ liệu của bạn vẫn an toàn!");
+                      return false;
                   }
               });
           });

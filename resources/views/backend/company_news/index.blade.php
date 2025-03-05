@@ -32,31 +32,29 @@
             </tr>
           </thead>
           <tbody>
-            @foreach($news as $item)   
+            @foreach($news as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->title }}</td>
                     <td>
-                        @if($item->image)
-                            <img src="{{ asset('storage/'.$item->image) }}" class="img-fluid" style="max-width:80px">
-                        @else
-                            <img src="{{ asset('backend/img/no-image.png') }}" class="img-fluid" style="max-width:80px">
-                        @endif
+                        <img src="{{ $item->image ? asset('storage/'.$item->image) : asset('backend/img/no-image.png') }}"
+                             class="img-fluid"
+                             style="width:80px; height:auto;">
                     </td>
-                    <td>{{ \Carbon\Carbon::parse($item->published_at)->format('d-m-Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->published_at)->translatedFormat('d-m-Y') }}</td>
                     <td>
                         <a href="{{ route('company_news.edit', $item->id) }}" class="btn btn-warning btn-sm">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form method="POST" action="{{ route('company_news.destroy', $item->id) }}" class="d-inline">
-                          @csrf 
+                        <form method="POST" action="{{ route('company_news.destroy', $item->id) }}" class="d-inline delete-form">
+                          @csrf
                           @method('delete')
                           <button type="submit" class="btn btn-danger btn-sm dltBtn">
                               <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
                     </td>
-                </tr>  
+                </tr>
             @endforeach
           </tbody>
         </table>
@@ -71,7 +69,6 @@
 
 @push('styles')
   <link href="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
 @endpush
 
 @push('scripts')
@@ -81,33 +78,27 @@
 
   <script>
       $(document).ready(function(){
-          $('#notification-dataTable').DataTable({
-              "columnDefs": [
-                  {
-                      "orderable": false,
-                      "targets": [4]
+          $('#news-dataTable').DataTable({
+              "ordering": true,
+              "searching": true,
+              "paging": false,
+              "lengthMenu": [10, 25, 50, 100],
+              "columnDefs": [ { "orderable": false, "targets": [4] } ],
+              "language": {
+                  "sProcessing":   "Đang xử lý...",
+                  "sLengthMenu":   "Hiển thị _MENU_ dòng",
+                  "sZeroRecords":  "Không tìm thấy dữ liệu phù hợp",
+                  "sInfo":         "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                  "sInfoEmpty":    "Không có dữ liệu",
+                  "sInfoFiltered": "(được lọc từ tổng số _MAX_ mục)",
+                  "sSearch":       "Tìm kiếm:",
+                  "oPaginate": {
+                      "sFirst":    "Đầu",
+                      "sPrevious": "Trước",
+                      "sNext":     "Tiếp",
+                      "sLast":     "Cuối"
                   }
-              ]
-          });
-
-          $('.dltBtn').click(function(e){
-              e.preventDefault();
-              var form = $(this).closest('form');
-
-              swal({
-                  title: "Bạn có chắc không?",
-                  text: "Sau khi xóa, bạn sẽ không thể khôi phục dữ liệu này!",
-                  icon: "warning",
-                  buttons: true,
-                  dangerMode: true,
-              })
-              .then((willDelete) => {
-                  if (willDelete) {
-                      form.submit();
-                  } else {
-                      swal("Dữ liệu của bạn vẫn an toàn!");
-                  }
-              });
+              }
           });
       });
   </script>

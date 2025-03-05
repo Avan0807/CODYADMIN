@@ -18,9 +18,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::getAllProduct();
+        $products = Product::paginate(10); // Hiển thị 10 sản phẩm mỗi trang
         return view('backend.product.index')->with('products', $products);
     }
+
 
     /**
      * Trang thêm mới sản phẩm.
@@ -223,7 +224,7 @@ class ProductController extends Controller
     public function updateCommission(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        
+
         $request->validate([
             'commission_percentage' => 'numeric|min:0|max:100'
         ]);
