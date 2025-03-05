@@ -9,6 +9,7 @@ use App\Models\PostCategory;
 use App\Models\PostTag;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -176,12 +177,12 @@ class PostController extends Controller
 
     //API---------------------------------------------------------------------------------------------------------------------
 
+
     public function apiCreatePost(Request $request)
     {
         // Xác thực bác sĩ (token)
         $doctor = $request->user(); // Bác sĩ đã đăng nhập
 
-        // Kiểm tra nếu không có thông tin bác sĩ
         if (!$doctor) {
             return response()->json([
                 'success' => false,
@@ -195,26 +196,40 @@ class PostController extends Controller
             'tags' => 'required|string|max:255',
             'summary' => 'required|string|max:500',
             'description' => 'required|string',
-            'photo' => 'nullable|string',  // Nếu có ảnh
-            'quote' => 'nullable|string',  // Nếu có trích dẫn
-            'post_cat_id' => 'required|exists:post_categories,id', // Kiểm tra thể loại bài viết
-            'post_tag_id' => 'nullable|exists:post_tags,id', // Kiểm tra tag
-            'status' => 'required|string|in:active,inactive', // Kiểm tra trạng thái
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048', // Chấp nhận file ảnh, max 2MB
+            'quote' => 'nullable|string',
+            'post_cat_id' => 'required|exists:post_categories,id',
+            'post_tag_id' => 'nullable|exists:post_tags,id',
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         try {
+            // Xử lý upload ảnh lên S3 nếu có
+            $photoUrl = null;
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = 'posts/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                // Upload lên S3
+                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file), 'public');
+
+                if ($uploaded) {
+                    $photoUrl = Storage::disk('s3')->url($fileName);
+                }
+            }
+
             // Tạo bài viết mới
             $post = Post::create([
                 'title' => $validated['title'],
                 'tags' => $validated['tags'],
                 'summary' => $validated['summary'],
                 'description' => $validated['description'],
-                'photo' => $validated['photo'] ?? null,
+                'photo' => $photoUrl, // Lưu link ảnh trên S3
                 'quote' => $validated['quote'] ?? null,
                 'post_cat_id' => $validated['post_cat_id'],
                 'post_tag_id' => $validated['post_tag_id'] ?? null,
                 'status' => $validated['status'],
-                'added_by' => $doctor->doctorID, // Lưu ID bác sĩ vào trường added_by
+                'added_by' => $doctor->doctorID, // Lưu ID bác sĩ
             ]);
 
             return response()->json([
@@ -230,6 +245,7 @@ class PostController extends Controller
             ], 500); // Lỗi 500 - Server Error
         }
     }
+
     public function apiGetAllPosts()
     {
         try {

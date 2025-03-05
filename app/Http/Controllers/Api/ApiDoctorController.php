@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Order;
+use Illuminate\Support\Facades\Storage;
 
 class ApiDoctorController extends Controller
 {
@@ -29,8 +30,11 @@ class ApiDoctorController extends Controller
     }
 
     // Admin tạo tài khoản bác sĩ (Cập nhật đầy đủ các trường)
+
+
     public function createDoctor(Request $request)
     {
+        // Kiểm tra quyền admin
         if (!auth()->user() || auth()->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
@@ -38,6 +42,7 @@ class ApiDoctorController extends Controller
             ], 403);
         }
 
+        // Xác thực dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'specialization' => 'required|string',
@@ -48,7 +53,7 @@ class ApiDoctorController extends Controller
             'workplace' => 'nullable|string',
             'phone' => 'required|string|unique:doctors',
             'email' => 'required|email|unique:doctors',
-            'photo' => 'nullable|string',
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048', // Hỗ trợ upload ảnh
             'status' => 'required|in:active,inactive',
             'rating' => 'nullable|numeric|min:0|max:5',
             'consultation_fee' => 'nullable|numeric|min:0',
@@ -65,18 +70,41 @@ class ApiDoctorController extends Controller
             ], 422);
         }
 
-        // Mã hóa mật khẩu
-        $doctorData = $request->all();
-        $doctorData['password'] = bcrypt($request->password);
+        try {
+            // Mã hóa mật khẩu
+            $doctorData = $request->except(['photo']);
+            $doctorData['password'] = bcrypt($request->password);
 
-        $doctor = Doctor::create($doctorData);
+            // Xử lý upload ảnh lên S3 nếu có
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = 'doctors/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tài khoản bác sĩ đã được tạo thành công.',
-            'doctor' => $doctor,
-        ], 201);
+                // Upload lên S3
+                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file), 'public');
+
+                if ($uploaded) {
+                    $doctorData['photo'] = Storage::disk('s3')->url($fileName);
+                }
+            }
+
+            // Tạo tài khoản bác sĩ
+            $doctor = Doctor::create($doctorData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tài khoản bác sĩ đã được tạo thành công.',
+                'doctor' => $doctor,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tạo tài khoản bác sĩ!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     // Xem thông tin bác sĩ theo ID
     public function show($id)

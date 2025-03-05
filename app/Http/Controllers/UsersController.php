@@ -11,7 +11,6 @@ use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Log;
 
-
 class UsersController extends Controller
 {
     /**
@@ -47,34 +46,34 @@ class UsersController extends Controller
             $request,
             [
                 'name' => 'string|required|max:30',
-                'email' => 'string|required|email|unique:users,email', 
+                'email' => 'string|required|email|unique:users,email',
                 'phone' => 'required|string|max:15',
-                'password' => 'required|string|min:6', 
-                'role' => 'required|in:admin,user', 
+                'password' => 'required|string|min:6',
+                'role' => 'required|in:admin,user',
                 'status' => 'required|in:active,inactive',
                 'photo' => 'nullable|string',
             ]
         );
-    
+
         $data = $request->all();
         $data['password'] = Hash::make($request->password); // Mã hóa mật khẩu
-    
+
         // Kiểm tra nếu người dùng không nhập ảnh thì gán ảnh mặc định
         if (empty($data['photo'])) {
             $data['photo'] = 'default-avatar.png'; // Thay bằng ảnh mặc định của bạn
         }
-    
+
         $status = User::create($data);
-    
+
         if ($status) {
             request()->session()->flash('success', 'Người dùng đã được thêm thành công');
         } else {
             request()->session()->flash('error', 'Đã xảy ra lỗi khi thêm người dùng');
         }
-    
+
         return redirect()->route('users.index');
     }
-    
+
 
     /**
      * Display the specified resource.
@@ -116,7 +115,7 @@ class UsersController extends Controller
                 'name' => 'string|required|max:30',
                 'email' => 'string|required|email|unique:users,email,'.$id,
                 'phone' => 'required|string|max:15',
-                'role' => 'required|in:admin,user', 
+                'role' => 'required|in:admin,user',
                 'status' => 'required|in:active,inactive',
                 'photo' => 'nullable|string',
             ]
@@ -178,6 +177,7 @@ class UsersController extends Controller
         }
     }
 
+
     public function apiuploadAvatar(Request $request, $id)
     {
         try {
@@ -206,17 +206,32 @@ class UsersController extends Controller
                 ], 400);
             }
 
+            // Tạo tên file mới và thư mục lưu trữ
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $sanitizedName = Str::slug($originalName);
             $fileName = $sanitizedName . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('uploads/photos', $fileName, 'public');
-            $fileUrl = asset('storage/' . $filePath);
+            $filePath = 'uploads/photos/' . $fileName;
 
-            if ($user->photo) {
-                $oldPath = str_replace(asset('storage/'), '', $user->photo);
-                Storage::delete('public/' . $oldPath);
+            // Upload lên S3
+            $uploaded = Storage::disk('s3')->put($filePath, file_get_contents($file), 'public');
+
+            if (!$uploaded) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể tải ảnh lên S3.',
+                ], 500);
             }
 
+            // Lấy URL từ S3
+            $fileUrl = Storage::disk('s3')->url($filePath);
+
+            // Xóa ảnh cũ trên S3 nếu có
+            if ($user->photo) {
+                $oldPath = str_replace(Storage::disk('s3')->url(''), '', $user->photo);
+                Storage::disk('s3')->delete($oldPath);
+            }
+
+            // Lưu URL mới vào database
             $user->photo = $fileUrl;
             $user->save();
 
@@ -233,6 +248,7 @@ class UsersController extends Controller
             ], 500);
         }
     }
+
 
 
     public function apigetAvatarByUserId($id)
@@ -318,7 +334,7 @@ class UsersController extends Controller
     {
         // Kiểm tra xem người dùng có quyền truy cập thông báo của userID này hay không
         $user = $request->user();  // Người dùng hiện tại
-    
+
         // Kiểm tra xem userID trong URL có phải là người dùng hiện tại không (hoặc có quyền xem thông báo của user khác)
         if ($user->id != $userID) {
             return response()->json([
@@ -326,17 +342,17 @@ class UsersController extends Controller
                 'message' => 'Truy cập trái phép vào thông báo của người dùng.',
             ], 403);
         }
-    
+
         // Lấy thông tin user từ userID
         $targetUser = User::find($userID);
-    
+
         if (!$targetUser) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy người dùng.',
             ], 404);
         }
-    
+
         // Trả về thông báo và thông tin user (bao gồm ID)
         return response()->json([
             'success' => true,
@@ -344,8 +360,8 @@ class UsersController extends Controller
             'notifications' => $targetUser->notifications,
         ], 200);
     }
-    
-    
+
+
     /**
      * Đánh dấu một thông báo là đã đọc
      */
@@ -373,7 +389,7 @@ class UsersController extends Controller
     {
         // Lấy thông tin người dùng đã đăng nhập (user)
         $user = $request->user();
-    
+
         // Kiểm tra xem người dùng có quyền truy cập thông báo của chính mình không
         if ($user->id != $userID) {
             return response()->json([
@@ -381,17 +397,17 @@ class UsersController extends Controller
                 'message' => 'Truy cập trái phép vào thông báo của người dùng.',
             ], 403); // Nếu không phải user hiện tại, trả về lỗi 403
         }
-    
+
         // Lấy các thông báo chưa đọc của user
         $unreadNotifications = $user->unreadNotifications;
-    
+
         // Trả về thông báo chưa đọc của user
         return response()->json([
             'success' => true,
             'notifications' => $unreadNotifications,
         ], 200);
     }
-    
+
 
     /**
      * Xóa một thông báo
