@@ -47,26 +47,34 @@ class UsersController extends Controller
             $request,
             [
                 'name' => 'string|required|max:30',
-                'email' => 'string|required|unique:email',
-                'password' => 'string|required',
-                'role' => 'required|in:admin,user,doctor',
+                'email' => 'string|required|email|unique:users,email', 
+                'phone' => 'required|string|max:15',
+                'password' => 'required|string|min:6', 
+                'role' => 'required|in:admin,user', 
                 'status' => 'required|in:active,inactive',
                 'photo' => 'nullable|string',
             ]
         );
-        // dd($request->all());
+    
         $data = $request->all();
-        $data['password'] = Hash::make($request->password);
-        // dd($data);
+        $data['password'] = Hash::make($request->password); // Mã hóa mật khẩu
+    
+        // Kiểm tra nếu người dùng không nhập ảnh thì gán ảnh mặc định
+        if (empty($data['photo'])) {
+            $data['photo'] = 'default-avatar.png'; // Thay bằng ảnh mặc định của bạn
+        }
+    
         $status = User::create($data);
-        // dd($status);
+    
         if ($status) {
             request()->session()->flash('success', 'Người dùng đã được thêm thành công');
         } else {
             request()->session()->flash('error', 'Đã xảy ra lỗi khi thêm người dùng');
         }
+    
         return redirect()->route('users.index');
     }
+    
 
     /**
      * Display the specified resource.
@@ -101,16 +109,19 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
         $this->validate(
             $request,
             [
                 'name' => 'string|required|max:30',
-                'email' => 'string|required|unique:email',
-                'role' => 'required|in:admin,user,doctor',
+                'email' => 'string|required|email|unique:users,email,'.$id,
+                'phone' => 'required|string|max:15',
+                'role' => 'required|in:admin,user', 
                 'status' => 'required|in:active,inactive',
                 'photo' => 'nullable|string',
             ]
         );
+
         // dd($request->all());
         $data = $request->all();
         // dd($data);

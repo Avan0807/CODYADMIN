@@ -33,8 +33,8 @@ return [
     // Then you can rewrite userField function in App\Handler\ConfigHandler class
     // And set 'user_field' to App\Handler\ConfigHandler::class
     // Ex: The private folder of user will be named as the user id.
-    'private_folder_name'      => UniSharp\LaravelFilemanager\Handlers\ConfigHandler::class,
 
+    'private_folder_name'      => 'images', 
 
     'allow_shared_folder'      => false,
 
@@ -48,12 +48,11 @@ return [
 
     'folder_categories' => [
         'file' => [
-            'folder_name' => 'photos', // Sử dụng cùng folder
+            'folder_name' => 'images', // Thay đổi thành 'images'
             'startup_view' => 'grid',
             'max_size' => 50000, // size in KB
             'valid_mime' => [
                 'image/jpeg',
-                'image/pjpeg',
                 'image/png',
                 'image/gif',
                 'image/svg+xml',
@@ -63,12 +62,11 @@ return [
             ],
         ],
         'image' => [
-            'folder_name' => 'photos', // Sử dụng cùng folder
+            'folder_name' => 'images', // Thay đổi thành 'images'
             'startup_view' => 'list',
             'max_size' => 50000, // size in KB
             'valid_mime' => [
                 'image/jpeg',
-                'image/pjpeg',
                 'image/png',
                 'image/gif',
                 'image/svg+xml',
@@ -78,6 +76,7 @@ return [
             ],
         ],
     ],
+
 
 
     /*
@@ -96,7 +95,9 @@ return [
     |--------------------------------------------------------------------------
      */
 
-    'disk'                     => 'public',
+    'disk'                     => 's3',
+    
+    'url'                      => env('AWS_URL'),
 
     'rename_file'              => false,
 

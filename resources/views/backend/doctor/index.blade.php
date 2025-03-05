@@ -51,9 +51,9 @@
                     </td>
                     <td>
                         @if($doctor->status=='active')
-                            <span class="badge badge-success">{{$doctor->status}}</span>
+                            <span class="badge badge-success">Hoạt động</span>
                         @else
-                            <span class="badge badge-warning">{{$doctor->status}}</span>
+                            <span class="badge badge-warning">Không hoạt động</span>
                         @endif
                     </td>
                     <td>

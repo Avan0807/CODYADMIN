@@ -41,20 +41,10 @@
                             <span class="text-danger">Chưa có sản phẩm</span>
                         @endif
                     </td>
-
-                    <!-- Ô nhập % hoa hồng (có tự động lưu) -->
                     <td>
-                        <div class="input-group">
-                            <input type="number" class="form-control commission-input"
-                                   data-id="{{ $affiliate->id }}"
-                                   value="{{ number_format($affiliate->commission_percentage, 2) }}"
-                                   min="0" max="100" step="0.01">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                        <small class="text-success commission-status d-none">✔ Đã lưu</small>
+                        <span>{{ number_format($affiliate->commission_percentage, 2) }}%</span>
                     </td>
+
                 </tr>
             @endforeach
           </tbody>
@@ -115,39 +105,6 @@
       });
   </script>
 
-<script>
-    $(document).ready(function () {
-        $('.commission-input').on('change blur keypress', function (event) {
-            if (event.type === "keypress" && event.which !== 13) return;
 
-            let inputField = $(this);
-            let commissionValue = inputField.val();
-            let affiliateId = inputField.data('id');
-            let statusMessage = inputField.closest('td').find('.commission-status');
-            let url = "{{ route('products-affiliate.update-commission', ':id') }}".replace(':id', affiliateId);
-
-            // Hiện loading khi đang cập nhật
-            inputField.prop('disabled', true);
-            statusMessage.text('⏳ Đang cập nhật...').removeClass('d-none text-success').addClass('text-warning');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    commission_percentage: commissionValue
-                },
-                success: function (response) {
-                    inputField.prop('disabled', false);
-                    statusMessage.text('✔ Đã lưu').removeClass('text-warning').addClass('text-success').fadeIn().delay(1000).fadeOut();
-                },
-                error: function (xhr) {
-                    inputField.prop('disabled', false);
-                    swal("Lỗi!", "Không thể cập nhật hoa hồng, thử lại sau!", "error");
-                }
-            });
-        });
-    });
-</script>
 
 @endpush

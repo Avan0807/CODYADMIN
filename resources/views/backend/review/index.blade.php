@@ -49,9 +49,9 @@
                     <td>{{$review->created_at->setTimezone('Asia/Ho_Chi_Minh')->format('F d, Y h:i A')}}</td>
                     <td>
                         @if($review->status=='active')
-                          <span class="badge badge-success">{{$review->status}}</span>
+                            <span class="badge badge-success">Hoạt động</span>
                         @else
-                          <span class="badge badge-warning">{{$review->status}}</span>
+                            <span class="badge badge-warning">Không hoạt động</span>
                         @endif
                     </td>
                     <td>

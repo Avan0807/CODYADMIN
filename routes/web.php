@@ -137,7 +137,7 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     Route::resource('/company_news', 'CompanyNewsController');
 
     Route::get('/products-affiliate', 'ProductAffiliateController@index')->name('products.affiliate.index');
-    Route::post('/products/update-commission/{id}', 'ProductController@updateCommission')->name('products.update-commission');
+    Route::post('/products/update-commission/{id}', 'ProductController@updateCommission')->name('products-affiliate.update-commission');
 
     Route::get('/affiliate-orders', 'AffiliateOrderController@index')->name('affiliate_orders.index');
     Route::post('/affiliate-orders/{id}/update-status', 'AffiliateOrderController@updateStatus')->name('admin.affiliate.orders.update');

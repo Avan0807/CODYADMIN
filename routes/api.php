@@ -27,6 +27,24 @@ use App\Http\Controllers\Api\ApiAffiliateController;
 use App\Http\Controllers\Api\ApiOrderController;
 use App\Http\Controllers\Api\ApiCartController;
 use App\Http\Controllers\Api\ApiDoctorReviewController;
+use Illuminate\Support\Facades\Storage;
+
+Route::post('/upload', function (Request $request) {
+    if (!$request->hasFile('file')) {
+        return response()->json(['error' => 'Không có file được upload'], 400);
+    }
+
+    $file = $request->file('file');
+
+    // Lưu file vào S3 mà không đặt ACL
+    $path = Storage::disk('s3')->putFileAs('images', $file, $file->getClientOriginalName());
+
+    // Lấy URL công khai
+    $url = Storage::disk('s3')->url($path);
+
+    return response()->json(['url' => $url]);
+});
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('doctor-reviews', [ApiDoctorReviewController::class, 'store']); // Đăng đánh giá

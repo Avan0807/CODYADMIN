@@ -30,8 +30,8 @@
             @foreach($comments as $comment)
                 <tr>
                     <td>{{$comment->id}}</td>
-                    <td>{{$comment->user_info['name']}}</td>
-                    <td>{{$comment->post->title}}</td>
+                    <td>{{ $comment->user_info ? $comment->user_info['name'] : 'Không có thông tin' }}</td>
+                    <td>{{ $comment->post ? $comment->post->title : 'Không có bài viết' }}</td>
                     <td>{{$comment->comment}}</td>
                     <td>{{$comment->created_at->setTimezone('Asia/Ho_Chi_Minh')->format('F d, Y h:i A')}}</td>
                     <td>

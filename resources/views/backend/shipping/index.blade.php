@@ -33,9 +33,9 @@
                     <td>{{number_format($shipping->price, 0, ',', '.')}}đ</td>
                     <td>
                         @if($shipping->status=='active')
-                            <span class="badge badge-success">{{$shipping->status}}</span>
+                            <span class="badge badge-success">Hoạt động</span>
                         @else
-                            <span class="badge badge-warning">{{$shipping->status}}</span>
+                            <span class="badge badge-warning">Không hoạt động</span>
                         @endif
                     </td>
                     <td>
