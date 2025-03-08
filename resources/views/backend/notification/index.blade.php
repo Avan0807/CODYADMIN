@@ -66,6 +66,8 @@
   <script>
       $(document).ready(function(){
           $('#notification-dataTable').DataTable({
+            "searching": true,
+            "paging": false,
               "columnDefs": [
                   {
                       "orderable": false,

@@ -141,6 +141,10 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
 
     Route::get('/affiliate-orders', 'AffiliateOrderController@index')->name('affiliate_orders.index');
     Route::post('/affiliate-orders/{id}/update-status', 'AffiliateOrderController@updateStatus')->name('admin.affiliate.orders.update');
+
+    Route::get('/commissions', 'CommissionController@index')->name('commissions.index');
+    Route::get('/commissions/{doctor_id}', 'CommissionController@show')->name('commission.detail');
+
 });
 
 

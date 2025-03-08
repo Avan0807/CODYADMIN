@@ -142,7 +142,7 @@
             <span>Đánh giá</span></a>
     </li>
 
-        <!-- Divider -->
+    <!-- Divider -->
 
     <hr class="sidebar-divider">
 
@@ -178,6 +178,14 @@
                 <a class="collapse-item" href="{{ route('clinics.create') }}">Thêm phòng khám</a>
             </div>
         </div>
+    </li>
+
+    <!-- Hoa Hồng -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('commissions.index') }}">
+            <i class="fas fa-coins"></i>
+            <span>Hoa Hồng</span>
+        </a>
     </li>
 
     <hr class="sidebar-divider">

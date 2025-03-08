@@ -1,7 +1,7 @@
 @extends('backend.layouts.master')
 
 @section('main-content')
- <!-- DataTales Example -->
+ <!-- Danh sách đơn hàng tiếp thị liên kết -->
  <div class="card shadow mb-4">
      <div class="row">
          <div class="col-md-12">
@@ -9,55 +9,47 @@
          </div>
      </div>
     <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách đơn hàng Affiliate</h6>
+      <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách đơn hàng tiếp thị liên kết</h6>
     </div>
     <div class="card-body">
       <div class="table-responsive">
-        @if(count($affiliateOrders) > 0)
-        <table class="table table-bordered table-hover" id="affiliateOrders-dataTable" width="100%" cellspacing="0">
+        @if($affiliateLinks->count() > 0)
+        <table class="table table-bordered table-hover" id="affiliateLinks-dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Bác sĩ</th>
-              <th>Mã đơn hàng</th>
-              <th>Hoa hồng</th>
-              <th>Trạng thái</th>
-              <th>Chức năng</th>
+                <th>#</th>
+                <th>Bác sĩ</th>
+                <th>Sản phẩm</th>
+                <th>Hoa hồng</th>
             </tr>
           </thead>
           <tbody>
-            @foreach($affiliateOrders as $order)
+            @foreach($affiliateLinks as $affiliate)
                 <tr>
-                    <td>{{ $order->id }}</td>
-                    <td>{{ $order->doctor->name ?? 'Không có bác sĩ' }}</td>
-                    <td>{{ $order->order_code }}</td>
-                    <td>{{ number_format($order->commission, 0, ',', '.') }} VNĐ</td>
+                    <td>{{ $affiliate->id }}</td>
+
+                    <!-- Hiển thị bác sĩ -->
+                    <td>{{ optional($affiliate->doctor)->name ?? 'Chưa có bác sĩ' }}</td>
+
+                    <!-- Hiển thị sản phẩm -->
                     <td>
-                        @if($order->status == 'Đã giao')
-                            <span class="badge badge-success">Đã giao</span>
+                        @if($affiliate->product)
+                            <a href="{{ $affiliate->product_link }}" target="_blank">
+                                {{ $affiliate->product->title }}
+                            </a>
                         @else
-                            <span class="badge badge-primary">Mới</span>
+                            <span class="text-danger">Chưa có sản phẩm</span>
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('affiliate.show', $order->id) }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <form method="POST" action="{{ route('affiliate.destroy', $order->id) }}" style="display:inline;">
-                          @csrf
-                          @method('DELETE')
-                          <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} data-toggle="tooltip" title="Xóa">
-                              <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </form>
+                        <span>{{ number_format($affiliate->commission_percentage, 2) }}%</span>
                     </td>
+
                 </tr>
             @endforeach
           </tbody>
         </table>
-        <div class="d-flex justify-content-end mt-3">
-            {{ $affiliateOrders->links('pagination::bootstrap-4') }}
-        </div>
+        <span style="float:right">{{ $affiliateLinks->links() }}</span>
         @else
           <h6 class="text-center">Không tìm thấy đơn hàng nào! Vui lòng kiểm tra lại dữ liệu.</h6>
         @endif
@@ -87,43 +79,32 @@
               }
           });
 
-          $('#affiliateOrders-dataTable').DataTable({
+          // Cấu hình DataTables với ngôn ngữ Tiếng Việt
+          $('#affiliateLinks-dataTable').DataTable({
               "ordering": true,
               "searching": true,
-              "paging": false,  // Tắt phân trang của DataTables để giữ Laravel Pagination
-              "info": false,
-              "lengthChange": false,
-              "columnDefs": [{ "orderable": false, "targets": [5] }],
+              "paging": true,
+              "lengthMenu": [10, 25, 50, 100],
+              "columnDefs": [ { "orderable": false, "targets": [3] } ],
               "language": {
-                  "sProcessing": "Đang xử lý...",
-                  "sZeroRecords": "Không tìm thấy dữ liệu phù hợp",
-                  "sSearch": "Tìm kiếm:",
+                  "sProcessing":   "Đang xử lý...",
+                  "sLengthMenu":   "Hiển thị _MENU_ dòng",
+                  "sZeroRecords":  "Không tìm thấy dữ liệu phù hợp",
+                  "sInfo":         "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                  "sInfoEmpty":    "Không có dữ liệu",
+                  "sInfoFiltered": "(được lọc từ tổng số _MAX_ mục)",
+                  "sSearch":       "Tìm kiếm:",
                   "oPaginate": {
-                      "sFirst": "Đầu",
+                      "sFirst":    "Đầu",
                       "sPrevious": "Trước",
-                      "sNext": "Tiếp",
-                      "sLast": "Cuối"
+                      "sNext":     "Tiếp",
+                      "sLast":     "Cuối"
                   }
               }
           });
-
-          $('.dltBtn').click(function(e){
-              var form = $(this).closest('form');
-              e.preventDefault();
-              swal({
-                  title: "Bạn có chắc không?",
-                  text: "Sau khi xóa, bạn sẽ không thể khôi phục đơn hàng này!",
-                  icon: "warning",
-                  buttons: true,
-                  dangerMode: true,
-              }).then((willDelete) => {
-                  if (willDelete) {
-                      form.submit();
-                  } else {
-                      swal("Đơn hàng của bạn vẫn an toàn!");
-                  }
-              });
-          });
       });
   </script>
+
+
+
 @endpush

@@ -1,76 +1,113 @@
 @extends('backend.layouts.master')
 
-@section('title','CODY || Tất cả thông báo chiến dịch')
-
 @section('main-content')
-
-<div class="card shadow mb-4">
-    <div class="row">
-        <div class="col-md-12">
-           @include('backend.layouts.notification')
-        </div>
-    </div>
-
+ <!-- DataTales Example -->
+ <div class="card shadow mb-4">
+     <div class="row">
+         <div class="col-md-12">
+            @include('backend.layouts.notification')
+         </div>
+     </div>
     <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách Thông Báo Chiến Dịch</h6>
-      <a href="{{ route('campaign_notifications.create') }}" class="btn btn-primary btn-sm float-right">
-          <i class="fas fa-plus"></i> Thêm Thông Báo
-      </a>
+      <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách sản phẩm</h6>
+      <a href="{{route('product.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Add User"><i class="fas fa-plus"></i> Thêm sản phẩm</a>
     </div>
-
     <div class="card-body">
       <div class="table-responsive">
-        @if($campaign_notifications->count() > 0)
-        <table class="table table-bordered table-hover" id="notification-dataTable" width="100%" cellspacing="0">
+        @if(count($products)>0)
+        <table class="table table-bordered table-hover" id="product-dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
               <th>#</th>
               <th>Tiêu đề</th>
-              <th>Đối tượng</th>
-              <th>Ngày tạo</th>
-              <th>Hoạt động</th>
+              <th>Loại</th>
+              <th>Nổi bật</th>
+              <th>Giá</th>
+              <th>Giảm giá</th>
+              <th>Loại</th>
+              <th>Tình trạng</th>
+              <th>Thương hiệu</th>
+              <th>Kho</th>
+              <th>Ảnh</th>
+              <th>Trạng thái</th>
+              <th>Hoa hồng</th>
+              <th>Chức năng</th>
             </tr>
           </thead>
           <tbody>
-            @foreach($campaign_notifications as $notification)
+
+            @foreach($products as $product)
+              @php
+              $sub_cat_info=DB::table('categories')->select('title')->where('id',$product->child_cat_id)->get();
+              // dd($sub_cat_info);
+              $brands=DB::table('brands')->select('title')->where('id',$product->brand_id)->get();
+              @endphp
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $notification->title }}</td>
-                    <td>{{ ucfirst($notification->target_audience) }}</td>
-                    <td>{{ \Carbon\Carbon::parse($notification->created_at)->format('d-m-Y H:i') }}</td>
+                    <td>{{$product->id}}</td>
+                    <td>{{$product->title}}</td>
+                    <td>{{$product->cat_info['title']}}
+                      <sub>
+                          {{$product->sub_cat_info->title ?? ''}}
+                      </sub>
+                    </td>
+                    <td>{{(($product->is_featured==1)? 'Yes': 'No')}}</td>
+                    <td>{{ number_format($product->price, 0, ',', '.') }}đ</td>
+                    <td>{{$product->discount}}%</td>
+                    <td>{{$product->size}}</td>
+                    <td>{{$product->condition}}</td>
+                    <td> {{ucfirst($product->brand->title)}}</td>
                     <td>
-                        <a href="{{ route('campaign_notifications.show', $notification->id) }}"
-                           class="btn btn-primary btn-sm float-left mr-1"
-                           style="height:30px; width:30px; border-radius:50%"
-                           data-toggle="tooltip" title="Xem">
-                            <i class="fas fa-eye"></i>
-                        </a>
-
-                        <a href="{{ route('campaign_notifications.edit', $notification->id) }}"
-                           class="btn btn-warning btn-sm float-left mr-1"
-                           style="height:30px; width:30px; border-radius:50%"
-                           data-toggle="tooltip" title="Chỉnh sửa">
-                            <i class="fas fa-edit"></i>
-                        </a>
-
-                        <form method="POST" action="{{ route('campaign_notifications.destroy', $notification->id) }}" class="delete-form d-inline">
-                          @csrf
-                          @method('delete')
-                          <button type="submit"
-                                  class="btn btn-danger btn-sm dltBtn"
-                                  style="height:30px; width:30px; border-radius:50%"
-                                  data-toggle="tooltip" title="Xóa">
-                              <i class="fas fa-trash-alt"></i>
-                          </button>
+                      @if($product->stock>0)
+                      <span class="badge badge-primary">{{$product->stock}}</span>
+                      @else
+                      <span class="badge badge-danger">{{$product->stock}}</span>
+                      @endif
+                    </td>
+                    <td>
+                        @if($product->photo)
+                            @php
+                              $photo=explode(',',$product->photo);
+                              // dd($photo);
+                            @endphp
+                            <img src="{{$photo[0]}}" class="img-fluid zoom" style="max-width:80px" alt="{{$product->photo}}">
+                        @else
+                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
+                        @endif
+                    </td>
+                    <td>
+                        @if($product->status=='active')
+                            <span class="badge badge-success">Hoạt Động</span>
+                        @else
+                            <span class="badge badge-warning">Không Hoạt Động</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="input-group commission-group">
+                            <input type="number" class="form-control commission-input"
+                                  data-id="{{ $product->id }}"
+                                  value="{{ number_format($product->commission_percentage, 2) }}"
+                                  min="0" max="100" step="0.01">
+                            <div class="input-group-append">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <small class="text-success commission-status d-none">✔ Đã lưu</small>
+                    </td>
+                    <td>
+                        <a href="{{route('product.edit',$product->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
+                    <form method="POST" action="{{route('product.destroy',[$product->id])}}">
+                      @csrf
+                      @method('delete')
+                          <button class="btn btn-danger btn-sm dltBtn" data-id={{$product->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
                         </form>
                     </td>
                 </tr>
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{ $campaign_notifications->links() }}</span>
+        <span style="float:right">{{$products->links()}}</span>
         @else
-          <h6 class="text-center">Không có thông báo chiến dịch nào! Vui lòng tạo mới.</h6>
+          <h6 class="text-center">Không tìm thấy sản phẩm nào!!! Vui lòng tạo sản phẩm</h6>
         @endif
       </div>
     </div>
@@ -78,65 +115,116 @@
 @endsection
 
 @push('styles')
-  <link href="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+  <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
+  <style>
+      div.dataTables_wrapper div.dataTables_paginate{
+          display: none;
+      }
+      .zoom {
+        transition: transform .2s; /* Animation */
+      }
+
+      .zoom:hover {
+        transform: scale(5);
+      }
+  </style>
 @endpush
 
 @push('scripts')
-  <script src="{{ asset('backend/vendor/datatables/jquery.dataTables.min.js') }}"></script>
-  <script src="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+
+  <!-- Page level plugins -->
+  <script src="{{asset('backend/vendor/datatables/jquery.dataTables.min.js')}}"></script>
+  <script src="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 
+  <!-- Page level custom scripts -->
+  <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
+  <script>
+
+      $('#product-dataTable').DataTable( {
+        "scrollX": false,
+        "ordering": true,
+        "searching": true,
+        "paging": true,
+            "columnDefs":[
+                {
+                    "orderable":false,
+                    "targets":[10,11,12]
+                }
+            ]
+        } );
+
+        // Sweet alert
+
+        function deleteData(id){
+
+        }
+  </script>
   <script>
       $(document).ready(function(){
-          $('#notification-dataTable').DataTable({
-              "ordering": true,
-              "searching": true,
-              "paging": true,
-              "lengthMenu": [10, 25, 50, 100],
-              "columnDefs": [
-                  {
-                      "orderable": false,
-                      "targets": [4] // Không sắp xếp cột hoạt động
-                  }
-              ],
-              "language": {
-                  "sProcessing":   "Đang xử lý...",
-                  "sLengthMenu":   "Hiển thị _MENU_ dòng",
-                  "sZeroRecords":  "Không tìm thấy dữ liệu phù hợp",
-                  "sInfo":         "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
-                  "sInfoEmpty":    "Không có dữ liệu",
-                  "sInfoFiltered": "(được lọc từ tổng số _MAX_ mục)",
-                  "sSearch":       "Tìm kiếm:",
-                  "oPaginate": {
-                      "sFirst":    "Đầu",
-                      "sPrevious": "Trước",
-                      "sNext":     "Tiếp",
-                      "sLast":     "Cuối"
-                  }
-              }
-          });
-
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
           $('.dltBtn').click(function(e){
+            var form=$(this).closest('form');
+              var dataID=$(this).data('id');
+              // alert(dataID);
               e.preventDefault();
-              var form = $(this).closest('form');
-
               swal({
-                  title: "Bạn có chắc không?",
-                  text: "Sau khi xóa, bạn sẽ không thể khôi phục dữ liệu này!",
-                  icon: "warning",
-                  buttons: true,
-                  dangerMode: true,
-              })
-              .then((willDelete) => {
-                  if (willDelete) {
-                      form.submit();
-                  } else {
-                      swal("Dữ liệu của bạn vẫn an toàn!");
-                      return false;
-                  }
-              });
-          });
-      });
+                    title: "Bạn có chắc không?",
+                    text: "Sau khi xóa, bạn sẽ không thể khôi phục dữ liệu này!",
+                    icon: "cảnh báo",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((willDelete) => {
+                    if (willDelete) {
+                       form.submit();
+                    } else {
+                        swal("Dữ liệu của bạn an toàn!");
+                    }
+                });
+          })
+      })
   </script>
+  
+<script>
+    $(document).ready(function () {
+        $('.commission-input').on('change blur keypress', function (event) {
+            if (event.type === "keypress" && event.which !== 13) return;
+
+            let inputField = $(this);
+            let commissionValue = inputField.val();
+            let productId = inputField.data('id');
+            let statusMessage = inputField.closest('td').find('.commission-status');
+            let url = "{{ route('products-affiliate.update-commission', ':id') }}".replace(':id', productId);
+
+            // Hiện loading khi đang cập nhật
+            inputField.prop('disabled', true);
+            statusMessage.text('⏳ Đang cập nhật...').removeClass('d-none text-success').addClass('text-warning');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    commission_percentage: commissionValue
+                },
+                success: function (response) {
+                    inputField.prop('disabled', false);
+                    statusMessage.text('✔ Đã lưu').removeClass('text-warning').addClass('text-success').fadeIn().delay(1000).fadeOut();
+                },
+                error: function (xhr) {
+                    inputField.prop('disabled', false);
+                    swal("Lỗi!", "Không thể cập nhật hoa hồng, thử lại sau!", "error");
+                }
+            });
+        });
+    });
+</script>
+
+
 @endpush
