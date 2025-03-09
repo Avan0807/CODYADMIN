@@ -48,9 +48,8 @@ class MedicalRecordController extends Controller
     public function apiGetAllMedicalRecordsByUser($userId)
     {
         try {
-            $medicalRecords = MedicalRecord::select('id', 'user_id', 'doctor_id', 'diagnosis', 'notes')
-                ->where('user_id', $userId) // Lọc theo user_id
-                ->with(['doctor:id,name']) // Chỉ lấy thông tin bác sĩ cần thiết
+            $medicalRecords = MedicalRecord::where('user_id', $userId)
+                ->with(['doctor:id,name']) // Chỉ lấy ID và tên từ bảng doctors
                 ->get();
 
             if ($medicalRecords->isEmpty()) {
@@ -72,6 +71,7 @@ class MedicalRecordController extends Controller
             ], 500);
         }
     }
+
 
     public function apiCreateMedicalRecord(Request $request)
     {

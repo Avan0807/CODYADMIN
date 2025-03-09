@@ -14,7 +14,8 @@ class TreatmentLog extends Model
     protected $fillable = [
         'medical_record_id',
         'description',
-        'date',
+        'treatment_date', // Sửa 'date' thành 'treatment_date'
+        'next_appointment_date' // Nếu bạn cần lưu ngày hẹn tái khám
     ];
 
     public $timestamps = true;
@@ -24,3 +25,4 @@ class TreatmentLog extends Model
         return $this->belongsTo(MedicalRecord::class, 'medical_record_id');
     }
 }
+

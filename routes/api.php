@@ -256,15 +256,13 @@ Route::middleware('auth:sanctum')->delete('/medical-records/delete/{id}', [Medic
 
 // TREATMENT
 
-// Get all treatment by medical record id
-Route::middleware('auth:sanctum')->get('/treatment-logs/alltreatment/{medical_record_id}', [TreatmentLogController::class, 'apiGetTreatmentLogsByMedicalRecord']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/treatment-logs/alltreatment/{medical_record_id}', [TreatmentLogController::class, 'apiGetTreatmentLogsByMedicalRecord']);
+    Route::get('/treatment-logs/{id}', [TreatmentLogController::class, 'apiGetTreatmentLogById']);
+    Route::post('/treatment-logs/create/{medical_record_id}', [TreatmentLogController::class, 'apiCreateTreatmentLog']);
+    Route::delete('/treatment-logs/{id}', [TreatmentLogController::class, 'apiDeleteTreatmentLog']);
+});
 
-// Get treatment by it's id
-Route::middleware('auth:sanctum')->get('/treatment-logs/{id}', [TreatmentLogController::class, 'apiGetTreatmentLogById']);
-// Create
-Route::middleware('auth:sanctum')->post('/treatment-logs/{medical_record_id}/create', [TreatmentLogController::class, 'apiCreateTreatmentLog']);
-//Delete
-Route::middleware('auth:sanctum')->delete('/treatment-logs/{id}', [TreatmentLogController::class, 'apiDeleteTreatmentLog']);
 
 
 // =================== NOTIFICATION ROUTES ===================

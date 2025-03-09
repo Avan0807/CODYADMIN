@@ -69,123 +69,95 @@ class TreatmentLogController extends Controller
 
     public function apiCreateTreatmentLog(Request $request, $medical_record_id)
     {
-        // Lấy thông tin bác sĩ từ token (đã đăng nhập với Sanctum)
-        $doctor = $request->user();  // Lấy thông tin bác sĩ từ token
+        $doctor = $request->user();
 
-        // Kiểm tra nếu không có thông tin bác sĩ
         if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'Chỉ bác sĩ mới có quyền thêm log điều trị!',
-            ], 403); // Lỗi 403 - Forbidden
+            ], 403);
         }
 
-        // Kiểm tra nếu doctorID trong bảng Doctors trùng với ID của người đăng nhập
-        $doctorRecord = Doctor::find($doctor->id);
-
-        // Nếu không tìm thấy bác sĩ trong bảng Doctors hoặc ID không khớp
-        if (!$doctorRecord || $doctorRecord->id != $doctor->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token không hợp lệ hoặc bác sĩ không có quyền thao tác!',
-            ], 403); // Lỗi 403 - Forbidden
-        }
-
-        // Kiểm tra xem bệnh án có tồn tại không
+        // Kiểm tra bệnh án
         $medicalRecord = MedicalRecord::find($medical_record_id);
         if (!$medicalRecord) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy bệnh án này!',
-            ], 404); // Lỗi 404 - Not Found
+            ], 404);
         }
 
-        // Xác thực dữ liệu đầu vào từ request
         $validated = $request->validate([
-            'description' => 'required|string|max:1000', // Mô tả điều trị là bắt buộc
-            'treatment_date' => 'required|date', // Ngày điều trị là bắt buộc
+            'description' => 'required|string|max:1000',
+            'treatment_date' => 'required|date',
+            'next_appointment_date' => 'nullable|date'
         ]);
 
-        // Tạo log điều trị mới
         try {
             $treatmentLog = TreatmentLog::create([
-                'medical_record_id' => $medical_record_id, // Lưu medical_record_id
-                'description' => $validated['description'], // Mô tả điều trị
-                'treatment_date' => $validated['treatment_date'], // Ngày điều trị
+                'medical_record_id' => $medical_record_id,
+                'description' => $validated['description'],
+                'treatment_date' => $validated['treatment_date'],
+                'next_appointment_date' => $validated['next_appointment_date'] ?? null
             ]);
 
             return response()->json([
                 'success' => true,
                 'data' => $treatmentLog,
                 'message' => 'Log điều trị đã được tạo thành công!',
-            ], 201); // Mã 201 - Created
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể tạo log điều trị!',
                 'error' => $e->getMessage(),
-            ], 500); // Lỗi 500 - Server Error
+            ], 500);
         }
     }
 
 
+
     public function apiDeleteTreatmentLog($id, Request $request)
     {
-        // Lấy thông tin bác sĩ từ token
         $doctor = $request->user();
 
-        // Kiểm tra nếu không có thông tin bác sĩ
         if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'Chỉ bác sĩ mới có quyền xóa log điều trị!',
-            ], 403); // Lỗi 403 - Forbidden
+            ], 403);
         }
 
-        // Tìm bản ghi log điều trị theo ID
         $treatmentLog = TreatmentLog::find($id);
 
-        // Kiểm tra nếu không tìm thấy bản ghi log điều trị
         if (!$treatmentLog) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy bản ghi điều trị này.',
-            ], 404); // Lỗi 404 - Not Found
+            ], 404);
         }
 
-        // Kiểm tra xem bệnh án (medical_record) có tồn tại và được tạo bởi bác sĩ này không
         $medicalRecord = MedicalRecord::find($treatmentLog->medical_record_id);
-
-        // Kiểm tra nếu không tìm thấy bệnh án
-        if (!$medicalRecord) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy bệnh án này!',
-            ], 404); // Lỗi 404 - Not Found
-        }
-
-        // Kiểm tra nếu bác sĩ không phải là người tạo bệnh án này
-        if ($medicalRecord->doctor_id != $doctor->id) {
+        if (!$medicalRecord || $medicalRecord->doctor_id != $doctor->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền xóa log điều trị này!',
-            ], 403); // Lỗi 403 - Forbidden
+            ], 403);
         }
 
-        // Xóa bản ghi log điều trị
         try {
             $treatmentLog->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Log điều trị đã được xóa thành công!',
-            ], 200); // Mã 200 - OK
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể xóa log điều trị!',
                 'error' => $e->getMessage(),
-            ], 500); // Lỗi 500 - Server Error
+            ], 500);
         }
     }
+
 }
