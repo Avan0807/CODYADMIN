@@ -8,7 +8,7 @@
     <h5 class="card-header">Chỉnh Sửa Tin Tức</h5>
     <div class="card-body">
       <form method="post" action="{{ route('company_news.update', $news->id) }}" enctype="multipart/form-data">
-        @csrf 
+        @csrf
         @method('PATCH')
 
         <div class="form-group">
@@ -28,12 +28,25 @@
         </div>
 
         <div class="form-group">
-          <label for="image" class="col-form-label">Ảnh</label>
-          <input type="file" class="form-control" name="image">
-          @if($news->image)
-            <img src="{{ asset('storage/'.$news->image) }}" class="img-fluid mt-2" style="max-width:80px">
-          @endif
+            <label for="inputPhoto" class="col-form-label">Ảnh</label>
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
+                        <i class="fa fa-picture-o"></i> Chọn
+                    </a>
+                </span>
+                <input id="thumbnail" class="form-control" type="text" name="image" value="{{$news->image}}">
+            </div>
+            <div id="holder" style="margin-top:15px;max-height:100px;">
+                @if($news->image)
+                    <img src="{{ asset('storage/'.$news->image) }}" class="img-fluid mt-2" style="max-width:80px">
+                @endif
+            </div>
+            @error('image')
+                <span class="text-danger">{{$message}}</span>
+            @enderror
         </div>
+
 
         <div class="form-group">
           <label for="published_at" class="col-form-label">Ngày xuất bản</label>
@@ -55,8 +68,11 @@
 @endpush
 
 @push('scripts')
+<script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{ asset('backend/summernote/summernote.min.js') }}"></script>
 <script>
+    $('#lfm').filemanager('image');
+
     $(document).ready(function() {
       $('#message').summernote({
         placeholder: "Nhập tin tức.....",
@@ -65,21 +81,5 @@
       });
     });
 </script>
-@endpush
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('backend/summernote/summernote.min.css') }}">
-@endpush
-
-@push('scripts')
-<script src="{{ asset('backend/summernote/summernote.min.js') }}"></script>
-<script>
-    $(document).ready(function() {
-      $('#message').summernote({
-        placeholder: "Nhập tin tức...",
-          tabsize: 2,
-          height: 150
-      });
-    });
-</script>
 @endpush

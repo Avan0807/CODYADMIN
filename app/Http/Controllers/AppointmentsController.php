@@ -16,75 +16,85 @@ class AppointmentsController extends Controller
 {
 
     public function apiCreateAppointment(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'doctor_id' => 'required|exists:doctors,id',
-            'user_id' => 'required|exists:users,id',
-            'date' => 'required|date|after_or_equal:today',
-            'time' => 'required|date_format:H:i',
-            'consultation_type' => 'required|in:Online,Offline,At Home',
-            'notes' => 'nullable|string',
+{
+    $validator = Validator::make($request->all(), [
+        'doctor_id' => 'required|exists:doctors,id',
+        'date' => 'required|date|after_or_equal:today',
+        'time' => 'required|date_format:H:i',
+        'consultation_type' => 'required|in:Online,Offline,At Home',
+        'notes' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    try {
+        // Lấy ID người dùng hiện tại từ Auth
+        $userId = Auth::id();
+
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xác thực người dùng.',
+            ], 401);
+        }
+
+        // Tạo lịch hẹn mới
+        $appointment = Appointment::create([
+            'doctor_id' => $request->doctor_id,
+            'user_id' => $userId,
+            'date' => $request->date,
+            'time' => $request->time,
+            'status' => 'Chờ duyệt',
+            'approval_status' => 'Chờ duyệt',
+            'notes' => $request->notes,
+            'consultation_type' => $request->consultation_type,
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+        // Lấy thông tin bệnh nhân
+        $user = Auth::user();
+
+        // Lấy thông tin bác sĩ
+        $doctor = Doctor::find($request->doctor_id);
+
+        // Gửi thông báo cho bác sĩ
+        if ($doctor) {
+            $doctor->notify(new StatusNotification([
+                'title' => 'Yêu cầu lịch hẹn mới',
+                'message' => "Bạn có một yêu cầu lịch hẹn mới từ bệnh nhân {$user->name} vào ngày {$appointment->date} lúc {$appointment->time}.",
+                'appointment_id' => $appointment->id,
+                'type' => 'appointment_request',
+            ]));
         }
 
-        try {
-            // Tạo lịch hẹn mới
-            $appointment = Appointment::create([
-                'doctor_id' => $request->doctor_id,
-                'user_id' => $request->user_id,
-                'date' => $request->date,
-                'time' => $request->time,
-                'status' => 'Chờ duyệt',
-                'approval_status' => 'Chờ duyệt',
-                'notes' => $request->notes,
-                'consultation_type' => $request->consultation_type,
-            ]);
-
-            // Lấy thông tin bệnh nhân
-            $user = User::find($request->user_id);
-            // Lấy thông tin bác sĩ
-            $doctor = Doctor::find($request->doctor_id);
-
-            // Gửi thông báo cho bác sĩ
-            if ($doctor) {
-                $doctor->notify(new StatusNotification([
-                    'title' => 'Yêu cầu lịch hẹn mới',
-                    'message' => "Bạn có một yêu cầu lịch hẹn mới từ bệnh nhân {$user->name} vào ngày {$appointment->date} lúc {$appointment->time}.",
-                    'appointment_id' => $appointment->id,
-                    'type' => 'appointment_request'
-                ]));
-            }
-
-            // Gửi thông báo cho bệnh nhân
-            if ($user) {
-                $user->notify(new StatusNotification([
-                    'title' => 'Lịch hẹn của bạn đang chờ duyệt',
-                    'message' => "Bạn đã đặt lịch hẹn với bác sĩ {$doctor->name} vào ngày {$appointment->date} lúc {$appointment->time}. Vui lòng chờ xác nhận.",
-                    'appointment_id' => $appointment->id,
-                    'type' => 'appointment_pending'
-                ]));
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Yêu cầu đặt lịch khám đã được gửi và thông báo đã được gửi.',
-                'appointment' => $appointment,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể gửi yêu cầu đặt lịch khám.',
-                'error' => $e->getMessage(),
-            ], 500);
+        // Gửi thông báo cho bệnh nhân
+        if ($user) {
+            $user->notify(new StatusNotification([
+                'title' => 'Lịch hẹn của bạn đang chờ duyệt',
+                'message' => "Bạn đã đặt lịch hẹn với bác sĩ {$doctor->name} vào ngày {$appointment->date} lúc {$appointment->time}. Vui lòng chờ xác nhận.",
+                'appointment_id' => $appointment->id,
+                'type' => 'appointment_pending',
+            ]));
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Yêu cầu đặt lịch khám đã được gửi và thông báo đã được gửi.',
+            'appointment' => $appointment,
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Không thể gửi yêu cầu đặt lịch khám.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * Lấy danh sách tất cả các cuộc hẹn.
@@ -168,14 +178,33 @@ class AppointmentsController extends Controller
     public function apiCancelAppointment(Request $request, $userID, $appointmentID)
     {
         try {
-            $appointment = Appointment::where('user_id', $userID)
-                ->where('id', $appointmentID)
-                ->first();
+            // Lấy ID người dùng đang đăng nhập
+            $currentUserId = Auth::id();
 
-            if (!$appointment) {
-                return response()->json(['message' => 'Không tìm thấy lịch khám.'], 404);
+            if (!$currentUserId) {
+                return response()->json([
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
             }
 
+            // Lấy thông tin lịch hẹn
+            $appointment = Appointment::where('id', $appointmentID)->first();
+
+            // Kiểm tra quyền sở hữu hoặc bác sĩ liên quan
+            if (!$appointment || ($appointment->user_id !== $currentUserId && $appointment->doctor_id !== $currentUserId)) {
+                return response()->json([
+                    'message' => 'Bạn không có quyền hủy lịch hẹn này hoặc lịch hẹn không tồn tại.',
+                ], 403);
+            }
+
+            // Nếu lịch hẹn đã bị hủy hoặc hoàn thành, không cho phép hủy nữa
+            if (in_array($appointment->status, ['Đã hủy', 'Hoàn thành'])) {
+                return response()->json([
+                    'message' => 'Lịch hẹn đã bị hủy hoặc đã hoàn thành, không thể hủy thêm.',
+                ], 400);
+            }
+
+            // Cập nhật trạng thái lịch hẹn
             $appointment->status = 'Đã hủy';
             $appointment->save();
 
@@ -206,11 +235,12 @@ class AppointmentsController extends Controller
                 'appointment' => $appointment
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Không thể hủy lịch khám.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Không thể hủy lịch khám.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
-
-
 
     // Xác nhận lịch hẹn
 
@@ -218,18 +248,39 @@ class AppointmentsController extends Controller
     public function apiConfirmAppointment($appointmentID, Request $request)
     {
         try {
-            $appointment = Appointment::where('id', $appointmentID)->firstOrFail();
+            // Lấy thông tin bác sĩ đang đăng nhập
+            $doctorId = Auth::id();
 
-            if ($appointment->status !== 'Chờ duyệt' || $appointment->approval_status !== 'Chờ duyệt') {
-                return response()->json(['message' => 'Lịch hẹn không ở trạng thái chờ duyệt.'], 400);
+            if (!$doctorId) {
+                return response()->json([
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
             }
 
+            // Lấy thông tin lịch hẹn
+            $appointment = Appointment::where('id', $appointmentID)->firstOrFail();
+
+            // Kiểm tra quyền sở hữu: Chỉ bác sĩ sở hữu lịch hẹn mới được phép xác nhận
+            if ($appointment->doctor_id !== $doctorId) {
+                return response()->json([
+                    'message' => 'Bạn không có quyền xác nhận lịch hẹn này.',
+                ], 403);
+            }
+
+            // Kiểm tra trạng thái lịch hẹn
+            if ($appointment->status !== 'Chờ duyệt' || $appointment->approval_status !== 'Chờ duyệt') {
+                return response()->json([
+                    'message' => 'Lịch hẹn không ở trạng thái chờ duyệt.',
+                ], 400);
+            }
+
+            // Cập nhật trạng thái lịch hẹn
             $appointment->update([
                 'status' => 'Sắp tới',
                 'approval_status' => 'Chấp nhận'
             ]);
 
-            // ✅ Gửi thông báo cho bệnh nhân
+            // Gửi thông báo cho bệnh nhân
             $user = User::find($appointment->user_id);
             if ($user) {
                 $user->notify(new StatusNotification([
@@ -240,7 +291,7 @@ class AppointmentsController extends Controller
                 ]));
             }
 
-            // ✅ Gửi thông báo cho bác sĩ
+            // Gửi thông báo cho bác sĩ
             $doctor = Doctor::find($appointment->doctor_id);
             if ($doctor) {
                 $doctor->notify(new StatusNotification([
@@ -256,7 +307,10 @@ class AppointmentsController extends Controller
                 'appointment' => $appointment
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Lỗi khi xác nhận lịch hẹn.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Lỗi khi xác nhận lịch hẹn.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -265,15 +319,36 @@ class AppointmentsController extends Controller
     public function apiCompleteAppointment($appointmentID, Request $request)
     {
         try {
-            $appointment = Appointment::where('id', $appointmentID)->firstOrFail();
+            // Xác thực bác sĩ đang đăng nhập
+            $doctorId = Auth::id();
 
-            if ($appointment->status !== 'Sắp tới') {
-                return response()->json(['message' => 'Lịch hẹn không ở trạng thái sắp tới.'], 400);
+            if (!$doctorId) {
+                return response()->json([
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
             }
 
+            // Lấy thông tin lịch hẹn
+            $appointment = Appointment::where('id', $appointmentID)->firstOrFail();
+
+            // Kiểm tra quyền sở hữu: chỉ bác sĩ sở hữu lịch hẹn mới được hoàn thành
+            if ($appointment->doctor_id !== $doctorId) {
+                return response()->json([
+                    'message' => 'Bạn không có quyền hoàn thành lịch hẹn này.',
+                ], 403);
+            }
+
+            // Kiểm tra trạng thái lịch hẹn
+            if ($appointment->status !== 'Sắp tới') {
+                return response()->json([
+                    'message' => 'Lịch hẹn không ở trạng thái sắp tới.',
+                ], 400);
+            }
+
+            // Cập nhật trạng thái lịch hẹn thành 'Hoàn thành'
             $appointment->update(['status' => 'Hoàn thành']);
 
-            // ✅ Gửi thông báo cho bệnh nhân
+            // Gửi thông báo cho bệnh nhân
             $user = User::find($appointment->user_id);
             if ($user) {
                 $user->notify(new StatusNotification([
@@ -284,7 +359,7 @@ class AppointmentsController extends Controller
                 ]));
             }
 
-            // ✅ Gửi thông báo cho bác sĩ
+            // Gửi thông báo cho bác sĩ
             $doctor = Doctor::find($appointment->doctor_id);
             if ($doctor) {
                 $doctor->notify(new StatusNotification([
@@ -300,7 +375,10 @@ class AppointmentsController extends Controller
                 'appointment' => $appointment
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Lỗi khi hoàn thành lịch hẹn.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Lỗi khi hoàn thành lịch hẹn.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

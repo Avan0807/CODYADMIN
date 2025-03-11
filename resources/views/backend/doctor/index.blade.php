@@ -50,12 +50,13 @@
                         @endif
                     </td>
                     <td>
-                        @if($doctor->status=='active')
-                            <span class="badge badge-success">Hoạt động</span>
+                        @if($doctor->status == 'active')
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Hoạt động</span>
                         @else
-                            <span class="badge badge-warning">Không hoạt động</span>
+                            <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Không hoạt động</span>
                         @endif
                     </td>
+
                     <td>
                         <a href="{{route('doctor.edit',$doctor->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="Chỉnh sửa" data-placement="bottom"><i class="fas fa-edit"></i></a>
                         <form method="POST" action="{{route('doctor.destroy',[$doctor->id])}}">
@@ -98,6 +99,7 @@
       $(document).ready(function(){
           $('#doctor-dataTable').DataTable({
               "scrollX": false,
+              "paging": false,
               "language": {
                   "decimal": "",
                   "emptyTable": "Không có dữ liệu",

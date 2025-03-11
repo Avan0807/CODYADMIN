@@ -146,7 +146,7 @@
         "scrollX": false,
         "ordering": true,
         "searching": true,
-        "paging": true,
+        "paging": false,
             "columnDefs":[
                 {
                     "orderable":false,
@@ -190,7 +190,7 @@
           })
       })
   </script>
-  
+
 <script>
     $(document).ready(function () {
         $('.commission-input').on('change blur keypress', function (event) {

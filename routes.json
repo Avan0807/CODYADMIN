@@ -1,0 +1,3698 @@
+[
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "\/",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "_debugbar\/assets\/javascript",
+        "name": "debugbar.assets.js",
+        "action": "Barryvdh\\Debugbar\\Controllers\\AssetController@js",
+        "middleware": [
+            "Barryvdh\\Debugbar\\Middleware\\DebugbarEnabled",
+            "Closure"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "_debugbar\/assets\/stylesheets",
+        "name": "debugbar.assets.css",
+        "action": "Barryvdh\\Debugbar\\Controllers\\AssetController@css",
+        "middleware": [
+            "Barryvdh\\Debugbar\\Middleware\\DebugbarEnabled",
+            "Closure"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "_debugbar\/cache\/{key}\/{tags?}",
+        "name": "debugbar.cache.delete",
+        "action": "Barryvdh\\Debugbar\\Controllers\\CacheController@delete",
+        "middleware": [
+            "Barryvdh\\Debugbar\\Middleware\\DebugbarEnabled",
+            "Closure"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "_debugbar\/clockwork\/{id}",
+        "name": "debugbar.clockwork",
+        "action": "Barryvdh\\Debugbar\\Controllers\\OpenHandlerController@clockwork",
+        "middleware": [
+            "Barryvdh\\Debugbar\\Middleware\\DebugbarEnabled",
+            "Closure"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "_debugbar\/open",
+        "name": "debugbar.openhandler",
+        "action": "Barryvdh\\Debugbar\\Controllers\\OpenHandlerController@handle",
+        "middleware": [
+            "Barryvdh\\Debugbar\\Middleware\\DebugbarEnabled",
+            "Closure"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin",
+        "name": "admin",
+        "action": "App\\Http\\Controllers\\AdminController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/affiliate-orders",
+        "name": "affiliate_orders.index",
+        "action": "App\\Http\\Controllers\\AffiliateOrderController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/affiliate-orders\/{id}\/update-status",
+        "name": "admin.affiliate.orders.update",
+        "action": "App\\Http\\Controllers\\AffiliateOrderController@updateStatus",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/ajax\/route",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AjaxController@method",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin",
+            "App\\Http\\Middleware\\VerifyCsrfTokenForAjax"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/banner",
+        "name": "banner.index",
+        "action": "App\\Http\\Controllers\\BannerController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/banner",
+        "name": "banner.store",
+        "action": "App\\Http\\Controllers\\BannerController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/banner\/create",
+        "name": "banner.create",
+        "action": "App\\Http\\Controllers\\BannerController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/banner\/{banner}",
+        "name": "banner.show",
+        "action": "App\\Http\\Controllers\\BannerController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/banner\/{banner}",
+        "name": "banner.update",
+        "action": "App\\Http\\Controllers\\BannerController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/banner\/{banner}",
+        "name": "banner.destroy",
+        "action": "App\\Http\\Controllers\\BannerController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/banner\/{banner}\/edit",
+        "name": "banner.edit",
+        "action": "App\\Http\\Controllers\\BannerController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/brand",
+        "name": "brand.index",
+        "action": "App\\Http\\Controllers\\BrandController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/brand",
+        "name": "brand.store",
+        "action": "App\\Http\\Controllers\\BrandController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/brand\/create",
+        "name": "brand.create",
+        "action": "App\\Http\\Controllers\\BrandController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/brand\/{brand}",
+        "name": "brand.show",
+        "action": "App\\Http\\Controllers\\BrandController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/brand\/{brand}",
+        "name": "brand.update",
+        "action": "App\\Http\\Controllers\\BrandController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/brand\/{brand}",
+        "name": "brand.destroy",
+        "action": "App\\Http\\Controllers\\BrandController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/brand\/{brand}\/edit",
+        "name": "brand.edit",
+        "action": "App\\Http\\Controllers\\BrandController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/campaign_notifications",
+        "name": "campaign_notifications.index",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/campaign_notifications",
+        "name": "campaign_notifications.store",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/campaign_notifications\/create",
+        "name": "campaign_notifications.create",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/campaign_notifications\/{campaign_notification}",
+        "name": "campaign_notifications.show",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/campaign_notifications\/{campaign_notification}",
+        "name": "campaign_notifications.update",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/campaign_notifications\/{campaign_notification}",
+        "name": "campaign_notifications.destroy",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/campaign_notifications\/{campaign_notification}\/edit",
+        "name": "campaign_notifications.edit",
+        "action": "App\\Http\\Controllers\\CampaignNotificationController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/category",
+        "name": "category.index",
+        "action": "App\\Http\\Controllers\\CategoryController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/category",
+        "name": "category.store",
+        "action": "App\\Http\\Controllers\\CategoryController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/category\/create",
+        "name": "category.create",
+        "action": "App\\Http\\Controllers\\CategoryController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/category\/{category}",
+        "name": "category.show",
+        "action": "App\\Http\\Controllers\\CategoryController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/category\/{category}",
+        "name": "category.update",
+        "action": "App\\Http\\Controllers\\CategoryController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/category\/{category}",
+        "name": "category.destroy",
+        "action": "App\\Http\\Controllers\\CategoryController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/category\/{category}\/edit",
+        "name": "category.edit",
+        "action": "App\\Http\\Controllers\\CategoryController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/category\/{id}\/child",
+        "name": null,
+        "action": "App\\Http\\Controllers\\CategoryController@getChildByParent",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/change-password",
+        "name": "change.password.form",
+        "action": "App\\Http\\Controllers\\AdminController@changePassword",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/change-password",
+        "name": "change.password",
+        "action": "App\\Http\\Controllers\\AdminController@changPasswordStore",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/clinics",
+        "name": "clinics.index",
+        "action": "App\\Http\\Controllers\\ClinicController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/clinics",
+        "name": "clinics.store",
+        "action": "App\\Http\\Controllers\\ClinicController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/clinics\/create",
+        "name": "clinics.create",
+        "action": "App\\Http\\Controllers\\ClinicController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/clinics\/{clinic}",
+        "name": "clinics.show",
+        "action": "App\\Http\\Controllers\\ClinicController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/clinics\/{clinic}",
+        "name": "clinics.update",
+        "action": "App\\Http\\Controllers\\ClinicController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/clinics\/{clinic}",
+        "name": "clinics.destroy",
+        "action": "App\\Http\\Controllers\\ClinicController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/clinics\/{clinic}\/edit",
+        "name": "clinics.edit",
+        "action": "App\\Http\\Controllers\\ClinicController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/commissions",
+        "name": "commissions.index",
+        "action": "App\\Http\\Controllers\\CommissionController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/commissions\/{doctor_id}",
+        "name": "commission.detail",
+        "action": "App\\Http\\Controllers\\CommissionController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/company_news",
+        "name": "company_news.index",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/company_news",
+        "name": "company_news.store",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/company_news\/create",
+        "name": "company_news.create",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/company_news\/{company_news}",
+        "name": "company_news.show",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/company_news\/{company_news}",
+        "name": "company_news.update",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/company_news\/{company_news}",
+        "name": "company_news.destroy",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/company_news\/{company_news}\/edit",
+        "name": "company_news.edit",
+        "action": "App\\Http\\Controllers\\CompanyNewsController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/coupon",
+        "name": "coupon.index",
+        "action": "App\\Http\\Controllers\\CouponController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/coupon",
+        "name": "coupon.store",
+        "action": "App\\Http\\Controllers\\CouponController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/coupon\/create",
+        "name": "coupon.create",
+        "action": "App\\Http\\Controllers\\CouponController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/coupon\/{coupon}",
+        "name": "coupon.show",
+        "action": "App\\Http\\Controllers\\CouponController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/coupon\/{coupon}",
+        "name": "coupon.update",
+        "action": "App\\Http\\Controllers\\CouponController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/coupon\/{coupon}",
+        "name": "coupon.destroy",
+        "action": "App\\Http\\Controllers\\CouponController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/coupon\/{coupon}\/edit",
+        "name": "coupon.edit",
+        "action": "App\\Http\\Controllers\\CouponController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/doctor",
+        "name": "doctor.index",
+        "action": "App\\Http\\Controllers\\DoctorController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/doctor",
+        "name": "doctor.store",
+        "action": "App\\Http\\Controllers\\DoctorController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/doctor\/create",
+        "name": "doctor.create",
+        "action": "App\\Http\\Controllers\\DoctorController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/doctor\/{doctor}",
+        "name": "doctor.show",
+        "action": "App\\Http\\Controllers\\DoctorController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/doctor\/{doctor}",
+        "name": "doctor.update",
+        "action": "App\\Http\\Controllers\\DoctorController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/doctor\/{doctor}",
+        "name": "doctor.destroy",
+        "action": "App\\Http\\Controllers\\DoctorController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/doctor\/{doctor}\/edit",
+        "name": "doctor.edit",
+        "action": "App\\Http\\Controllers\\DoctorController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/file-manager",
+        "name": "file-manager",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/message",
+        "name": "message.index",
+        "action": "App\\Http\\Controllers\\MessageController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/message",
+        "name": "message.store",
+        "action": "App\\Http\\Controllers\\MessageController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/message\/create",
+        "name": "message.create",
+        "action": "App\\Http\\Controllers\\MessageController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/message\/five",
+        "name": "messages.five",
+        "action": "App\\Http\\Controllers\\MessageController@messageFive",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/message\/{message}",
+        "name": "message.show",
+        "action": "App\\Http\\Controllers\\MessageController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/message\/{message}",
+        "name": "message.update",
+        "action": "App\\Http\\Controllers\\MessageController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/message\/{message}",
+        "name": "message.destroy",
+        "action": "App\\Http\\Controllers\\MessageController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/message\/{message}\/edit",
+        "name": "message.edit",
+        "action": "App\\Http\\Controllers\\MessageController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/notification\/{id}",
+        "name": "admin.notification",
+        "action": "App\\Http\\Controllers\\NotificationController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/notification\/{id}",
+        "name": "notification.delete",
+        "action": "App\\Http\\Controllers\\NotificationController@delete",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/notifications",
+        "name": "all.notification",
+        "action": "App\\Http\\Controllers\\NotificationController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/order",
+        "name": "order.index",
+        "action": "App\\Http\\Controllers\\OrderController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/order",
+        "name": "order.store",
+        "action": "App\\Http\\Controllers\\OrderController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/order\/create",
+        "name": "order.create",
+        "action": "App\\Http\\Controllers\\OrderController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/order\/{order}",
+        "name": "order.show",
+        "action": "App\\Http\\Controllers\\OrderController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/order\/{order}",
+        "name": "order.update",
+        "action": "App\\Http\\Controllers\\OrderController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/order\/{order}",
+        "name": "order.destroy",
+        "action": "App\\Http\\Controllers\\OrderController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/order\/{order}\/edit",
+        "name": "order.edit",
+        "action": "App\\Http\\Controllers\\OrderController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post",
+        "name": "post.index",
+        "action": "App\\Http\\Controllers\\PostController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/post",
+        "name": "post.store",
+        "action": "App\\Http\\Controllers\\PostController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-category",
+        "name": "post-category.index",
+        "action": "App\\Http\\Controllers\\PostCategoryController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/post-category",
+        "name": "post-category.store",
+        "action": "App\\Http\\Controllers\\PostCategoryController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-category\/create",
+        "name": "post-category.create",
+        "action": "App\\Http\\Controllers\\PostCategoryController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-category\/{post_category}",
+        "name": "post-category.show",
+        "action": "App\\Http\\Controllers\\PostCategoryController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/post-category\/{post_category}",
+        "name": "post-category.update",
+        "action": "App\\Http\\Controllers\\PostCategoryController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/post-category\/{post_category}",
+        "name": "post-category.destroy",
+        "action": "App\\Http\\Controllers\\PostCategoryController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-category\/{post_category}\/edit",
+        "name": "post-category.edit",
+        "action": "App\\Http\\Controllers\\PostCategoryController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-tag",
+        "name": "post-tag.index",
+        "action": "App\\Http\\Controllers\\PostTagController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/post-tag",
+        "name": "post-tag.store",
+        "action": "App\\Http\\Controllers\\PostTagController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-tag\/create",
+        "name": "post-tag.create",
+        "action": "App\\Http\\Controllers\\PostTagController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-tag\/{post_tag}",
+        "name": "post-tag.show",
+        "action": "App\\Http\\Controllers\\PostTagController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/post-tag\/{post_tag}",
+        "name": "post-tag.update",
+        "action": "App\\Http\\Controllers\\PostTagController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/post-tag\/{post_tag}",
+        "name": "post-tag.destroy",
+        "action": "App\\Http\\Controllers\\PostTagController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post-tag\/{post_tag}\/edit",
+        "name": "post-tag.edit",
+        "action": "App\\Http\\Controllers\\PostTagController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post\/create",
+        "name": "post.create",
+        "action": "App\\Http\\Controllers\\PostController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post\/{post}",
+        "name": "post.show",
+        "action": "App\\Http\\Controllers\\PostController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/post\/{post}",
+        "name": "post.update",
+        "action": "App\\Http\\Controllers\\PostController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/post\/{post}",
+        "name": "post.destroy",
+        "action": "App\\Http\\Controllers\\PostController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/post\/{post}\/edit",
+        "name": "post.edit",
+        "action": "App\\Http\\Controllers\\PostController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/product",
+        "name": "product.index",
+        "action": "App\\Http\\Controllers\\ProductController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/product",
+        "name": "product.store",
+        "action": "App\\Http\\Controllers\\ProductController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/product\/create",
+        "name": "product.create",
+        "action": "App\\Http\\Controllers\\ProductController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/product\/{product}",
+        "name": "product.show",
+        "action": "App\\Http\\Controllers\\ProductController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/product\/{product}",
+        "name": "product.update",
+        "action": "App\\Http\\Controllers\\ProductController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/product\/{product}",
+        "name": "product.destroy",
+        "action": "App\\Http\\Controllers\\ProductController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/product\/{product}\/edit",
+        "name": "product.edit",
+        "action": "App\\Http\\Controllers\\ProductController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/products-affiliate",
+        "name": "products.affiliate.index",
+        "action": "App\\Http\\Controllers\\ProductAffiliateController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/products\/update-commission\/{id}",
+        "name": "products-affiliate.update-commission",
+        "action": "App\\Http\\Controllers\\ProductController@updateCommission",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/profile",
+        "name": "admin-profile",
+        "action": "App\\Http\\Controllers\\AdminController@profile",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/profile\/{id}",
+        "name": "profile-update",
+        "action": "App\\Http\\Controllers\\AdminController@profileUpdate",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/setting\/update",
+        "name": "settings.update",
+        "action": "App\\Http\\Controllers\\AdminController@settingsUpdate",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/settings",
+        "name": "settings",
+        "action": "App\\Http\\Controllers\\AdminController@settings",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/shipping",
+        "name": "shipping.index",
+        "action": "App\\Http\\Controllers\\ShippingController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/shipping",
+        "name": "shipping.store",
+        "action": "App\\Http\\Controllers\\ShippingController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/shipping\/create",
+        "name": "shipping.create",
+        "action": "App\\Http\\Controllers\\ShippingController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/shipping\/{shipping}",
+        "name": "shipping.show",
+        "action": "App\\Http\\Controllers\\ShippingController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/shipping\/{shipping}",
+        "name": "shipping.update",
+        "action": "App\\Http\\Controllers\\ShippingController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/shipping\/{shipping}",
+        "name": "shipping.destroy",
+        "action": "App\\Http\\Controllers\\ShippingController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/shipping\/{shipping}\/edit",
+        "name": "shipping.edit",
+        "action": "App\\Http\\Controllers\\ShippingController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/users",
+        "name": "users.index",
+        "action": "App\\Http\\Controllers\\UsersController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "admin\/users",
+        "name": "users.store",
+        "action": "App\\Http\\Controllers\\UsersController@store",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/users\/create",
+        "name": "users.create",
+        "action": "App\\Http\\Controllers\\UsersController@create",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/users\/{user}",
+        "name": "users.show",
+        "action": "App\\Http\\Controllers\\UsersController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "admin\/users\/{user}",
+        "name": "users.update",
+        "action": "App\\Http\\Controllers\\UsersController@update",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "admin\/users\/{user}",
+        "name": "users.destroy",
+        "action": "App\\Http\\Controllers\\UsersController@destroy",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "admin\/users\/{user}\/edit",
+        "name": "users.edit",
+        "action": "App\\Http\\Controllers\\UsersController@edit",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/admin\/approve-payout\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAuthAdminController@approvePayout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/admin\/create-doctor",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorController@createDoctor",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/admin\/delete-doctor\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorController@deleteDoctor",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/admin\/logout",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAuthAdminController@logout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/admin\/reject-payout\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAuthAdminController@rejectPayout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Admin"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/admin\/update-order-status\/{order_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiOrderController@updateOrderStatus",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/affiliate\/click\/{hash_ref}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAffiliateController@trackClick",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/alldoctors",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@apiGetAllDoctors",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointment-info\/{appointmentID}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiGetAppointmentInfo",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointments",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@ApiGetAllAppointments",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/appointments",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiCreateAppointment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointments\/doctor\/recent",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiGetRecentAppointments",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/appointments\/doctor\/{appointmentID}\/reject",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiDeleteAppointment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointments\/doctor\/{doctorID}\/all",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiGetAllAppointmentsByDoctor",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointments\/upcoming",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiGetCurrentAppointments",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/appointments\/user",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiGetAppointmentsByUser",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/appointments\/{appointmentID}\/cancel",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiCancelAppointment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/appointments\/{appointmentID}\/complete",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiCompleteAppointment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/appointments\/{appointmentID}\/confirm",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@apiConfirmAppointment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/campaign-notifications\/authenticated",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCampaignNotificationsController@getNotificationsForAuthenticatedUser",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:user,doctor"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/campaign-notifications\/authenticated\/latest",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCampaignNotificationsController@getLatestFiveForAuthenticatedUser",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:user,doctor"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/campaign-notifications\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCampaignNotificationsController@getNotificationDetail",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:user,doctor"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/cart",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCartController@index",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/cart\/add",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCartController@addToCart",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/cart\/remove",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCartController@cartDelete",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/cart\/single",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCartController@singleAddToCart",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/cart\/update",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCartController@cartUpdate",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/cart\/{userID}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\CartController@apiGetUserCart",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/cart\/{userId}\/{productId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\CartController@apiRemoveFromCartByUser",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/cart\/{userId}\/{productId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\CartController@apiUpdateUserCartQuantity",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/comments\/post_comments",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostCommentController@apiCreateComment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/comments\/{postId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostCommentController@getCommentsByPostId",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/company-news",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCompanyNewsController@getAllNews",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/company-news\/latest",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCompanyNewsController@getLatestNews",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/company-news\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiCompanyNewsController@getNewsDetail",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/doctor-reviews",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiReviewDoctorController@store",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor-reviews\/{doctor_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiReviewDoctorController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/doctor-reviews\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorReviewController@destroy",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor\/affiliate-products",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAffiliateController@getAffiliateProducts",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor\/commissions",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorCommissionController@getDoctorCommission",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/doctor\/logout",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorController@doctorLogout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/doctor\/notifications\/{notificationID}\/delete",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@deleteNotification",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/doctor\/notifications\/{notificationID}\/read",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@markNotificationAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/doctor\/request-payout",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorController@requestPayout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor\/{doctorID}\/notifications",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@getNotifications",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor\/{doctorID}\/notifications\/unread",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@getUnreadNotifications",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctor\/{doctor_id}\/orders",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiDoctorController@orders",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctors",
+        "name": null,
+        "action": "App\\Http\\Controllers\\GetdoctorsController@apiHome",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/doctors\/{doctorID}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@apiGetDoctorsByDoctorId",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/generate-link\/{product_slug}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAffiliateController@generateLink",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/login",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\LoginController@apiLogin",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\RedirectIfAuthenticated"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/login\/doctor",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\LoginController@apiDoctorLogin",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\RedirectIfAuthenticated"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/logout",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiAuthController@logout",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/medical-records\/create",
+        "name": null,
+        "action": "App\\Http\\Controllers\\MedicalRecordController@apiCreateMedicalRecord",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/medical-records\/delete\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\MedicalRecordController@apiDeleteMedicalRecord",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/medical-records\/user\/{userId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\MedicalRecordController@apiGetAllMedicalRecordsByUser",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/medical-records\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\MedicalRecordController@apiGetMedicalRecordById",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/notifications",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@index",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/notifications\/delete-all",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@deleteAll",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/notifications\/delete\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@delete",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/notifications\/read-all",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@markAllAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/notifications\/read\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@markAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/notifications\/unread",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiNotificationController@unread",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/order\/store",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiOrderController@store",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/order\/storeDoctor",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiOrderController@storeDoctor",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/orders",
+        "name": null,
+        "action": "App\\Http\\Controllers\\OrderController@apiGetUserOrders",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/orders\/create",
+        "name": null,
+        "action": "App\\Http\\Controllers\\OrderController@apiCreateOrder",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/orders\/status",
+        "name": null,
+        "action": "App\\Http\\Controllers\\OrderController@apiGetUserOrdersStatus",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/orders\/{order_id}\/status",
+        "name": null,
+        "action": "App\\Http\\Controllers\\OrderController@apiGetOrderStatus",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/patient-info\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\DoctorsController@apiGetPatientInfo",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/patients\/doctor\/all",
+        "name": null,
+        "action": "App\\Http\\Controllers\\AppointmentsController@getAllPatientsForDoctor",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/posts",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostController@apiGetAllPosts",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/posts\/create",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostController@apiCreatePost",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/posts\/{postId}\/comments\/{commentId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostCommentController@apiGetCommentById",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/posts\/{postId}\/comments\/{commentId}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostCommentController@apiUpdateComment",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/posts\/{slug}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\PostController@apiGetPostBySlug",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/product-detail\/{product_slug}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiProductController@trackAffiliate",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/products",
+        "name": null,
+        "action": "App\\Http\\Controllers\\ProductController@apiGetAllProducts",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/products\/slug\/{slug}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiProductController@findBySlug",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/products\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\ProductController@apiGetProductById",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/productsadd",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ApiProductController@store",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/register",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\RegisterController@apiRegister",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\RedirectIfAuthenticated"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/treatment-logs\/alltreatment\/{medical_record_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\TreatmentLogController@apiGetTreatmentLogsByMedicalRecord",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/treatment-logs\/create\/{medical_record_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\TreatmentLogController@apiCreateTreatmentLog",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/treatment-logs\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\TreatmentLogController@apiGetTreatmentLogById",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/treatment-logs\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\TreatmentLogController@apiDeleteTreatmentLog",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/upload",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/user",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api\/user\/notifications\/{notificationID}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@deleteNotification",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/user\/notifications\/{notificationID}\/read",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@markNotificationAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/user\/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@apiGetUserById",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/user\/{userID}\/get-avatar",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@apiGetAvatarByUserId",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/user\/{userID}\/notifications",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@getNotifications",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/user\/{userID}\/notifications\/unread",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@getUnreadNotifications",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api\/user\/{userID}\/upload-avatar",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@apiUploadAvatar",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api\/users\/{userID}\/address",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@apiUpdateAddress",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api\/users\/{userID}\/getaddress",
+        "name": null,
+        "action": "App\\Http\\Controllers\\UsersController@apiGetUserByID",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "blog",
+        "name": "blog",
+        "action": "App\\Http\\Controllers\\FrontendController@blog",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "blog-cat\/{slug}",
+        "name": "blog.category",
+        "action": "App\\Http\\Controllers\\FrontendController@blogByCategory",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "blog-detail\/{slug}",
+        "name": "blog.detail",
+        "action": "App\\Http\\Controllers\\FrontendController@blogDetail",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "blog-tag\/{slug}",
+        "name": "blog.tag",
+        "action": "App\\Http\\Controllers\\FrontendController@blogByTag",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "blog\/filter",
+        "name": "blog.filter",
+        "action": "App\\Http\\Controllers\\FrontendController@blogFilter",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "blog\/search",
+        "name": "blog.search",
+        "action": "App\\Http\\Controllers\\FrontendController@blogSearch",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|POST|HEAD",
+        "uri": "broadcasting\/auth",
+        "name": null,
+        "action": "Illuminate\\Broadcasting\\BroadcastController@authenticate",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "cancel",
+        "name": "payment.cancel",
+        "action": "App\\Http\\Controllers\\PayPalController@cancel",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "captcha\/api\/{config?}",
+        "name": null,
+        "action": "Mews\\Captcha\\CaptchaController@getCaptchaApi",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "captcha\/{config?}",
+        "name": null,
+        "action": "Mews\\Captcha\\CaptchaController@getCaptcha",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "cart",
+        "name": "cart",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "cart\/order",
+        "name": "cart.order",
+        "action": "App\\Http\\Controllers\\OrderController@store",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "checkout",
+        "name": "checkout",
+        "action": "App\\Http\\Controllers\\CartController@checkout",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\User"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "comment",
+        "name": "comment.index",
+        "action": "App\\Http\\Controllers\\PostCommentController@index",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "comment",
+        "name": "comment.store",
+        "action": "App\\Http\\Controllers\\PostCommentController@store",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "comment\/create",
+        "name": "comment.create",
+        "action": "App\\Http\\Controllers\\PostCommentController@create",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "comment\/{comment}",
+        "name": "comment.show",
+        "action": "App\\Http\\Controllers\\PostCommentController@show",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "comment\/{comment}",
+        "name": "comment.update",
+        "action": "App\\Http\\Controllers\\PostCommentController@update",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "comment\/{comment}",
+        "name": "comment.destroy",
+        "action": "App\\Http\\Controllers\\PostCommentController@destroy",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "comment\/{comment}\/edit",
+        "name": "comment.edit",
+        "action": "App\\Http\\Controllers\\PostCommentController@edit",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "coupon-store",
+        "name": "coupon-store",
+        "action": "App\\Http\\Controllers\\CouponController@couponStore",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "doctorincome",
+        "name": "product.doctororder.income",
+        "action": "App\\Http\\Controllers\\OrderController@doctorincomeChart",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager",
+        "name": "unisharp.lfm.show",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\LfmController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/crop",
+        "name": "unisharp.lfm.getCrop",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getCrop",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/cropimage",
+        "name": "unisharp.lfm.getCropimage",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getCropimage",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/cropnewimage",
+        "name": "unisharp.lfm.getCropnewimage",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getNewCropimage",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/delete",
+        "name": "unisharp.lfm.getDelete",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DeleteController@getDelete",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/demo",
+        "name": "unisharp.lfm.",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DemoController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/domove",
+        "name": "unisharp.lfm.domove",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@domove",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/doresize",
+        "name": "unisharp.lfm.performResize",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ResizeController@performResize",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/download",
+        "name": "unisharp.lfm.getDownload",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DownloadController@getDownload",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/errors",
+        "name": "unisharp.lfm.getErrors",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\LfmController@getErrors",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/folders",
+        "name": "unisharp.lfm.getFolders",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\FolderController@getFolders",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/jsonitems",
+        "name": "unisharp.lfm.getItems",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@getItems",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/move",
+        "name": "unisharp.lfm.move",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@move",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/newfolder",
+        "name": "unisharp.lfm.getAddfolder",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\FolderController@getAddfolder",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/rename",
+        "name": "unisharp.lfm.getRename",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\RenameController@getRename",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "filemanager\/resize",
+        "name": "unisharp.lfm.getResize",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ResizeController@getResize",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS",
+        "uri": "filemanager\/upload",
+        "name": "unisharp.lfm.upload",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\UploadController@upload",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|POST|HEAD",
+        "uri": "filter",
+        "name": "shop.filter",
+        "action": "App\\Http\\Controllers\\FrontendController@productFilter",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "income",
+        "name": "product.order.income",
+        "action": "App\\Http\\Controllers\\OrderController@incomeChart",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager",
+        "name": "unisharp.lfm.show",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\LfmController@show",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/crop",
+        "name": "unisharp.lfm.getCrop",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getCrop",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/cropimage",
+        "name": "unisharp.lfm.getCropimage",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getCropimage",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/cropnewimage",
+        "name": "unisharp.lfm.getCropnewimage",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\CropController@getNewCropimage",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/delete",
+        "name": "unisharp.lfm.getDelete",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DeleteController@getDelete",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/demo",
+        "name": "unisharp.lfm.",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DemoController@index",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/domove",
+        "name": "unisharp.lfm.domove",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@domove",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/doresize",
+        "name": "unisharp.lfm.performResize",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ResizeController@performResize",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/download",
+        "name": "unisharp.lfm.getDownload",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\DownloadController@getDownload",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/errors",
+        "name": "unisharp.lfm.getErrors",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\LfmController@getErrors",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/folders",
+        "name": "unisharp.lfm.getFolders",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\FolderController@getFolders",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/jsonitems",
+        "name": "unisharp.lfm.getItems",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@getItems",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/move",
+        "name": "unisharp.lfm.move",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ItemsController@move",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/newfolder",
+        "name": "unisharp.lfm.getAddfolder",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\FolderController@getAddfolder",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/rename",
+        "name": "unisharp.lfm.getRename",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\RenameController@getRename",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "laravel-filemanager\/resize",
+        "name": "unisharp.lfm.getResize",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\ResizeController@getResize",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS",
+        "uri": "laravel-filemanager\/upload",
+        "name": "unisharp.lfm.upload",
+        "action": "UniSharp\\LaravelFilemanager\\Controllers\\UploadController@upload",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\CreateDefaultFolder",
+            "UniSharp\\LaravelFilemanager\\Middlewares\\MultiUser"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "login",
+        "name": "login",
+        "action": "App\\Http\\Controllers\\Auth\\LoginController@showLoginForm",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\RedirectIfAuthenticated"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "login",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\LoginController@login",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\RedirectIfAuthenticated"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "logout",
+        "name": "logout",
+        "action": "App\\Http\\Controllers\\Auth\\LoginController@logout",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "order\/pdf\/{id}",
+        "name": "order.pdf",
+        "action": "App\\Http\\Controllers\\OrderController@pdf",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "password-reset",
+        "name": "password.reset",
+        "action": "App\\Http\\Controllers\\FrontendController@showResetForm",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "password\/confirm",
+        "name": "password.confirm",
+        "action": "App\\Http\\Controllers\\Auth\\ConfirmPasswordController@showConfirmForm",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "password\/confirm",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\ConfirmPasswordController@confirm",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\Authenticate"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "password\/email",
+        "name": "password.email",
+        "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@sendResetLinkEmail",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "password\/reset",
+        "name": "password.request",
+        "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@showLinkRequestForm",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "password\/reset",
+        "name": "password.update",
+        "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@reset",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "password\/reset\/{token}",
+        "name": "password.reset",
+        "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@showResetForm",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "payment",
+        "name": "payment",
+        "action": "App\\Http\\Controllers\\PayPalController@payment",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "payment\/success",
+        "name": "payment.success",
+        "action": "App\\Http\\Controllers\\PayPalController@success",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "post\/{slug}\/comment",
+        "name": "post-comment.store",
+        "action": "App\\Http\\Controllers\\PostCommentController@store",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "product-grids",
+        "name": "product-grids",
+        "action": "App\\Http\\Controllers\\FrontendController@productGrids",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "product-lists",
+        "name": "product-lists",
+        "action": "App\\Http\\Controllers\\FrontendController@productLists",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "product\/track",
+        "name": "order.track",
+        "action": "App\\Http\\Controllers\\OrderController@orderTrack",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "product\/track\/order",
+        "name": "product.track.order",
+        "action": "App\\Http\\Controllers\\OrderController@productTrackOrder",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "product\/{slug}\/review",
+        "name": "review.store",
+        "action": "App\\Http\\Controllers\\ProductReviewController@store",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "review",
+        "name": "review.index",
+        "action": "App\\Http\\Controllers\\ProductReviewController@index",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "review",
+        "name": "review.store",
+        "action": "App\\Http\\Controllers\\ProductReviewController@store",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "review\/create",
+        "name": "review.create",
+        "action": "App\\Http\\Controllers\\ProductReviewController@create",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "review\/{review}",
+        "name": "review.show",
+        "action": "App\\Http\\Controllers\\ProductReviewController@show",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT|PATCH",
+        "uri": "review\/{review}",
+        "name": "review.update",
+        "action": "App\\Http\\Controllers\\ProductReviewController@update",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "review\/{review}",
+        "name": "review.destroy",
+        "action": "App\\Http\\Controllers\\ProductReviewController@destroy",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "review\/{review}\/edit",
+        "name": "review.edit",
+        "action": "App\\Http\\Controllers\\ProductReviewController@edit",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "sanctum\/csrf-cookie",
+        "name": null,
+        "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "wishlist",
+        "name": "wishlist",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "wishlist-delete\/{id}",
+        "name": "wishlist-delete",
+        "action": "App\\Http\\Controllers\\WishlistController@wishlistDelete",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "wishlist\/{slug}",
+        "name": "add-to-wishlist",
+        "action": "App\\Http\\Controllers\\WishlistController@wishlist",
+        "middleware": [
+            "web",
+            "App\\Http\\Middleware\\User"
+        ]
+    }
+]

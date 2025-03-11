@@ -5,40 +5,37 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Log;
 
 class GetdoctorsController extends Controller
 {
     /**
-     * Get list of doctors in the same province as the authenticated user.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Get list of doctors.
+     * - Nếu user đăng nhập, lấy bác sĩ cùng tỉnh.
+     * - Nếu không đăng nhập, trả về toàn bộ danh sách bác sĩ.
      */
-    public function apihome(Request $request)
+    public function apiHome(Request $request)
     {
         try {
-            $user = Auth::user();
+            $user = Auth::user(); // Lấy user nếu có đăng nhập
 
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Người dùng chưa đăng nhập',
-                ], 401);
+            if ($user) {
+                \Log::info('User ID: ' . $user->id);
+                \Log::info('User Province: ' . $user->province);
+
+                // Lọc danh sách bác sĩ theo tỉnh của user
+                $doctors = Doctor::where('location', 'like', "%{$user->province}%")->get();
+            } else {
+                // Nếu chưa đăng nhập, trả về toàn bộ danh sách bác sĩ
+                $doctors = Doctor::all();
             }
 
-            \Log::info('User ID: ' . $user->id);
-            \Log::info('User Province: ' . $user->province);
-
-            $doctors = Doctor::where('location', 'like', "%{$user->province}%")->get();
             \Log::info('Doctors Found: ', $doctors->toArray());
 
             return response()->json([
                 'success' => true,
                 'message' => 'Danh sách bác sĩ',
-                'province' => $user->province,
                 'doctors' => $doctors,
             ], 200);
         } catch (\Exception $e) {

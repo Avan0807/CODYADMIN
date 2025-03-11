@@ -83,7 +83,7 @@
           $('#affiliateLinks-dataTable').DataTable({
               "ordering": true,
               "searching": true,
-              "paging": true,
+              "paging": false,
               "lengthMenu": [10, 25, 50, 100],
               "columnDefs": [ { "orderable": false, "targets": [3] } ],
               "language": {

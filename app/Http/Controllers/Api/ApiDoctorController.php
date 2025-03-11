@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Order;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApiDoctorController extends Controller
 {
@@ -31,10 +32,9 @@ class ApiDoctorController extends Controller
 
     // Admin tạo tài khoản bác sĩ (Cập nhật đầy đủ các trường)
 
-
     public function createDoctor(Request $request)
     {
-        // Kiểm tra quyền admin
+        // 1. Kiểm tra quyền admin
         if (!auth()->user() || auth()->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
@@ -42,7 +42,7 @@ class ApiDoctorController extends Controller
             ], 403);
         }
 
-        // Xác thực dữ liệu đầu vào
+        // 2. Xác thực dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'specialization' => 'required|string',
@@ -53,7 +53,7 @@ class ApiDoctorController extends Controller
             'workplace' => 'nullable|string',
             'phone' => 'required|string|unique:doctors',
             'email' => 'required|email|unique:doctors',
-            'photo' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048', // Hỗ trợ upload ảnh
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
             'status' => 'required|in:active,inactive',
             'rating' => 'nullable|numeric|min:0|max:5',
             'consultation_fee' => 'nullable|numeric|min:0',
@@ -71,24 +71,30 @@ class ApiDoctorController extends Controller
         }
 
         try {
-            // Mã hóa mật khẩu
+            // 3. Chuẩn bị dữ liệu lưu
             $doctorData = $request->except(['photo']);
             $doctorData['password'] = bcrypt($request->password);
 
-            // Xử lý upload ảnh lên S3 nếu có
+            // 4. Upload ảnh lên S3 nếu có
             if ($request->hasFile('photo')) {
-                $file = $request->file('photo');
-                $fileName = 'doctors/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $fileName = 'doctors/' . Str::slug(pathinfo($request->photo->getClientOriginalName(), PATHINFO_FILENAME))
+                    . '-' . uniqid() . '.' . $request->photo->getClientOriginalExtension();
 
-                // Upload lên S3
-                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file), 'public');
+                // Lưu file vào S3
+                $photoPath = $request->file('photo')->storeAs('doctors', $fileName, 's3');
 
-                if ($uploaded) {
-                    $doctorData['photo'] = Storage::disk('s3')->url($fileName);
+                if (!$photoPath) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Upload ảnh thất bại!',
+                    ], 500);
                 }
+
+                // Lưu đường dẫn URL public của ảnh
+                $doctorData['photo'] = Storage::disk('s3')->url($photoPath);
             }
 
-            // Tạo tài khoản bác sĩ
+            // 5. Tạo tài khoản bác sĩ
             $doctor = Doctor::create($doctorData);
 
             return response()->json([
@@ -96,6 +102,7 @@ class ApiDoctorController extends Controller
                 'message' => 'Tài khoản bác sĩ đã được tạo thành công.',
                 'doctor' => $doctor,
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -119,11 +126,13 @@ class ApiDoctorController extends Controller
     // Cập nhật thông tin bác sĩ (Cập nhật đầy đủ các trường)
     public function update(Request $request, $id)
     {
+        // 1. Tìm kiếm bác sĩ
         $doctor = Doctor::find($id);
         if (!$doctor) {
             return response()->json(['message' => 'Không tìm thấy bác sĩ'], Response::HTTP_NOT_FOUND);
         }
 
+        // 2. Xác thực dữ liệu đầu vào
         $request->validate([
             'name' => 'required|string|max:255',
             'specialization' => 'required|string',
@@ -134,7 +143,7 @@ class ApiDoctorController extends Controller
             'workplace' => 'nullable|string',
             'phone' => 'required|string|unique:doctors,phone,' . $id,
             'email' => 'required|email|unique:doctors,email,' . $id,
-            'photo' => 'nullable|string',
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png|max:2048', // Sửa để nhận file upload
             'status' => 'required|in:active,inactive',
             'rating' => 'nullable|numeric|min:0|max:5',
             'consultation_fee' => 'nullable|numeric|min:0',
@@ -143,22 +152,40 @@ class ApiDoctorController extends Controller
             'points' => 'nullable|integer|min:0'
         ]);
 
-        $updateData = $request->all();
+        // 3. Chuẩn bị dữ liệu cập nhật (loại bỏ các trường đặc biệt)
+        $updateData = $request->except(['photo', 'password']);
 
-        // Nếu có mật khẩu mới, mã hóa trước khi cập nhật
+        // 4. Xử lý cập nhật mật khẩu nếu có
         if ($request->filled('password')) {
             $updateData['password'] = bcrypt($request->password);
-        } else {
-            unset($updateData['password']); // Không cập nhật nếu không có mật khẩu mới
         }
 
+        // 5. Xử lý ảnh mới nếu có upload
+        if ($request->hasFile('photo')) {
+            // Xóa ảnh cũ trên S3 nếu tồn tại
+            if ($doctor->photo && Storage::disk('s3')->exists($doctor->photo)) {
+                Storage::disk('s3')->delete($doctor->photo);
+            }
+
+            // Upload ảnh mới lên S3
+            $photoPath = $request->file('photo')->store('doctors', 's3');
+            $updateData['photo'] = $photoPath;
+        }
+
+        // 6. Cập nhật thông tin bác sĩ
         $doctor->update($updateData);
+
+        // 7. Trả về URL ảnh đầy đủ từ S3
+        if ($doctor->photo) {
+            $doctor->photo = Storage::disk('s3')->url($doctor->photo);
+        }
 
         return response()->json([
             'message' => 'Thông tin bác sĩ đã được cập nhật',
             'data' => $doctor
         ], 200);
     }
+
 
     // Xóa bác sĩ (Admin)
     public function deleteDoctor($id)

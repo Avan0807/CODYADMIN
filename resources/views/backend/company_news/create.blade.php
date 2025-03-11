@@ -27,12 +27,21 @@
         </div>
 
         <div class="form-group">
-          <label for="image" class="col-form-label">Ảnh</label>
-          <input type="file" class="form-control" name="image">
-          @error('image')
-          <span class="text-danger">{{ $message }}</span>
-          @enderror
-        </div>
+            <label for="inputPhoto" class="col-form-label">Ảnh</label>
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
+                    <i class="fa fa-picture-o"></i> Chọn
+                    </a>
+                </span>
+            <input id="thumbnail" class="form-control" type="text" name="photo" value="{{old('photo')}}">
+          </div>
+          <div id="holder" style="margin-top:15px;max-height:100px;"></div>
+
+            @error('photo')
+            <span class="text-danger">{{$message}}</span>
+            @enderror
+          </div>
 
         <div class="form-group">
           <label for="published_at" class="col-form-label">Ngày xuất bản</label>
@@ -56,6 +65,8 @@
 @push('scripts')
 <script src="{{ asset('backend/summernote/summernote.min.js') }}"></script>
 <script>
+    $('#lfm').filemanager('image');
+
     $(document).ready(function() {
       $('#message').summernote({
         placeholder: "Nhập tin tức...",

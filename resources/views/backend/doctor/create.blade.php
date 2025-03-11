@@ -7,6 +7,7 @@
     <div class="card-body">
       <form method="post" action="{{route('doctor.store')}}">
         {{csrf_field()}}
+
         <div class="form-group">
           <label for="name" class="col-form-label">Tên Bác Sĩ <span class="text-danger">*</span></label>
           <input id="name" type="text" name="name" placeholder="Nhập tên bác sĩ" value="{{old('name')}}" class="form-control">
@@ -64,18 +65,26 @@
         </div>
 
         <div class="form-group">
-          <label for="photo" class="col-form-label">Hình Ảnh</label>
-          <input id="photo" type="text" name="photo" value="{{old('photo')}}" class="form-control">
-          @error('photo')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
+            <label for="inputPhoto" class="col-form-label">Hình Ảnh <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <a id="lfm" data-input="doctor_photo" data-preview="holder" class="btn btn-primary text-white">
+                        <i class="fas fa-image"></i> Chọn
+                    </a>
+                </span>
+                <input id="doctor_photo" class="form-control" type="text" name="photo" value="{{old('photo')}}">
+            </div>
+            <div id="holder" style="margin-top:15px;max-height:100px;"></div>
+            @error('photo')
+            <span class="text-danger">{{$message}}</span>
+            @enderror
         </div>
 
         <div class="form-group">
           <label for="status" class="col-form-label">Trạng Thái <span class="text-danger">*</span></label>
           <select name="status" class="form-control">
-              <option value="active">Hoạt Động</option>
-              <option value="inactive">Không Hoạt Động</option>
+              <option value="active" {{old('status')=='active' ? 'selected' : ''}}>Hoạt Động</option>
+              <option value="inactive" {{old('status')=='inactive' ? 'selected' : ''}}>Không Hoạt Động</option>
           </select>
           @error('status')
           <span class="text-danger">{{$message}}</span>
@@ -91,3 +100,10 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+<script>
+    $('#lfm').filemanager('image');
+</script>
+@endpush

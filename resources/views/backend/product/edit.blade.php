@@ -6,7 +6,7 @@
     <h5 class="card-header">Chỉnh Sửa Sản Phẩm</h5>
     <div class="card-body">
       <form method="post" action="{{route('product.update',$product->id)}}">
-        @csrf 
+        @csrf
         @method('PATCH')
         <div class="form-group">
           <label for="inputTitle" class="col-form-label">Tiêu Đề <span class="text-danger">*</span></label>
@@ -35,7 +35,7 @@
 
         <div class="form-group">
           <label for="is_featured">Nổi Bật</label><br>
-          <input type="checkbox" name='is_featured' id='is_featured' value='{{$product->is_featured}}' {{(($product->is_featured) ? 'checked' : '')}}> Có                        
+          <input type="checkbox" name='is_featured' id='is_featured' value='{{$product->is_featured}}' {{(($product->is_featured) ? 'checked' : '')}}> Có
         </div>
 
         <div class="form-group">
@@ -47,7 +47,7 @@
               @endforeach
           </select>
         </div>
-        @php 
+        @php
           $sub_cat_info=DB::table('categories')->select('title')->where('id',$product->child_cat_id)->get();
         @endphp
         <div class="form-group {{(($product->child_cat_id)? '' : 'd-none')}}" id="child_cat_div">
@@ -76,8 +76,8 @@
           <label for="size">Đơn Vị</label>
           <select name="size[]" class="form-control selectpicker" multiple data-live-search="true">
               <option value="">--Chọn đơn vị--</option>
-              @foreach($items as $item)              
-                @php 
+              @foreach($items as $item)
+                @php
                 $data=explode(',',$item->size);
                 @endphp
               <option value="Hộp" @if(in_array("Hộp", $data)) selected @endif>Hộp</option>
@@ -128,7 +128,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group">
           <label for="status" class="col-form-label">Trạng Thái <span class="text-danger">*</span></label>
           <select name="status" class="form-control">

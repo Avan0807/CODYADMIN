@@ -6,7 +6,7 @@
     <h5 class="card-header">Chỉnh Sửa Bác Sĩ</h5>
     <div class="card-body">
       <form method="post" action="{{route('doctor.update',$doctor->id)}}">
-        @csrf 
+        @csrf
         @method('PATCH')
         <div class="form-group">
           <label for="inputName" class="col-form-label">Tên <span class="text-danger">*</span></label>
@@ -65,11 +65,23 @@
         </div>
 
         <div class="form-group">
-          <label for="photo" class="col-form-label">Hình Ảnh</label>
-          <input id="photo" type="text" name="photo" value="{{$doctor->photo}}" class="form-control">
-          @error('photo')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
+            <label for="inputPhoto" class="col-form-label">Hình Ảnh <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <a id="lfm" data-input="doctor_photo" data-preview="holder" class="btn btn-primary text-white">
+                        <i class="fas fa-image"></i> Chọn
+                    </a>
+                </span>
+                <input id="doctor_photo" class="form-control" type="text" name="photo" value="{{$doctor->photo}}">
+            </div>
+            <div id="holder" style="margin-top:15px;max-height:100px;">
+                @if($doctor->photo)
+                    <img src="{{$doctor->photo}}" style="height: 5rem;">
+                @endif
+            </div>
+            @error('photo')
+            <span class="text-danger">{{$message}}</span>
+            @enderror
         </div>
 
         <div class="form-group">
@@ -82,7 +94,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group mb-3">
            <button class="btn btn-success" type="submit">Cập Nhật</button>
         </div>
@@ -91,3 +103,10 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+<script>
+    $('#lfm').filemanager('image');
+</script>
+@endpush

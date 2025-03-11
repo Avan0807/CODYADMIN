@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\AffiliateLink;
 
 
@@ -31,6 +32,16 @@ class ApiProductController extends Controller
      */
     public function store(Request $request)
     {
+        // ✅ Kiểm tra quyền Admin
+        $user = Auth::user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền thêm sản phẩm!',
+            ], 403);
+        }
+
+        // ✅ Xác thực dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
             'title'       => 'required|string|max:255',
             'summary'     => 'required|string',
@@ -40,7 +51,7 @@ class ApiProductController extends Controller
             'stock'       => 'required|min:0',
             'cat_id'      => 'required|exists:categories,id',
             'brand_id'    => 'nullable|exists:brands,id',
-            'child_cat_id' => 'nullable|exists:categories,id',
+            'child_cat_id'=> 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|boolean',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
@@ -60,7 +71,7 @@ class ApiProductController extends Controller
         try {
             $data = $request->all();
 
-            // Xử lý slug
+            // ✅ Xử lý slug duy nhất
             $slug  = Str::slug($request->title);
             $count = Product::where('slug', $slug)->count();
             if ($count > 0) {
@@ -69,9 +80,10 @@ class ApiProductController extends Controller
             $data['slug'] = $slug;
             $data['is_featured'] = $request->input('is_featured', 0);
 
-            // Xử lý size (nếu có)
+            // ✅ Xử lý size (nếu có)
             $data['size'] = $request->has('size') ? implode(',', $request->size) : null;
 
+            // ✅ Tạo sản phẩm
             $product = Product::create($data);
 
             DB::commit();
@@ -213,14 +225,14 @@ class ApiProductController extends Controller
         $product = Product::where('slug', $slug)
             ->with(['cat_info', 'sub_cat_info']) // Load danh mục và danh mục con
             ->first();
-    
+
         if (!$product) {
             return response()->json([
                 'success' => false,
                 'message' => 'Sản phẩm không tồn tại!'
             ], 404);
         }
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Chi tiết sản phẩm',
@@ -270,21 +282,21 @@ class ApiProductController extends Controller
             ]
         ], 200);
     }
-    
+
     public function trackAffiliate(Request $request, $product_slug)
     {
         // Tìm sản phẩm theo slug, nếu không có trả về lỗi 404
         $product = Product::where('slug', $product_slug)->firstOrFail();
-    
+
         // Kiểm tra ref (hash_ref) trong URL
         if ($request->has('ref')) {
             $affiliate = AffiliateLink::findByHash($request->query('ref'));
-    
+
             if ($affiliate) {
                 session(['doctor_ref' => $affiliate->doctor_id]); // Lưu vào session
             }
         }
-    
+
         return response()->json([
             'message' => 'Thông tin sản phẩm và affiliate reference được lưu',
             'product' => $product,
