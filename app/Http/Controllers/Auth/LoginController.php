@@ -156,7 +156,7 @@ class LoginController extends Controller
                 ], 404);
             }
 
-            // Step 3: Kiểm tra mật khẩu đã băm
+            // Step 3: Kiểm tra mật khẩu
             if (!Hash::check($request->password, $doctor->password)) {
                 return response()->json([
                     'success' => false,
@@ -164,25 +164,46 @@ class LoginController extends Controller
                 ], 401);
             }
 
-            // Step 4: Tạo token (Laravel Sanctum)
+            // Step 4: Kiểm tra trạng thái tài khoản
+            if ($doctor->status !== 'active') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tài khoản của bạn đang bị khóa. Vui lòng liên hệ admin.',
+                ], 403);
+            }
+
+            // Step 5: Tạo token (Laravel Sanctum)
             $token = $doctor->createToken('authToken')->plainTextToken;
 
-            // Step 5: Trả về phản hồi
+            // Step 6: Trả về tất cả các trường (trừ mật khẩu)
             return response()->json([
                 'success' => true,
                 'message' => 'Đăng nhập thành công.',
                 'doctor' => [
                     'id' => $doctor->id,
                     'name' => $doctor->name,
+                    'specialization' => $doctor->specialization,
+                    'services' => $doctor->services,
+                    'experience' => $doctor->experience,
+                    'working_hours' => $doctor->working_hours,
+                    'location' => $doctor->location,
+                    'workplace' => $doctor->workplace,
                     'phone' => $doctor->phone,
                     'email' => $doctor->email,
-                    'workplace' => $doctor->workplace,
+                    'photo' => $doctor->photo,
                     'status' => $doctor->status,
                     'rating' => $doctor->rating,
+                    'consultation_fee' => $doctor->consultation_fee,
+                    'bio' => $doctor->bio,
+                    'points' => $doctor->points,
+                    'total_commission' => $doctor->total_commission,
+                    'created_at' => $doctor->created_at,
+                    'updated_at' => $doctor->updated_at,
                 ],
                 'token' => $token,
                 'token_type' => 'Bearer',
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

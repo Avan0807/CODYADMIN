@@ -26,6 +26,11 @@ class Doctor extends Authenticatable
     protected $casts = [
         'rating' => 'decimal:2',
         'consultation_fee' => 'decimal:2',
+        'experience' => 'integer',
+        'points' => 'integer',
+        'total_commission' => 'double',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // 🔹 Bổ sung quan hệ với `Appointment`
