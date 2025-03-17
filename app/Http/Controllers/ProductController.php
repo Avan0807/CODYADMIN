@@ -40,21 +40,22 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        // Validation
         $this->validate($request, [
             'title'       => 'string|required',
             'summary'     => 'string|required',
             'description' => 'string|nullable',
             'photo'       => 'string|required',
             'size'        => 'nullable',
-            'stock'       => "required|numeric",
+            'stock'       => "required|numeric|min:0",
             'cat_id'      => 'required|exists:categories,id',
             'brand_id'    => 'nullable|exists:brands,id',
             'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
-            'price'       => 'required|numeric',
-            'discount'    => 'nullable|numeric'
+            'price'       => 'required|numeric|min:0',
+            'discount'    => 'nullable|numeric|min:0|max:100'
         ]);
 
         $data = $request->all();
@@ -67,24 +68,29 @@ class ProductController extends Controller
         }
         $data['slug'] = $slug;
 
+        // Mặc định is_featured là 0 nếu không chọn
         $data['is_featured'] = $request->input('is_featured', 0);
+
+        // Xử lý discount, nếu không nhập thì mặc định là 0
+        $data['discount'] = $request->input('discount', 0);
 
         // Xử lý size (nếu có)
         $size = $request->input('size');
-        if ($size) {
-            $data['size'] = implode(',', $size);
-        } else {
-            $data['size'] = '';
-        }
+        $data['size'] = $size ? implode(',', $size) : '';
 
+        // Lưu dữ liệu
         $status = Product::create($data);
+
+        // Thông báo kết quả
         if ($status) {
             request()->session()->flash('success', 'Sản phẩm đã được thêm');
         } else {
             request()->session()->flash('error', 'Vui lòng thử lại!!');
         }
+
         return redirect()->route('product.index');
     }
+
 
     /**
      * Hiển thị thông tin chi tiết sản phẩm (nếu cần).

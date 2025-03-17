@@ -34,7 +34,7 @@
 
         <div class="form-group">
           <label for="is_featured">Sản Phẩm Nổi Bật</label><br>
-          <input type="checkbox" name='is_featured' id='is_featured' value='1' checked> Có                        
+          <input type="checkbox" name='is_featured' id='is_featured' value='1' checked> Có
         </div>
 
         <div class="form-group">
@@ -64,11 +64,21 @@
 
         <div class="form-group">
           <label for="discount" class="col-form-label">Giảm Giá (%)</label>
-          <input id="discount" type="number" name="discount" min="0" max="100" placeholder="Nhập phần trăm giảm giá"  value="{{old('discount')}}" class="form-control">
+          <input id="discount"
+           type="number"
+           name="discount"
+           min="0"
+           max="100"
+           placeholder="Nhập phần trăm giảm giá"
+           value="{{ old('discount', 0) }}"
+           class="form-control"
+           required
+           oninput="validateDiscount(this)">
           @error('discount')
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
+
 
         <div class="form-group">
           <label for="size">Đơn Vị</label>
@@ -107,7 +117,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group">
           <label for="inputPhoto" class="col-form-label">Hình Ảnh <span class="text-danger">*</span></label>
           <div class="input-group">
@@ -123,7 +133,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group">
           <label for="status" class="col-form-label">Trạng Thái <span class="text-danger">*</span></label>
           <select name="status" class="form-control">
@@ -134,7 +144,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group mb-3">
           <button type="reset" class="btn btn-warning">Đặt Lại</button>
            <button class="btn btn-success" type="submit">Thêm</button>
@@ -209,4 +219,14 @@
     }
   })
 </script>
+<script>
+    function validateDiscount(input) {
+        if (input.value > 100) {
+            input.value = 100;
+        } else if (input.value < 0) {
+            input.value = 0;
+        }
+    }
+</script>
+
 @endpush
