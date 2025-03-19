@@ -15,9 +15,10 @@ class MessageController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
-        $messages=Message::paginate(20);
+        $messages = Message::latest()->get(); 
         return view('backend.message.index')->with('messages',$messages);
     }
+    
     public function messageFive()
     {
         $message=Message::whereNull('read_at')->limit(5)->get();

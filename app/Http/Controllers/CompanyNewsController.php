@@ -13,7 +13,7 @@ class CompanyNewsController extends Controller
      */
     public function index()
     {
-        $news = CompanyNews::latest()->paginate(10);
+        $news = CompanyNews::latest()->get();
         return view('backend.company_news.index', compact('news'));
     }
 
@@ -30,24 +30,30 @@ class CompanyNewsController extends Controller
      */
     public function store(Request $request)
     {
+        // Xác thực dữ liệu đầu vào
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|string', // Không bắt buộc phải có ảnh
             'published_at' => 'nullable|date'
         ]);
-
+    
+        // Lấy tất cả dữ liệu từ request
         $data = $request->all();
-
-        // Xử lý hình ảnh
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('company_news', 'public');
+    
+        // Kiểm tra nếu có ảnh được tải lên
+        if ($request->has('image')) {
+            // Laravel Filemanager sẽ xử lý việc lưu ảnh vào S3 và trả về đường dẫn
+            $data['image'] = $request->input('image'); // Đây là giá trị URL của ảnh
         }
-
+    
+        // Tạo bản ghi tin tức trong cơ sở dữ liệu
         CompanyNews::create($data);
-
+    
+        // Điều hướng về trang danh sách tin tức với thông báo thành công
         return redirect()->route('company_news.index')->with('success', 'Tin tức công ty đã được tạo thành công.');
     }
+    
 
     /**
      * Hiển thị chi tiết một tin tức.
@@ -75,26 +81,28 @@ class CompanyNewsController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'string|required',  
             'published_at' => 'nullable|date'
         ]);
-
+    
         $news = CompanyNews::findOrFail($id);
         $data = $request->all();
-
-        // Xử lý hình ảnh (nếu có)
+    
+        // Xử lý hình ảnh
         if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($news->image) {
-                Storage::disk('public')->delete($news->image);
-            }
+            // Nếu có tệp ảnh mới
             $data['image'] = $request->file('image')->store('company_news', 'public');
+        } elseif (!empty($request->image)) {
+            // Nếu có URL hình ảnh từ bên ngoài
+            $data['image'] = $request->image;
         }
-
+    
         $news->update($data);
-
+    
         return redirect()->route('company_news.index')->with('success', 'Tin tức công ty đã được cập nhật.');
     }
+    
+    
 
     /**
      * Xóa tin tức khỏi cơ sở dữ liệu.

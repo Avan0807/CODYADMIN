@@ -34,7 +34,7 @@
                 $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
             @endphp
                 <tr>
-                    <td>{{$order->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$order->order_number}}</td>
                     <td>{{$order->first_name}} {{$order->last_name}}</td>
                     <td>{{$order->email}}</td>
@@ -65,7 +65,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$orders->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy đơn hàng nào!!! Vui lòng đặt hàng một số sản phẩm</h6>
         @endif
@@ -78,8 +77,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
   </style>
 @endpush
@@ -96,6 +95,11 @@
   <script>
 
       $('#order-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,

@@ -28,7 +28,7 @@
           <tbody>
             @foreach($shippings as $shipping)
                 <tr>
-                    <td>{{$shipping->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$shipping->type}}</td>
                     <td>{{number_format($shipping->price, 0, ',', '.')}}đ</td>
                     <td>
@@ -70,7 +70,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$shippings->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy shipping!!! Vui lòng tạo shipping</h6>
         @endif
@@ -83,9 +82,9 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
-      }
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
+      } 
       .zoom {
         transition: transform .2s; /* Animation */
       }
@@ -108,6 +107,11 @@
   <script>
 
       $('#banner-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,

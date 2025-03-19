@@ -28,7 +28,7 @@
           <tbody>
             @foreach($brands as $brand)   
                 <tr>
-                    <td>{{$brand->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$brand->title}}</td>
                     <td>{{$brand->slug}}</td>
                     <td>
@@ -50,7 +50,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$brands->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy thương hiệu nào! Vui lòng thêm thương hiệu mới.</h6>
         @endif
@@ -64,8 +63,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
       div.dataTables_wrapper div.dataTables_paginate {
-          display: none;
-      }
+          display: block !important;
+      } 
+      
       .zoom {
         transition: transform .2s;
       }
@@ -87,12 +87,17 @@
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
   <script>
       $('#banner-dataTable').DataTable({
-          "columnDefs": [
-              {
-                  "orderable": false,
-                  "targets": [3, 4]
-              }
-          ]
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
+            "columnDefs": [
+                {
+                    "orderable": false,
+                    "targets": [4]
+                }
+            ]
       });
 
       $(document).ready(function () {

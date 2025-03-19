@@ -10,7 +10,7 @@
      </div>
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách thẻ bài viết</h6>
-      <a href="{{route('post-tag.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Add User"><i class="fas fa-plus"></i> Add Post Tag</a>
+      <a href="{{route('post-tag.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Add User"><i class="fas fa-plus"></i>Thêm Thẻ</a>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -28,7 +28,7 @@
           <tbody>
             @foreach($postTags as $data)   
                 <tr>
-                    <td>{{$data->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$data->title}}</td>
                     <td>{{$data->slug}}</td>
                     <td>
@@ -50,7 +50,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$postTags->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy thẻ bài viết!!! Vui lòng tạo thẻ bài viết</h6>
         @endif
@@ -63,8 +62,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
   </style>
 @endpush
@@ -81,10 +80,15 @@
   <script>
       
       $('#post-category-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,
-                    "targets":[3,4]
+                    "targets":[4]
                 }
             ]
         } );

@@ -31,7 +31,7 @@
           <tbody>
             @foreach($reviews as $review)
                 <tr>
-                    <td>{{$review->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$review->user_info['name']}}</td>
                     <td>{{ $review->product ? $review->product->title : 'Product Not Found' }}</td>
                     <td>{{$review->review}}</td>
@@ -79,9 +79,9 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
-      }
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
+      } 
   </style>
 @endpush
 
@@ -96,11 +96,16 @@
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
   <script>
 
-      $('#order-dataTable').DataTable( {
+      $('#order-dataTable').DataTable( {        
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,
-                    "targets":[5,6]
+                    "targets":[6]
                 }
             ]
         } );

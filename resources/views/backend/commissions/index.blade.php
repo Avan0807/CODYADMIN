@@ -26,7 +26,7 @@
           <tbody>
             @foreach($commissions as $key => $commission)
                 <tr>
-                    <td>{{ $key + 1 }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $commission->doctor_name }}</td>
                     <td>{{ number_format($commission->total_commission, 0, ',', '.') }} đ</td>
                     <td>
@@ -52,15 +52,22 @@
 @push('styles')
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
 @endpush
+<style>
 
+  div.dataTables_wrapper div.dataTables_paginate {
+      display: block !important;
+  } 
+</style>
 @push('scripts')
   <script src="{{asset('backend/vendor/datatables/jquery.dataTables.min.js')}}"></script>
   <script src="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
   <script>
       $('#commission-dataTable').DataTable({
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
             "ordering": true,
             "searching": true,
-            "paging": false,
             "columnDefs": [
                 {
                     "orderable": false,

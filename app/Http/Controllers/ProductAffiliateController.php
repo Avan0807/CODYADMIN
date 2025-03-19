@@ -15,7 +15,7 @@ class ProductAffiliateController extends Controller
         // Lấy danh sách affiliate links có dữ liệu bác sĩ & sản phẩm
         $affiliateLinks = AffiliateLink::with(['doctor', 'product']) // Load quan hệ bác sĩ & sản phẩm
                                        ->orderBy('id', 'DESC')
-                                       ->paginate(10);
+                                       ->get();
 
         return view('backend.product_affiliate.index', compact('affiliateLinks'));
     }

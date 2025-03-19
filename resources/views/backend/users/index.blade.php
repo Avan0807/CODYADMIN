@@ -31,7 +31,7 @@
         <tbody>
     @foreach($users as $user)   
         <tr>
-            <td>{{$user->id}}</td>
+            <td>{{ $loop->iteration }}</td>
             <td>{{$user->name}}</td>
             <td>{{$user->email}}</td>
             <td>{{$user->phone ?? 'Chưa cập nhật'}}</td> <!-- Hiển thị số điện thoại -->
@@ -64,7 +64,6 @@
       </tbody>
 
         </table>
-        <span style="float:right">{{$users->links()}}</span>
       </div>
     </div>
 </div>
@@ -74,8 +73,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
   </style>
 @endpush
@@ -92,10 +91,15 @@
   <script>
       
       $('#user-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,
-                    "targets":[6,7]
+                    "targets":[8]
                 }
             ]
         } );

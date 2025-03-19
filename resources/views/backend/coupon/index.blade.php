@@ -30,7 +30,7 @@
           <tbody>
             @foreach($coupons as $coupon)   
                 <tr>
-                    <td>{{$coupon->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$coupon->code}}</td>
                     <td>
                         @if($coupon->type=='fixed')
@@ -65,7 +65,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$coupons->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy mã giảm giá! Vui lòng thêm mã giảm giá mới.</h6>
         @endif
@@ -79,7 +78,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
       div.dataTables_wrapper div.dataTables_paginate {
-          display: none;
+          display: block !important;
       }
       .zoom {
         transition: transform .2s;
@@ -102,10 +101,15 @@
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
   <script>
       $('#banner-dataTable').DataTable({
-          "columnDefs": [
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true, 
+            "columnDefs": [
               {
                   "orderable": false,
-                  "targets": [4, 5]
+                  "targets": [5]
               }
           ]
       });

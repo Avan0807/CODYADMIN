@@ -15,7 +15,7 @@ class BannerController extends Controller
      */
     public function index()
     {
-        $banner=Banner::orderBy('id','DESC')->paginate(10);
+        $banner=Banner::orderBy('id','DESC')->get();
         return view('backend.banner.index')->with('banners',$banner);
     }
 
@@ -39,11 +39,20 @@ class BannerController extends Controller
     public function store(Request $request)
     {
         // return $request->all();
-        $this->validate($request,[
-            'title'=>'string|required|max:50',
-            'description'=>'string|nullable',
-            'photo'=>'string|required',
-            'status'=>'required|in:active,inactive',
+        $this->validate($request, [
+            'title' => 'string|required|max:50',
+            'description' => 'string|nullable',
+            'photo' => 'string|required',
+            'status' => 'required|in:active,inactive',
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'title.string' => 'Tiêu đề phải là chuỗi.',
+            'title.max' => 'Tiêu đề không được quá 50 ký tự.',
+            'description.string' => 'Mô tả phải là chuỗi.',
+            'photo.required' => 'Hình ảnh là bắt buộc.',
+            'photo.string' => 'Hình ảnh phải là chuỗi.',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'status.in' => 'Trạng thái phải là "active" hoặc "inactive".',
         ]);
         $data=$request->all();
         $slug=Str::slug($request->title);
@@ -96,12 +105,22 @@ class BannerController extends Controller
     public function update(Request $request, $id)
     {
         $banner=Banner::findOrFail($id);
-        $this->validate($request,[
-            'title'=>'string|required|max:50',
-            'description'=>'string|nullable',
-            'photo'=>'string|required',
-            'status'=>'required|in:active,inactive',
+        $this->validate($request, [
+            'title' => 'string|required|max:50',
+            'description' => 'string|nullable',
+            'photo' => 'string|required',
+            'status' => 'required|in:active,inactive',
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'title.string' => 'Tiêu đề phải là chuỗi.',
+            'title.max' => 'Tiêu đề không được quá 50 ký tự.',
+            'description.string' => 'Mô tả phải là chuỗi.',
+            'photo.required' => 'Hình ảnh là bắt buộc.',
+            'photo.string' => 'Hình ảnh phải là chuỗi.',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'status.in' => 'Trạng thái phải là "active" hoặc "inactive".',
         ]);
+        
         $data=$request->all();
         // $slug=Str::slug($request->title);
         // $count=Banner::where('slug',$slug)->count();

@@ -35,7 +35,7 @@
               $author_info=DB::table('users')->select('name')->where('id',$post->added_by)->get();
               @endphp
                 <tr>
-                    <td>{{$post->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$post->title}}</td>
                     <td>{{$post->cat_info->title}}</td>
                     <td>{{$post->tags}}</td>
@@ -71,7 +71,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$posts->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy bài viết nào!!! Vui lòng tạo bài viết mới</h6>
         @endif
@@ -84,8 +83,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
       .zoom {
         transition: transform .2s; /* Animation */
@@ -109,10 +108,15 @@
   <script>
       
       $('#product-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,
-                    "targets":[8,9,10]
+                    "targets":[7]
                 }
             ]
         } );

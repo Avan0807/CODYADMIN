@@ -18,7 +18,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::paginate(10); // Hiển thị 10 sản phẩm mỗi trang
+        $products = Product::get(); 
         return view('backend.product.index')->with('products', $products);
     }
 
@@ -49,14 +49,30 @@ class ProductController extends Controller
             'size'        => 'nullable',
             'stock'       => "required|numeric|min:0",
             'cat_id'      => 'required|exists:categories,id',
-            'brand_id'    => 'nullable|exists:brands,id',
+            'brand_id'    => 'required|exists:brands,id',
             'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
             'price'       => 'required|numeric|min:0',
             'discount'    => 'nullable|numeric|min:0|max:100'
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'summary.required' => 'Tóm tắt là bắt buộc.',
+            'photo.required' => 'Hình ảnh là bắt buộc.',
+            'cat_id.required' => 'Danh mục là bắt buộc.',
+            'brand_id.required' => 'Thương hiệu là bắt buộc.',
+            'stock.required' => 'Số lượng là bắt buộc.',
+            'price.required' => 'Giá là bắt buộc.',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'condition.required' => 'Tình trạng là bắt buộc.',
+            'condition.in' => 'Tình trạng không hợp lệ.',
+            'price.min' => 'Giá phải lớn hơn 0.',
+            'stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
+            'discount.max' => 'Giảm giá không được lớn hơn 100.'
         ]);
+        
 
         $data = $request->all();
 
@@ -130,15 +146,30 @@ class ProductController extends Controller
             'description' => 'string|nullable',
             'photo'       => 'string|required',
             'size'        => 'nullable',
-            'stock'       => "required|numeric",
+            'stock'       => "required|numeric|min:0",
             'cat_id'      => 'required|exists:categories,id',
+            'brand_id'    => 'required|exists:brands,id',
             'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
-            'brand_id'    => 'nullable|exists:brands,id',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
-            'price'       => 'required|numeric',
-            'discount'    => 'nullable|numeric'
+            'price'       => 'required|numeric|min:0',
+            'discount'    => 'nullable|numeric|min:0|max:100'
+        ], [
+            'title.required' => 'Tiêu đề là bắt buộc.',
+            'summary.required' => 'Tóm tắt là bắt buộc.',
+            'photo.required' => 'Hình ảnh là bắt buộc.',
+            'cat_id.required' => 'Danh mục là bắt buộc.',
+            'brand_id.required' => 'Thương hiệu là bắt buộc.',
+            'stock.required' => 'Số lượng là bắt buộc.',
+            'price.required' => 'Giá là bắt buộc.',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'condition.required' => 'Tình trạng là bắt buộc.',
+            'condition.in' => 'Tình trạng không hợp lệ.',
+            'price.min' => 'Giá phải lớn hơn 0.',
+            'stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
+            'discount.max' => 'Giảm giá không được lớn hơn 100.'
         ]);
 
         $data = $request->all();

@@ -29,7 +29,7 @@
           <tbody>
             @foreach($postCategories as $data)   
                 <tr>
-                    <td>{{$data->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$data->title}}</td>
                     <td>{{$data->slug}}</td>
                     <td>
@@ -51,7 +51,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$postCategories->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy danh mục bài viết nào! Vui lòng tạo danh mục mới.</h6>
         @endif
@@ -64,8 +63,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
   </style>
 @endpush
@@ -82,6 +81,11 @@
   <script>
       
       $('#post-category-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,

@@ -1,6 +1,6 @@
 @extends('backend.layouts.master')
 
-@section('title','CODY || Thêm Tin Tức Công Ty')
+@section('title', 'CODY || Thêm Tin Tức Công Ty')
 
 @section('main-content')
 
@@ -19,12 +19,13 @@
         </div>
 
         <div class="form-group">
-          <label for="content" class="col-form-label">Nội dung <span class="text-danger">*</span></label>
+          <label for="contenten" class="col-form-label">Nội dung <span class="text-danger">*</span></label>
           <textarea class="form-control" id="content" name="content">{{ old('content') }}</textarea>
           @error('content')
           <span class="text-danger">{{ $message }}</span>
           @enderror
         </div>
+
 
         <div class="form-group">
             <label for="inputPhoto" class="col-form-label">Ảnh</label>
@@ -60,18 +61,20 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('backend/summernote/summernote.min.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/laravel-filemanager/css/lfm.css') }}">
 @endpush
-
 @push('scripts')
-<script src="{{ asset('backend/summernote/summernote.min.js') }}"></script>
+<script src="{{ asset('vendor/laravel-filemanager/js/stand-alone-button.js') }}"></script>
+<script src="{{asset('backend/summernote/summernote.min.js')}}"></script>
+
 <script>
     $('#lfm').filemanager('image');
 
     $(document).ready(function() {
-      $('#message').summernote({
+      $('#contenten').summernote({
         placeholder: "Nhập tin tức...",
-          tabsize: 2,
-          height: 150
+        tabsize: 2,
+        height: 150
       });
     });
 </script>

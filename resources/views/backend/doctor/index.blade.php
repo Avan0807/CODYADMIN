@@ -34,7 +34,7 @@
           <tbody>
             @foreach($doctors as $doctor)
                 <tr>
-                    <td>{{$doctor->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{$doctor->name}}</td>
                     <td>{{$doctor->specialization}}</td>
                     <td>{{$doctor->experience}} năm</td>
@@ -69,7 +69,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$doctors->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy bác sĩ nào!!! Vui lòng thêm bác sĩ</h6>
         @endif
@@ -81,6 +80,10 @@
 @push('styles')
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <style>
+
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
+      } 
       .zoom {
         transition: transform .2s;
       }
@@ -98,8 +101,11 @@
   <script>
       $(document).ready(function(){
           $('#doctor-dataTable').DataTable({
-              "scrollX": false,
-              "paging": false,
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
               "language": {
                   "decimal": "",
                   "emptyTable": "Không có dữ liệu",
@@ -125,7 +131,7 @@
               "columnDefs": [
                   {
                       "orderable": false,
-                      "targets": [8,9,10]  // Không sắp xếp các cột ảnh, trạng thái, chức năng
+                      "targets": [8,10]
                   }
               ]
           });

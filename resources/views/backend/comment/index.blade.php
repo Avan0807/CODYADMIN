@@ -29,7 +29,7 @@
           <tbody>
             @foreach($comments as $comment)
                 <tr>
-                    <td>{{$comment->id}}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $comment->user_info ? $comment->user_info['name'] : 'Không có thông tin' }}</td>
                     <td>{{ $comment->post ? $comment->post->title : 'Không có bài viết' }}</td>
                     <td>{{$comment->comment}}</td>
@@ -53,7 +53,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{$comments->links()}}</span>
         @else
           <h6 class="text-center">Không tìm thấy bình luận nào!</h6>
         @endif
@@ -66,8 +65,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
   </style>
 @endpush
@@ -84,10 +83,15 @@
   <script>
 
       $('#order-dataTable').DataTable( {
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
             "columnDefs":[
                 {
                     "orderable":false,
-                    "targets":[5,6]
+                    "targets":[6]
                 }
             ]
         } );

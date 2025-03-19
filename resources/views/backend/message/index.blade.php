@@ -12,7 +12,7 @@
     <table class="table message-table" id="message-dataTable">
       <thead>
         <tr>
-          <th scope="col">ID</th>
+          <th scope="col">#</th>
           <th scope="col">Tên</th>
           <th scope="col">Chủ đề</th>
           <th scope="col">Ngày</th>
@@ -40,9 +40,6 @@
         @endforeach
       </tbody>
     </table>
-    <nav class="blog-pagination justify-content-center d-flex">
-      {{$messages->links()}}
-    </nav>
     @else
       <h2>Tin nhắn trống!</h2>
     @endif
@@ -53,8 +50,8 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
   <style>
-      div.dataTables_wrapper div.dataTables_paginate{
-          display: none;
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
       }
       .zoom {
         transition: transform .2s; /* Animation */
@@ -74,20 +71,18 @@
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
   <script>
       
-      $('#message-dataTable').DataTable( {
-            "columnDefs":[
-                {
-                    "orderable":false,
-                    "targets":[4]
-                }
-            ]
-        } );
+      $('#message-dataTable').DataTable({
+          "paging": true,
+          "pageLength": 10,
+          "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+          "ordering": true,
+          "searching": true,
+          "columnDefs": [{ 
+            "orderable": false, 
+            "targets": [4] 
+          }]
+      });
 
-        // Sweet alert
-
-        function deleteData(id){
-            
-        }
   </script>
   
   <script>

@@ -68,7 +68,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{ $campaign_notifications->links() }}</span>
         @else
           <h6 class="text-center">Không có thông báo chiến dịch nào! Vui lòng tạo mới.</h6>
         @endif
@@ -80,6 +79,13 @@
 @push('styles')
   <link href="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
+
+  <style>
+      div.dataTables_wrapper div.dataTables_paginate {
+          display: block !important;
+      }
+  </style>
+
 @endpush
 
 @push('scripts')
@@ -92,12 +98,12 @@
           $('#notification-dataTable').DataTable({
               "ordering": true,
               "searching": true,
-              "paging": false,
+              "paging": true,
               "lengthMenu": [10, 25, 50, 100],
               "columnDefs": [
                   {
                       "orderable": false,
-                      "targets": [4] // Không sắp xếp cột hoạt động
+                      "targets": [4]
                   }
               ],
               "language": {

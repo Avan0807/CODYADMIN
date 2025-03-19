@@ -14,7 +14,7 @@ class PatientsController extends Controller
 
      public function index()
      {
-         $patients = \App\Models\Patient::paginate(10); // Phân trang với 10 dòng mỗi trang
+         $patients = \App\Models\Patient::get();
          return view('doctor.patients.index', compact('patients'));
      }
      

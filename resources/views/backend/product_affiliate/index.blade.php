@@ -26,7 +26,7 @@
           <tbody>
             @foreach($affiliateLinks as $affiliate)
                 <tr>
-                    <td>{{ $affiliate->id }}</td>
+                    <td>{{ $loop->iteration }}</td>
 
                     <!-- Hiển thị bác sĩ -->
                     <td>{{ optional($affiliate->doctor)->name ?? 'Chưa có bác sĩ' }}</td>
@@ -49,7 +49,6 @@
             @endforeach
           </tbody>
         </table>
-        <span style="float:right">{{ $affiliateLinks->links() }}</span>
         @else
           <h6 class="text-center">Không tìm thấy đơn hàng nào! Vui lòng kiểm tra lại dữ liệu.</h6>
         @endif
@@ -62,7 +61,12 @@
   <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
 @endpush
+<style>
 
+  div.dataTables_wrapper div.dataTables_paginate {
+      display: block !important;
+  } 
+</style>
 @push('scripts')
 
   <!-- Page level plugins -->
@@ -81,11 +85,12 @@
 
           // Cấu hình DataTables với ngôn ngữ Tiếng Việt
           $('#affiliateLinks-dataTable').DataTable({
-              "ordering": true,
-              "searching": true,
-              "paging": false,
-              "lengthMenu": [10, 25, 50, 100],
-              "columnDefs": [ { "orderable": false, "targets": [3] } ],
+            "paging": true,
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
+            "ordering": true,
+            "searching": true,
+              "columnDefs": [ { "orderable": false, "targets": [] } ],
               "language": {
                   "sProcessing":   "Đang xử lý...",
                   "sLengthMenu":   "Hiển thị _MENU_ dòng",

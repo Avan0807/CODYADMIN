@@ -16,7 +16,7 @@ class PostCategoryController extends Controller
      */
     public function index()
     {
-        $postCategory=PostCategory::orderBy('id','DESC')->paginate(10);
+        $postCategory=PostCategory::orderBy('id','DESC')->get();
         return view('backend.postcategory.index')->with('postCategories',$postCategory);
     }
 

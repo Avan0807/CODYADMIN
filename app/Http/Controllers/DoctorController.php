@@ -10,7 +10,7 @@ class DoctorController extends Controller
 {
     public function index()
     {
-        $doctors = Doctor::orderBy('id', 'DESC')->paginate(10); // Lấy danh sách với phân trang
+        $doctors = Doctor::orderBy('id', 'DESC')->get(); // Lấy danh sách với phân trang
         return view('backend.doctor.index', compact('doctors'));
     }
 

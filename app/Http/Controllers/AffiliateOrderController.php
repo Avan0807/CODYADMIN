@@ -17,7 +17,7 @@ class AffiliateOrderController extends Controller
     {
         $affiliateOrders = AffiliateOrder::whereHas('order', function ($query) {
             $query->whereNotNull('doctor_id');
-        })->with(['doctor', 'order'])->paginate(10);
+        })->with(['doctor', 'order'])->get();
 
         return view('backend.affiliate_orders.index', compact('affiliateOrders'));
     }

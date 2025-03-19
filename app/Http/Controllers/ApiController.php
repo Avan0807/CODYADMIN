@@ -11,7 +11,7 @@ class ApiController extends Controller
     // người dùng
     public function users()
     {
-        $users = User::orderBy('id', 'ASC')->paginate(10);
+        $users = User::orderBy('id', 'ASC')->get();
         return response()->json($users, 200);
     }
 

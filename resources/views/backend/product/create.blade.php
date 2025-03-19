@@ -45,13 +45,19 @@
                   <option value='{{$cat_data->id}}'>{{$cat_data->title}}</option>
               @endforeach
           </select>
+          @error('cat_id')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
 
         <div class="form-group d-none" id="child_cat_div">
-          <label for="child_cat_id">Danh Mục Con</label>
+          <label for="child_cat_id">Danh Mục Con<span class="text-danger">*</span></label>
           <select name="child_cat_id" id="child_cat_id" class="form-control">
               <option value="">--Chọn danh mục--</option>
           </select>
+          @error('child_cat_id')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
 
         <div class="form-group">
@@ -62,24 +68,25 @@
           @enderror
         </div>
 
-        <div class="form-group">
+ {{--       <div class="form-group">
           <label for="discount" class="col-form-label">Giảm Giá (%)</label>
-          <input id="discount"
-           type="number"
-           name="discount"
-           min="0"
-           max="100"
-           placeholder="Nhập phần trăm giảm giá"
-           value="{{ old('discount', 0) }}"
-           class="form-control"
-           required
-           oninput="validateDiscount(this)">
+            <input id="discount"
+              type="number"
+              name="discount"
+              min="0"
+              max="100"
+              placeholder="Nhập phần trăm giảm giá"
+              value="{{ old('discount', 0) }}"
+              class="form-control"
+              required
+              oninput="validateDiscount(this)">
           @error('discount')
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
+    --}}
 
-
+{{--
         <div class="form-group">
           <label for="size">Đơn Vị</label>
           <select name="size[]" class="form-control selectpicker" multiple data-live-search="true">
@@ -88,26 +95,35 @@
               <option value="Viên">Viên</option>
               <option value="Chiếc">Chiếc</option>
           </select>
+          @error('size[]')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
-
+--}}
         <div class="form-group">
-          <label for="brand_id">Thương Hiệu</label>
+          <label for="brand_id">Thương Hiệu<span class="text-danger">*</span></label>
           <select name="brand_id" class="form-control">
               <option value="">--Chọn thương hiệu--</option>
              @foreach($brands as $brand)
               <option value="{{$brand->id}}">{{$brand->title}}</option>
              @endforeach
           </select>
+          @error('brand_id')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
 
         <div class="form-group">
-          <label for="condition">Tình Trạng</label>
+          <label for="condition">Tình Trạng<span class="text-danger">*</span></label>
           <select name="condition" class="form-control">
               <option value="">--Chọn tình trạng--</option>
               <option value="default">Mặc Định</option>
               <option value="new">Mới</option>
               <option value="hot">Nổi Bật</option>
           </select>
+          @error('condition')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
 
         <div class="form-group">

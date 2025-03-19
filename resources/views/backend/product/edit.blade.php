@@ -65,14 +65,14 @@
           @enderror
         </div>
 
-        <div class="form-group">
+   {{--       <div class="form-group">
           <label for="discount" class="col-form-label">Giảm Giá (%)</label>
           <input id="discount" type="number" name="discount" min="0" max="100" placeholder="Nhập phần trăm giảm giá"  value="{{$product->discount}}" class="form-control">
           @error('discount')
           <span class="text-danger">{{$message}}</span>
           @enderror
-        </div>
-        <div class="form-group">
+        </div> --}}
+ {{--       <div class="form-group">
           <label for="size">Đơn Vị</label>
           <select name="size[]" class="form-control selectpicker" multiple data-live-search="true">
               <option value="">--Chọn đơn vị--</option>
@@ -86,6 +86,7 @@
               @endforeach
           </select>
         </div>
+  --}}      
         <div class="form-group">
           <label for="brand_id">Thương Hiệu</label>
           <select name="brand_id" class="form-control">

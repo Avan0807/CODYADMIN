@@ -12,7 +12,7 @@ class CampaignNotificationController extends Controller
      */
     public function index()
     {
-        $campaign_notifications = CampaignNotification::latest()->paginate(10);
+        $campaign_notifications = CampaignNotification::latest()->get();
         return view('backend.campaign_notifications.index', compact('campaign_notifications'));
     }
 
