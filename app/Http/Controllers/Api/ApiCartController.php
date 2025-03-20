@@ -12,13 +12,18 @@ class ApiCartController extends Controller
 {
     public function index()
     {
-        $cart = Cart::where('user_id', auth()->id())->get();
-
+        // Lấy giỏ hàng của người dùng hiện tại
+        $cart = Cart::where('user_id', auth()->id())
+                    ->with('product')  // Liên kết với bảng sản phẩm
+                    ->with('user')     // Liên kết với bảng người dùng (nếu cần)
+                    ->get();
+    
         return response()->json([
             'success' => true,
             'cart' => $cart
         ], 200);
     }
+    
     /**
      * Thêm sản phẩm vào giỏ hàng (API).
      */

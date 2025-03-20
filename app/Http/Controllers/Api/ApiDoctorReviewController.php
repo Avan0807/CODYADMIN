@@ -22,68 +22,66 @@ class ApiDoctorReviewController extends Controller
      */
     public function index($doctor_id)
     {
-        // Kiểm tra và lấy bác sĩ
-        $doctor = Doctor::findOrFail($doctor_id);
+        // Kiểm tra nếu bác sĩ tồn tại
+        $doctor = Doctor::findOrFail($doctor_id); // Sử dụng firstOrFail để tự động trả về lỗi nếu không tìm thấy
 
-        // Lấy danh sách đánh giá của bác sĩ kèm theo thông tin người dùng
+        // Lấy danh sách đánh giá của bác sĩ
         $reviews = DoctorReview::where('doctor_id', $doctor_id)
-            ->with(['user:id,name', 'doctor:id,name']) // Chỉ lấy những trường cần thiết
-            ->get()
-            ->map(function ($review) {
-                return [
-                    'id' => $review->id,
-                    'doctor_id' => $review->doctor_id,
-                    'doctor_name' => $review->doctor->name,
-                    'user_id' => $review->user_id,
-                    'user_name' => $review->user->name,
-                    'rating' => $review->rating,
-                    'review' => $review->review,
-                    'created_at' => $review->created_at,
-                    'updated_at' => $review->updated_at,
-                ];
-            });
+                ->with(['doctor:id,name', 'user:id,name,email']) // Tải chỉ các trường cần thiết
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'reviews' => $reviews,
-        ], 200);
+        if ($reviews->isEmpty()) {
+            return response()->json([
+                'message' => 'Bác sĩ chưa có đánh giá nào.',
+            ], 404);
+        }
+
+        return response()->json($reviews, 200);
     }
+
 
     /**
      * Người dùng đăng đánh giá bác sĩ (Chỉ người dùng đã đăng nhập).
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'rating'    => 'required|integer|min:1|max:5',
-            'review'    => 'nullable|string',
-        ]);
+        try {
+            // Kiểm tra nếu người dùng đã đánh giá bác sĩ này
+            $existingReview = DoctorReview::where('doctor_id', $request->doctor_id)
+                                         ->where('user_id', Auth::id())
+                                         ->first();
 
-        // Kiểm tra nếu người dùng đã đánh giá bác sĩ này
-        $existingReview = DoctorReview::where('doctor_id', $request->doctor_id)
-                                      ->where('user_id', Auth::id())
-                                      ->exists();
+            if ($existingReview) {
+                return response()->json([
+                    'error' => 'Bạn đã đánh giá bác sĩ này rồi.',
+                ], 400);
+            }
 
-        if ($existingReview) {
+            $request->validate([
+                'doctor_id' => 'required|exists:doctors,id',
+                'rating'    => 'required|integer|min:1|max:5',
+                'review'    => 'nullable|string',
+            ]);
+
+            $review = DoctorReview::create([
+                'doctor_id' => $request->doctor_id,
+                'user_id'   => Auth::id(),
+                'rating'    => $request->rating,
+                'review'    => $request->review,
+            ]);
+
             return response()->json([
-                'error' => 'Bạn đã đánh giá bác sĩ này rồi.',
-            ], 400);
+                'message' => 'Đánh giá của bạn đã được lưu!',
+                'data'    => $review
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error'   => 'Lỗi xác thực',
+                'message' => $e->errors(),
+            ], 422);
         }
-
-        // Tạo mới đánh giá
-        $review = DoctorReview::create([
-            'doctor_id' => $request->doctor_id,
-            'user_id'   => Auth::id(),
-            'rating'    => $request->rating,
-            'review'    => $request->review,
-        ]);
-
-        return response()->json([
-            'message' => 'Đánh giá của bạn đã được lưu!',
-            'data'    => $review
-        ], 201);
     }
+
 
     /**
      * Xóa đánh giá (Chỉ admin có thể xóa).
@@ -92,7 +90,7 @@ class ApiDoctorReviewController extends Controller
     {
         $review = DoctorReview::findOrFail($id);
 
-        // Kiểm tra quyền admin
+        // Kiểm tra xem người dùng có phải là admin không
         if (Auth::user()->role !== 'admin') {
             return response()->json([
                 'error' => 'Bạn không có quyền xóa đánh giá này.',
