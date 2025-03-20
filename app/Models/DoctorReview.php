@@ -19,13 +19,15 @@ class DoctorReview extends Model
         'review',
     ];
 
+    // Trong model DoctorReview
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class);
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
+
 }

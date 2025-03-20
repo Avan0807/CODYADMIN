@@ -29,7 +29,11 @@ class Post extends Model
 
     public function author_info()
     {
-        return $this->hasOne('App\User', 'id', 'added_by');
+        if ($this->added_by && User::find($this->added_by)) {
+            return $this->belongsTo(User::class, 'added_by', 'id');
+        }
+
+        return $this->belongsTo(Doctor::class, 'added_by', 'id');
     }
     public static function getAllPost()
     {

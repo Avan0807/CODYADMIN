@@ -26,6 +26,7 @@
             <tr>
               <th>#</th>
               <th>Tiêu đề</th>
+              <th>Nội dung</th>
               <th>Đối tượng</th>
               <th>Ngày tạo</th>
               <th>Hoạt động</th>
@@ -36,7 +37,18 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $notification->title }}</td>
-                    <td>{{ ucfirst($notification->target_audience) }}</td>
+                    <td>{{ $notification->message }}</td>
+                    <td>
+                        @if($notification->target_audience == 'doctor')
+                            Bác sĩ
+                        @elseif($notification->target_audience == 'user')
+                            Người dùng
+                        @elseif($notification->target_audience == 'both')
+                            Cả hai
+                        @else
+                            N/A
+                        @endif
+                    </td>
                     <td>{{ \Carbon\Carbon::parse($notification->created_at)->format('d-m-Y H:i') }}</td>
                     <td>
                         <a href="{{ route('campaign_notifications.show', $notification->id) }}"

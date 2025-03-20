@@ -63,6 +63,11 @@ class User extends Authenticatable
     {
         return $this->createToken('AuthToken')->plainTextToken;
     }
+    // Trong model User
+    public function reviews()
+    {
+        return $this->hasMany(DoctorReview::class);
+    }
 
 
 }

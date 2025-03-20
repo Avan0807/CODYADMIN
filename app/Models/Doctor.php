@@ -42,5 +42,11 @@ class Doctor extends Authenticatable
     {
         return $this->hasMany(AffiliateOrder::class);
     }
+    // Trong model Doctor
+    public function reviews()
+    {
+        return $this->hasMany(DoctorReview::class);
+    }
+
 
 }

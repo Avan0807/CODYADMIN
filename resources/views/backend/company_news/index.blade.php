@@ -26,6 +26,7 @@
                         <tr>
                             <th>#</th>
                             <th>Tiêu đề</th>
+                            <th>Nội dung</th>
                             <th>Ảnh</th>
                             <th>Ngày xuất bản</th>
                             <th>Hành động</th>
@@ -36,6 +37,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->title }}</td>
+                                <td>{{ Str::limit($item->content, 50) }} <!-- Hiển thị nội dung ngắn --> </td>
                                 <td>
                                     @if($item->image)
                                         <img src="{{ $item->image }}" class="img-fluid zoom" style="max-width:80px" alt="{{ $item->image }}">
