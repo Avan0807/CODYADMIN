@@ -68,6 +68,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(DoctorReview::class);
     }
+    public function doctorFollowers()
+    {
+        return $this->hasMany(DoctorFollower::class, 'user_id');
+    }
 
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'doctor_followers', 'user_id', 'doctor_id');
+    }
 
 }

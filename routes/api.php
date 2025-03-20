@@ -31,6 +31,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Api\ApiDoctorCommissionController;
 use App\Http\Controllers\Api\ApiCompanyNewsController;
 use App\Http\Controllers\Api\ApiCampaignNotificationsController;
+use App\Http\Controllers\Api\ApiFollowersDoctorController;
+
+
 
 
 // Các route liên quan đến thông báo chiến dịch cho người dùng đã xác thực (user, doctor)
@@ -240,6 +243,14 @@ Route::get('/alldoctors', [DoctorsController::class, 'apiGetAllDoctors']);
 
 // Lấy thông tin chi tiết của một bác sĩ theo ID (public, không yêu cầu xác thực)
 Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoctorId']);
+
+// Tất cả wishlist bác sĩ
+Route::middleware('auth:sanctum')->get('/wishlist', [ApiFollowersDoctorController::class, 'index']);
+// Thêm bác sĩ vào wishlist (yêu cầu xác thực)
+Route::middleware('auth:sanctum')->post('/addwishlist/{doctor_id}', [ApiFollowersDoctorController::class, 'store']);
+
+// Xóa bác sĩ khỏi wishlist (yêu cầu xác thực)
+Route::middleware('auth:sanctum')->delete('/delwishlist/{doctor_id}', [ApiFollowersDoctorController::class, 'destroy']);
 
 
 // ================== THÔNG TIN BỆNH NHÂN ==================

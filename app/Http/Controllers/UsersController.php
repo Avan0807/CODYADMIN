@@ -333,10 +333,9 @@ class UsersController extends Controller
      */
     public function getNotifications(Request $request, $userID)
     {
-        // Kiểm tra xem người dùng có quyền truy cập thông báo của userID này hay không
         $user = $request->user();  // Người dùng hiện tại
 
-        // Kiểm tra xem userID trong URL có phải là người dùng hiện tại không (hoặc có quyền xem thông báo của user khác)
+        // Kiểm tra quyền truy cập
         if ($user->id != $userID) {
             return response()->json([
                 'success' => false,
@@ -344,7 +343,7 @@ class UsersController extends Controller
             ], 403);
         }
 
-        // Lấy thông tin user từ userID
+        // Lấy thông tin người dùng
         $targetUser = User::find($userID);
 
         if (!$targetUser) {
@@ -354,13 +353,16 @@ class UsersController extends Controller
             ], 404);
         }
 
-        // Trả về thông báo và thông tin user (bao gồm ID)
+        // Lấy tất cả thông báo mà không phân trang
+        $notifications = $targetUser->notifications()->get();  // Dùng get() để lấy tất cả các thông báo
+
         return response()->json([
             'success' => true,
-            'user_id' => $targetUser->id,  // Trả về ID của user
-            'notifications' => $targetUser->notifications,
+            'user_id' => $targetUser->id,
+            'notifications' => $notifications,  // Trả về tất cả thông báo
         ], 200);
     }
+
 
 
     /**
@@ -426,4 +428,7 @@ class UsersController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Thông báo đã bị xóa.']);
     }
+
+
+
 }

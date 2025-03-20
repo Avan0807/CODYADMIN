@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 Auth::routes(['register'=>false]);
 
 // Reset password
-Route::post('password-reset', 'FrontendController@showResetForm')->name('password.reset');
+Route::post('password-reset', 'FrontendController@showResetForm')->name('password-reset-form');
 
 Route::get('/', function () {
     return redirect('/login');
@@ -57,7 +57,7 @@ Route::get('blog-tag/{slug}','FrontendController@blogByTag')->name('blog.tag');
 
 // Product Review
 Route::resource('/review','ProductReviewController');
-Route::post('product/{slug}/review','ProductReviewController@store')->name('review.store');
+Route::post('product/{slug}/review', 'ReviewController@store')->name('review.store.product');
 
 // Post Comment
 Route::post('post/{slug}/comment','PostCommentController@store')->name('post-comment.store');

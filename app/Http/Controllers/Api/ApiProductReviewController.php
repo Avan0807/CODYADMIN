@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api; 
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -47,9 +47,11 @@ class ApiProductReviewController extends Controller
         $user = User::where('role', 'admin')->get();
         $details = [
             'title' => 'Đánh giá sản phẩm mới!',
+            'message' => 'Người dùng ' . $request->user()->name . ' đã đánh giá sản phẩm: ' . $product_info->title,
             'actionURL' => route('product-detail', $product_info->slug),
             'fas' => 'fa-star'
         ];
+
         Notification::send($user, new StatusNotification($details));
 
         if ($status) {
@@ -58,6 +60,7 @@ class ApiProductReviewController extends Controller
             return response()->json(['error' => 'Có lỗi xảy ra! Vui lòng thử lại!!'], 400);
         }
     }
+
 
     /**
      * Cập nhật đánh giá sản phẩm (API).

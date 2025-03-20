@@ -19,16 +19,17 @@ class StatusNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast']; // 🔹 Lưu vào DB & gửi real-time (nếu dùng Laravel Echo)
+        return ['database', 'broadcast']; // Lưu vào DB và gửi real-time nếu dùng Laravel Echo
     }
 
     public function toDatabase($notifiable)
     {
         return [
-            'title' => $this->details['title'],
-            'message' => $this->details['message'],
-            'appointment_id' => $this->details['appointment_id'],
-            'type' => $this->details['type']
+            'title' => $this->details['title'],  // Tiêu đề thông báo
+            'message' => $this->details['message'] ?? 'No message provided',  // Đảm bảo message có sẵn
+            'actionURL' => $this->details['actionURL'],  // URL để người dùng có thể click
+            'type' => $this->details['fas'] ?? 'info',  // Loại thông báo (dùng icon font awesome nếu có)
+            'notifiable_type' => \App\Models\User::class,
         ];
     }
 
@@ -36,10 +37,11 @@ class StatusNotification extends Notification
     {
         return new BroadcastMessage([
             'title' => $this->details['title'],
-            'message' => $this->details['message'],
-            'appointment_id' => $this->details['appointment_id'],
-            'type' => $this->details['type'],
-            'time' => now()->format('F d, Y h:i A')
+            'message' => $this->details['message'] ?? 'No message provided',
+            'actionURL' => $this->details['actionURL'],
+            'fas' => $this->details['fas'] ?? 'info',
+            'time' => now()->format('F d, Y h:i A'),
+            'notifiable_type' => \App\Models\User::class,
         ]);
     }
 }

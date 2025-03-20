@@ -10,15 +10,32 @@ use Illuminate\Validation\ValidationException;
 
 class ApiReviewDoctorController extends Controller
 {
+
     // Lấy danh sách đánh giá của một bác sĩ
     public function index($doctor_id)
     {
-        $reviews = DoctorReview::where('doctor_id', $doctor_id)->latest()->get();
+        // Lấy danh sách đánh giá của bác sĩ cùng với thông tin người dùng và bác sĩ
+        $reviews = DoctorReview::with(['user', 'doctor']) // Eager load quan hệ user và doctor
+            ->where('doctor_id', $doctor_id)
+            ->latest()
+            ->get();
+
+        // Chỉ lấy thông tin cần thiết từ mối quan hệ user và doctor
+        $reviews = $reviews->map(function ($review) {
+            return [
+                'user_name' => $review->user->name,
+                'doctor_name' => $review->doctor->name,
+                'review' => $review->review,
+                'rating' => $review->rating,
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'reviews' => $reviews
         ]);
     }
+
 
     // Thêm đánh giá mới
     public function store(Request $request)

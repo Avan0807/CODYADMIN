@@ -47,6 +47,13 @@ class Doctor extends Authenticatable
     {
         return $this->hasMany(DoctorReview::class);
     }
-
+    public function doctorFollowers()
+    {
+        return $this->hasMany(DoctorFollower::class, 'doctor_id');
+    }
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'doctor_followers', 'doctor_id', 'user_id');
+    }
 
 }

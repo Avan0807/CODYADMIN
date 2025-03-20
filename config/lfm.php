@@ -15,7 +15,7 @@ return [
     |--------------------------------------------------------------------------
      */
 
-    'use_package_routes'       => true,
+    'use_package_routes'       => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     // And set 'user_field' to App\Handler\ConfigHandler::class
     // Ex: The private folder of user will be named as the user id.
 
-    'private_folder_name'      => 'images', 
+    'private_folder_name'      => 'images',
 
     'allow_shared_folder'      => false,
 
@@ -96,7 +96,7 @@ return [
      */
 
     'disk'                     => 's3',
-    
+
     'url'                      => env('AWS_URL'),
 
     'rename_file'              => false,

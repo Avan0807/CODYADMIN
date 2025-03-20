@@ -152,9 +152,24 @@ class PostCommentController extends Controller
 
             $comments = cache()->remember($cacheKey, now()->addMinutes(10), function () use ($postId) {
                 return PostComment::where('post_id', $postId)
-                    ->with(['user_info:id,name,email', 'replies:id,comment,parent_id,status,created_at'])
+                    ->with(['user_info:id,name,email,phone', 'doctor_info:id,name,email,phone', 'replies:id,comment,parent_id,status,created_at'])
                     ->where('status', 'active')
                     ->paginate(10);
+            });
+
+            // Duyệt qua các bình luận để thêm thông tin user_info và doctor_info nếu có
+            $comments->getCollection()->transform(function ($comment) {
+                // Nếu có user_id, lấy thông tin user
+                if ($comment->user_id) {
+                    $comment->user_info = $comment->user_info ? $comment->user_info->only(['name', 'email', 'phone']) : null;
+                }
+
+                // Nếu có doctor_id, lấy thông tin doctor
+                if ($comment->doctor_id) {
+                    $comment->doctor_info = $comment->doctor_info ? $comment->doctor_info->only(['name', 'email', 'phone']) : null;
+                }
+
+                return $comment;
             });
 
             return response()->json([
@@ -169,6 +184,7 @@ class PostCommentController extends Controller
             ], 500);
         }
     }
+
     public function apiCreateComment(Request $request)
     {
         // Xác thực dữ liệu đầu vào
