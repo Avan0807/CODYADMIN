@@ -95,7 +95,7 @@ class ApiAffiliateController extends Controller
         $doctor_id = $affiliate->doctor_id;
         $product_id = $affiliate->product_id;
 
-        // ✅ Kiểm tra xem IP/User-Agent đã click trong 10 phút gần đây chưa (chống spam điểm)
+        // ✅ Kiểm tra xem IP/User-Agent đã click trong 60 phút gần đây chưa (chống spam điểm)
         $recentClick = \DB::table('affiliate_clicks')
             ->where('doctor_id', $doctor_id)
             ->where('product_id', $product_id)
@@ -103,7 +103,7 @@ class ApiAffiliateController extends Controller
                 $query->where('ip_address', $ip_address)
                       ->orWhere('user_agent', $user_agent);
             })
-            ->where('created_at', '>', now()->subMinutes(10))
+            ->where('created_at', '>', now()->subMinutes(60))
             ->exists();
 
         // ✅ Lưu thông tin click

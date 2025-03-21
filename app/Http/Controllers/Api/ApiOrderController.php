@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\Doctor;
+use App\Models\AffiliateOrder;
 use App\Models\AffiliateLink;
 
 class ApiOrderController extends Controller
@@ -256,6 +257,67 @@ class ApiOrderController extends Controller
 
         return response()->json($data);
     }
+
+    public function apiDoctorIncomeChart(Request $request)
+    {
+        try {
+            // Lấy thông tin bác sĩ đăng nhập
+            $user = auth()->user();
+    
+            // Kiểm tra xem user có phải là doctor hay không
+            $doctor = Doctor::where('id', $user->id)->first();
+            if (!$doctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập vào dữ liệu này!',
+                ], 403);
+            }
+    
+            // Lấy năm mới nhất có dữ liệu trong bảng
+            $latestYear = AffiliateOrder::where('doctor_id', $doctor->id)
+                ->selectRaw('YEAR(created_at) as year')
+                ->orderBy('year', 'desc')
+                ->limit(1)
+                ->pluck('year')
+                ->first() ?? \Carbon\Carbon::now()->year;
+    
+            // Lấy tổng hoa hồng theo tháng của bác sĩ hiện tại
+            $items = AffiliateOrder::whereYear('created_at', $latestYear)
+                ->where('doctor_id', $doctor->id)
+                ->whereIn('status', ['delivered']) // Lọc đơn hàng đã giao
+                ->selectRaw('MONTH(created_at) as month, SUM(commission) as total_commission')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+    
+            // Khởi tạo kết quả với 12 tháng
+            $result = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $monthName = date('F', mktime(0, 0, 0, $i, 1)); // Ví dụ: January, February...
+                $result[$monthName] = 0;
+            }
+    
+            // Gán dữ liệu thực tế vào mảng kết quả
+            foreach ($items as $item) {
+                $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
+                $result[$monthName] = intval($item->total_commission);
+            }
+    
+            return response()->json([
+                'success' => true,
+                'doctor_id' => $doctor->id,
+                'year' => $latestYear,
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy dữ liệu thống kê thu nhập.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
 
     public function storeDoctor(Request $request) {
         if (!Auth::check()) {

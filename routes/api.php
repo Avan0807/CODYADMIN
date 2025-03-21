@@ -187,6 +187,11 @@ Route::prefix('doctor')->group(function () {
     });
 });
 
+// ================== DOCTOR INCOME CHART (ADMIN) ==================
+
+// API thống kê thu nhập bác sĩ theo tháng (chỉ admin hoặc xác thực)
+Route::middleware('auth:sanctum')->get('/doctor-income-chart', [ApiOrderController::class, 'apiDoctorIncomeChart']);
+
 // =================== DOCTOR review ===================
 Route::get('doctor-reviews/{doctor_id}', [ApiReviewDoctorController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
