@@ -162,168 +162,69 @@ class UsersController extends Controller
             // Kiểm tra nếu user không tồn tại
             if (!$user) {
                 return response()->json([
-                    'message' => 'User not found.'
+                    'message' => 'Không tìm thấy người dùng.'
                 ], 404);
             }
 
             return response()->json([
-                'message' => 'User retrieved successfully.',
+                'message' => 'Người dùng đã truy xuất thành công.',
                 'user' => $user
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error retrieving user.',
+                'message' => 'Lỗi khi truy xuất người dùng.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
-
-
-    public function apiuploadAvatar(Request $request, $id)
+    public function apiUpdateUser(Request $request)
     {
         try {
-            $user = User::findOrFail($id);
+            // Lấy user đang đăng nhập
+            $user = auth()->user();
 
-            if (!$request->hasFile('photo')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Vui lòng gửi file ảnh.',
-                ], 400);
-            }
-
-            $file = $request->file('photo');
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-            if (!in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Định dạng file không được hỗ trợ.',
-                ], 400);
-            }
-
-            if ($file->getSize() > 2097152) { // 2MB
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kích thước file vượt quá 2MB.',
-                ], 400);
-            }
-
-            // Tạo tên file mới và thư mục lưu trữ
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $sanitizedName = Str::slug($originalName);
-            $fileName = $sanitizedName . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $filePath = 'uploads/photos/' . $fileName;
-
-            // Upload lên S3
-            $uploaded = Storage::disk('s3')->put($filePath, file_get_contents($file), 'public');
-
-            if (!$uploaded) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể tải ảnh lên S3.',
-                ], 500);
-            }
-
-            // Lấy URL từ S3
-            $fileUrl = Storage::disk('s3')->url($filePath);
-
-            // Xóa ảnh cũ trên S3 nếu có
-            if ($user->photo) {
-                $oldPath = str_replace(Storage::disk('s3')->url(''), '', $user->photo);
-                Storage::disk('s3')->delete($oldPath);
-            }
-
-            // Lưu URL mới vào database
-            $user->photo = $fileUrl;
-            $user->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cập nhật ảnh đại diện thành công.',
-                'url' => $fileUrl,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi tải ảnh.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-
-    public function apigetAvatarByUserId($id)
-    {
-        try {
-            // Tìm người dùng dựa trên ID
-            $user = User::find($id);
-
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Không tìm thấy người dùng với ID {$id}.",
-                ], 404);
-            }
-
-            // Kiểm tra nếu người dùng không có ảnh
-            if (!$user->photo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Người dùng với ID {$id} chưa có ảnh đại diện.",
-                ], 404);
-            }
-
-            // Trả về URL ảnh đại diện
-            return response()->json([
-                'success' => true,
-                'message' => 'Lấy ảnh đại diện thành công.',
-                'photo_url' => $user->photo,
-            ], 200);
-        } catch (\Exception $e) {
-            // Xử lý lỗi
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể lấy ảnh đại diện.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-    public function apiupdateAddress(Request $request, $id)
-    {
-        try {
             // Xác thực dữ liệu
-            $request->validate([
-                'address' => 'required|string|max:255',
-            ], [
-                'address.required' => 'Địa chỉ không được để trống.',
-                'address.string' => 'Địa chỉ phải là chuỗi ký tự.',
-                'address.max' => 'Địa chỉ không được vượt quá 255 ký tự.',
+            $validatedData = $request->validate([
+                'name' => 'nullable|string|max:191',
+                'email' => 'nullable|email|max:191|unique:users,email,' . $user->id,
+                'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,
+                'photo' => 'nullable|string',
+                'address' => 'nullable|string|max:255',
             ]);
 
-            // Tìm user theo userID
-            $user = User::find($id);
+            // Loại bỏ trường 'role' và 'password' (không cập nhật trong API này)
+            unset($validatedData['role']);
+            unset($validatedData['password']);
 
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
-                ], 404);
+            // Xử lý ảnh đại diện nếu có
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filePath = 'uploads/photos/' . $fileName;
+
+                Storage::disk('s3')->put($filePath, file_get_contents($file), 'public');
+                $validatedData['photo'] = Storage::disk('s3')->url($filePath);
+
+                // Xóa ảnh cũ trên S3 nếu có
+                if ($user->photo) {
+                    $oldPath = str_replace(Storage::disk('s3')->url(''), '', $user->photo);
+                    Storage::disk('s3')->delete($oldPath);
+                }
             }
 
-            // Cập nhật địa chỉ
-            $user->address = $request->address;
-            $user->save();
+            // Cập nhật dữ liệu
+            $user->update($validatedData);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật địa chỉ thành công.',
-                'user' => $user,
+                'message' => 'Cập nhật thông tin thành công.',
+                'user' => $user
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể cập nhật địa chỉ.',
-                'error' => $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi cập nhật thông tin.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

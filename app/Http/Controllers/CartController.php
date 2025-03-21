@@ -7,7 +7,9 @@ use App\Models\Product;
 use App\Models\Wishlist;
 use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Helper;
 use Illuminate\Contracts\View\View as ViewContract;
 
@@ -274,52 +276,57 @@ class CartController extends Controller
         }
     }
 
-    public function apiAddProductToCart(Request $request)
+    public function apiAddProductToCart(Request $request, $userID, $productId)
     {
         try {
-            // Xác thực người dùng
-            if (Auth::id() !== (int) $request->user_id) {
+            // Kiểm tra người dùng đã đăng nhập chưa
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn chưa đăng nhập.',
+                ], 401);
+            }
+
+            // Kiểm tra user có đúng không
+            if (Auth::id() !== (int) $userID) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Bạn không có quyền thêm sản phẩm vào giỏ hàng này.',
                 ], 403);
             }
 
-            // Xác thực dữ liệu đầu vào
-            $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'product_id' => 'required|exists:products,id',
+            // Kiểm tra dữ liệu đầu vào
+            $validator = Validator::make($request->all(), [
                 'quantity' => 'required|integer|min:1',
             ]);
 
-            $product = Product::find($request->product_id);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dữ liệu không hợp lệ',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
 
+            // Kiểm tra sản phẩm có tồn tại không
+            $product = Product::find($productId);
             if (!$product || $product->stock < $request->quantity) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Số lượng sản phẩm không đủ trong kho.',
+                    'message' => 'Sản phẩm không đủ hàng trong kho.',
                 ], 400);
             }
 
-            $cartItem = Cart::where('user_id', $request->user_id)
-                ->where('product_id', $request->product_id)
-                ->whereNull('order_id')
-                ->first();
+            // Thêm sản phẩm vào giỏ hàng
+            $cartItem = Cart::create([
+                'user_id' => $userID,
+                'product_id' => $productId,
+                'quantity' => $request->quantity,
+                'amount' => $request->quantity * $product->price,
+                'price' => $product->price, // ✅ Thêm giá sản phẩm
+                'status' => 'new',
+            ]);
 
-            if ($cartItem) {
-                $cartItem->quantity += $request->quantity;
-                $cartItem->amount = $cartItem->quantity * $product->price;
-                $cartItem->save();
-            } else {
-                $cartItem = Cart::create([
-                    'user_id' => $request->user_id,
-                    'product_id' => $request->product_id,
-                    'quantity' => $request->quantity,
-                    'amount' => $request->quantity * $product->price,
-                    'price' => $product->price,
-                    'status' => 'progress',
-                ]);
-            }
 
             return response()->json([
                 'success' => true,
@@ -329,11 +336,13 @@ class CartController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể thêm sản phẩm vào giỏ hàng.',
+                'message' => 'Lỗi server',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+
+
 
     public function apiRemoveFromCartByUser(Request $request, $userId, $productId)
     {

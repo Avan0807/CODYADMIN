@@ -96,24 +96,15 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('doctor-reviews/{doctor_id}', [ApiDoctorReviewController::class, 'index']);
 
 
-// ================== ĐƠN HÀNG VÀ GIỎ HÀNG ==================
+// ================== ĐƠN HÀNG  ==================
 
-// Các route liên quan đến đơn hàng và giỏ hàng yêu cầu xác thực bằng Sanctum
+// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
 Route::middleware('auth:sanctum')->group(function () {
     // Tạo đơn hàng mới
     Route::post('/order/store', [ApiOrderController::class, 'store']);
-
-    // Thêm sản phẩm vào giỏ hàng
-    Route::post('/cart/add', [ApiCartController::class, 'addToCart']);
-    // Thêm một sản phẩm đơn lẻ vào giỏ hàng
-    Route::post('/cart/single', [ApiCartController::class, 'singleAddToCart']);
-    // Lấy danh sách sản phẩm trong giỏ hàng
-    Route::get('/cart', [ApiCartController::class, 'index']);
-    // Cập nhật sản phẩm trong giỏ hàng
-    Route::put('/cart/update', [ApiCartController::class, 'cartUpdate']);
-    // Xóa sản phẩm khỏi giỏ hàng
-    Route::delete('/cart/remove', [ApiCartController::class, 'cartDelete']);
 });
+
+
 
 
 // ================== ADMIN - QUẢN LÝ ĐƠN HÀNG ==================
@@ -204,25 +195,14 @@ Route::middleware('auth:sanctum')->post('logout', [ApiAuthController::class, 'lo
 // admin Logout
 Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middleware('auth:sanctum');
 
+
 // ================== USERS ROUTES ==================
 
 // Lấy thông tin người dùng theo ID (yêu cầu xác thực bằng Sanctum)
 Route::middleware('auth:sanctum')->get('/user/{id}', [UsersController::class, 'apiGetUserById']);
 
-// ================== UPLOAD ẢNH ĐẠI DIỆN ==================
-
-// Upload ảnh đại diện cho người dùng (public, không yêu cầu xác thực)
-Route::post('/user/{userID}/upload-avatar', [UsersController::class, 'apiUploadAvatar']);
-// Lấy ảnh đại diện của người dùng (public, không yêu cầu xác thực)
-Route::get('/user/{userID}/get-avatar', [UsersController::class, 'apiGetAvatarByUserId']);
-
-
-// ================== ĐỊA CHỈ NGƯỜI DÙNG ==================
-
-// Cập nhật địa chỉ cho người dùng (public, không yêu cầu xác thực)
-Route::put('/users/{userID}/address', [UsersController::class, 'apiUpdateAddress']);
-// Lấy địa chỉ của người dùng (public, không yêu cầu xác thực, nhưng có thể cần kiểm tra lại logic nếu cần bảo mật)
-Route::get('/users/{userID}/getaddress', [UsersController::class, 'apiGetUserByID']);
+// Cập nhật thông tin User
+Route::middleware('auth:sanctum')->put('/user/update', [UsersController::class, 'apiUpdateUser']);
 
 
 // Lấy danh sách thông báo của User
@@ -352,11 +332,17 @@ Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsCont
 // Lấy giỏ hàng của người dùng (public, nên thêm xác thực để bảo mật)
 Route::middleware('auth:sanctum')->get('/cart/{userID}', [CartController::class, 'apiGetUserCart']);
 
+// Thêm vào giỏ hàng của người dùng (public, nên thêm xác thực để bảo mật)
+Route::middleware('auth:sanctum')->post('/addcart/{userID}/{productId}', [CartController::class, 'apiAddProductToCart']);
+
 // Xóa sản phẩm khỏi giỏ hàng theo userID và productID (public, nên thêm xác thực)
-Route::middleware('auth:sanctum')->delete('/cart/{userId}/{productId}', [CartController::class, 'apiRemoveFromCartByUser']);
+Route::middleware('auth:sanctum')->delete('/delcart/{userId}/{productId}', [CartController::class, 'apiRemoveFromCartByUser']);
 
 // Cập nhật số lượng sản phẩm trong giỏ hàng (public, nên thêm xác thực)
-Route::middleware('auth:sanctum')->put('/cart/{userId}/{productId}', [CartController::class, 'apiUpdateUserCartQuantity']);
+Route::middleware('auth:sanctum')->put('/updatecart/{userId}/{productId}', [CartController::class, 'apiUpdateUserCartQuantity']);
+
+// Mua hàng trực tiếp
+Route::middleware('auth:sanctum')->post('/cart/checkout-now/{product_id}', [ApiCartController::class, 'checkoutNow']);
 
 
 // ================== POST ROUTES ==================

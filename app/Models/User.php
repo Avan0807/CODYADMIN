@@ -25,7 +25,7 @@ class User extends Authenticatable
         'status',
         'provider',
         'provider_id',
-        'address' // Thêm dòng này để Laravel chấp nhận lưu `address`
+        'address'
     ];
 
     /**

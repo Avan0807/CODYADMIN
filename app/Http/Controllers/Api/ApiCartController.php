@@ -135,6 +135,10 @@ class ApiCartController extends Controller
      */
     public function cartDelete(Request $request)
     {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Bạn chưa đăng nhập'], 401);
+        }
+
         $request->validate([
             'id' => 'required|integer',
         ]);
@@ -147,6 +151,8 @@ class ApiCartController extends Controller
 
         return response()->json(['error' => 'Đã xảy ra lỗi, vui lòng thử lại'], 400);
     }
+
+
 
     /**
      * Cập nhật giỏ hàng (API).
