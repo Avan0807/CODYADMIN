@@ -27,13 +27,24 @@ class Post extends Model
         return $this->hasOne('App\Models\PostTag', 'id', 'post_tag_id');
     }
 
-    public function author_info()
+    public function user()
     {
-        if ($this->added_by && User::find($this->added_by)) {
-            return $this->belongsTo(User::class, 'added_by', 'id');
+        return $this->belongsTo(User::class, 'added_by');
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'added_by');
+    }
+    public function getAuthorInfoAttribute()
+    {
+        // Ưu tiên Doctor trước
+        if ($this->doctor) {
+            return $this->doctor;
         }
 
-        return $this->belongsTo(Doctor::class, 'added_by', 'id');
+        // Nếu không có doctor, kiểm tra user
+        return $this->user;
     }
     public static function getAllPost()
     {

@@ -46,6 +46,19 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
+
+        // Thêm guard cho user
+        'user' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        // Thêm guard cho doctor
+        'doctor' => [
+            'driver' => 'session',
+            'provider' => 'doctors',
+        ],
+            
     ],
 
     /*
@@ -71,6 +84,10 @@ return [
             'model' => App\Models\User::class,
         ],
 
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Doctor::class,
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

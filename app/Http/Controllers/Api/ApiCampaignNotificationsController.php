@@ -18,13 +18,11 @@ class ApiCampaignNotificationsController extends Controller
         $doctor = Auth::guard('doctor')->user();
 
         if ($user) {
-            $notifications = CampaignNotification::where('target_audience', 'user')
-                                                 ->orWhere('target_audience', 'both')
+            $notifications = CampaignNotification::whereIn('target_audience', ['user', 'both'])
                                                  ->latest()
                                                  ->get();
         } elseif ($doctor) {
-            $notifications = CampaignNotification::where('target_audience', 'doctor')
-                                                 ->orWhere('target_audience', 'both')
+            $notifications = CampaignNotification::whereIn('target_audience', ['doctor', 'both'])
                                                  ->latest()
                                                  ->get();
         } else {
@@ -43,14 +41,12 @@ class ApiCampaignNotificationsController extends Controller
         $doctor = Auth::guard('doctor')->user();
 
         if ($user) {
-            $notifications = CampaignNotification::where('target_audience', 'user')
-                                                 ->orWhere('target_audience', 'both')
+            $notifications = CampaignNotification::whereIn('target_audience', ['user', 'both'])
                                                  ->latest()
                                                  ->take(5)
                                                  ->get();
         } elseif ($doctor) {
-            $notifications = CampaignNotification::where('target_audience', 'doctor')
-                                                 ->orWhere('target_audience', 'both')
+            $notifications = CampaignNotification::whereIn('target_audience', ['doctor', 'both'])
                                                  ->latest()
                                                  ->take(5)
                                                  ->get();
@@ -66,7 +62,12 @@ class ApiCampaignNotificationsController extends Controller
      */
     public function getNotificationDetail($id)
     {
-        $notification = CampaignNotification::findOrFail($id);
+        $notification = CampaignNotification::find($id);
+
+        if (!$notification) {
+            return response()->json(['message' => 'Notification not found'], 404);
+        }
+
         return response()->json($notification);
     }
 }

@@ -317,4 +317,52 @@ class PostCommentController extends Controller
             ], 500);
         }
     }
+    public function apiReplyComment(Request $request)
+    {
+        // Xác thực dữ liệu đầu vào
+        $validated = $request->validate([
+            'post_id' => 'required|exists:posts,id',
+            'comment' => 'required|string|max:1000',
+            'parent_id' => 'required|exists:post_comments,id', // Bắt buộc phải có parent_id để biết đang reply comment nào
+        ]);
+
+        try {
+            // Lấy thông tin người dùng hiện tại
+            $user = auth()->user();
+
+            // Kiểm tra nếu người dùng là bác sĩ
+            $doctor = Doctor::where('id', $user->id)->first();
+
+            if ($doctor) {
+                $user_id = null;
+                $doctor_id = $doctor->doctorID;
+            } else {
+                $user_id = $user->id;
+                $doctor_id = null;
+            }
+
+            // Tạo comment trả lời
+            $reply = PostComment::create([
+                'user_id' => $user_id,
+                'doctor_id' => $doctor_id,
+                'post_id' => $validated['post_id'],
+                'comment' => $validated['comment'],
+                'parent_id' => $validated['parent_id'],
+                'status' => 'active',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $reply,
+                'message' => 'Phản hồi đã được tạo thành công!',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tạo phản hồi!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }

@@ -37,11 +37,11 @@ use App\Http\Controllers\Api\ApiFollowersDoctorController;
 
 
 // Các route liên quan đến thông báo chiến dịch cho người dùng đã xác thực (user, doctor)
-Route::middleware(['auth:user,doctor'])->get('/campaign-notifications/authenticated', [ApiCampaignNotificationsController::class, 'getNotificationsForAuthenticatedUser']);
+Route::middleware(['auth:sanctum'])->get('/campaign-notifications/authenticated', [ApiCampaignNotificationsController::class, 'getNotificationsForAuthenticatedUser']);
 // Lấy 5 thông báo chiến dịch mới nhất cho người dùng đã xác thực (user, doctor)
-Route::middleware(['auth:user,doctor'])->get('/campaign-notifications/authenticated/latest', [ApiCampaignNotificationsController::class, 'getLatestFiveForAuthenticatedUser']);
+Route::middleware(['auth:sanctum'])->get('/campaign-notifications/authenticated/latest', [ApiCampaignNotificationsController::class, 'getLatestFiveForAuthenticatedUser']);
 // Lấy chi tiết một thông báo chiến dịch theo ID cho người dùng đã xác thực (user, doctor)
-Route::middleware(['auth:user,doctor'])->get('/campaign-notifications/{id}', [ApiCampaignNotificationsController::class, 'getNotificationDetail']);
+Route::middleware(['auth:sanctum'])->get('/campaign-notifications/{id}', [ApiCampaignNotificationsController::class, 'getNotificationDetail']);
 
 
 
@@ -379,6 +379,9 @@ Route::get('/posts/{postId}/comments/{commentId}', [PostCommentController::class
 
 // Cập nhật nội dung bình luận (yêu cầu xác thực)
 Route::middleware('auth:sanctum')->put('/posts/{postId}/comments/{commentId}', [PostCommentController::class, 'apiUpdateComment']);
+
+// Trả lời bình luận (yêu cầu xác thực)
+Route::middleware('auth:sanctum')->post('/comments/reply', [PostCommentController::class, 'apiReplyComment']);
 
 
 // ================== ORDER ROUTES ==================
