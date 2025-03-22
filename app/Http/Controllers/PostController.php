@@ -250,7 +250,8 @@ class PostController extends Controller
     {
         try {
             // Lấy danh sách bài đăng với phân trang
-            $posts = Post::with(['category', 'author_info'])->where('status', 'active')->orderBy('id', 'DESC')->paginate(10);
+            $posts = Post::with(['category', 'doctor', 'user'])->where('status', 'active')->orderBy('id', 'DESC')->paginate(10);
+
 
             if ($posts->isEmpty()) {
                 return response()->json([
