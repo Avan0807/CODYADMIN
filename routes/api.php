@@ -32,7 +32,7 @@ use App\Http\Controllers\Api\ApiDoctorCommissionController;
 use App\Http\Controllers\Api\ApiCompanyNewsController;
 use App\Http\Controllers\Api\ApiCampaignNotificationsController;
 use App\Http\Controllers\Api\ApiFollowersDoctorController;
-
+use App\Http\Controllers\Api\ApiAffiliateOrdersController;
 
 
 
@@ -217,6 +217,13 @@ Route::get('/alldoctors', [DoctorsController::class, 'apiGetAllDoctors']);
 
 // Lấy thông tin chi tiết của một bác sĩ theo ID (public, không yêu cầu xác thực)
 Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoctorId']);
+
+// Cập nhật thông tin bác sĩ
+Route::middleware('auth:sanctum')->post('/doctor/update', [DoctorsController::class, 'updateApi']);
+
+// Lấy danh sách đơn hàng tiếp thị của từng bác sĩ
+Route::middleware('auth:sanctum')->get('/doctor/affiliate-orders', [ApiAffiliateOrdersController::class, 'index']);
+
 
 // Tất cả wishlist bác sĩ
 Route::middleware('auth:sanctum')->get('/wishlist', [ApiFollowersDoctorController::class, 'index']);

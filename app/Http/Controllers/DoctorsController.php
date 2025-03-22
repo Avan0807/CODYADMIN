@@ -14,6 +14,9 @@ use App\Models\Appointment;
 use App\Rules\MatchOldPassword;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 
 class DoctorsController extends Controller
@@ -120,7 +123,7 @@ class DoctorsController extends Controller
         return view('doctor.review.index')->with('reviews', $reviews);
     }
 
-    /** 
+    /**
      * Trang chỉnh sửa đánh giá sản phẩm (productReviewEdit)
      */
     public function productReviewEdit($id)
@@ -344,19 +347,74 @@ class DoctorsController extends Controller
         ], 200); // Mã 200 - OK
     }
 
+    public function updateApi(Request $request)
+    {
+        // ✅ Kiểm tra bác sĩ đã đăng nhập chưa
+        $doctor = Auth::user();
+
+        if (!$doctor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn chưa đăng nhập.',
+            ], 401);
+        }
+
+        // ✅ Validate dữ liệu gửi lên
+        $request->validate([
+            'name' => 'required',
+            'specialization' => 'required',
+            'experience' => 'required|integer',
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'phone' => 'required',
+            'status' => 'required',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'password' => 'nullable|min:6',
+        ]);
+
+        $data = $request->only([
+            'name', 'specialization', 'services', 'experience',
+            'working_hours', 'location', 'workplace', 'phone',
+            'email', 'status', 'rating', 'consultation_fee',
+            'bio', 'points'
+        ]);
+
+        // ✅ Nếu có cập nhật mật khẩu
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        // ✅ Nếu có ảnh mới
+        if ($request->hasFile('photo')) {
+            if ($doctor->photo && Storage::exists('public/' . $doctor->photo)) {
+                Storage::delete('public/' . $doctor->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
+        }
+
+        // ✅ Cập nhật thông tin
+        $doctor->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật thông tin bác sĩ thành công',
+            'doctor' => $doctor->fresh()
+        ]);
+    }
+
+
     // Lấy thông báo cho bác sĩ đang đăng nhập
     public function getNotifications(Request $request, $doctorID)
     {
         // Lấy bác sĩ từ thông tin người dùng đã đăng nhập (token)
         $doctor = $request->user(); // Bác sĩ đang đăng nhập
-    
+
         if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy bác sĩ.',
             ], 404);
         }
-    
+
         // Kiểm tra xem bác sĩ đăng nhập có phải là bác sĩ yêu cầu thông báo không
         if ($doctor->id != $doctorID) {
             return response()->json([
@@ -364,16 +422,16 @@ class DoctorsController extends Controller
                 'message' => 'Truy cập trái phép vào thông báo của người dùng.',
             ], 403); // Trả về lỗi 403 nếu bác sĩ không phải người yêu cầu
         }
-    
+
         // Lấy thông báo của bác sĩ
         return response()->json([
             'success' => true,
             'notifications' => $doctor->notifications,
         ], 200);
     }
-    
-  
-    // thông báo đã đọc 
+
+
+    // thông báo đã đọc
     public function markNotificationAsRead($notificationID)
     {
         $notification = auth()->user()->notifications()->find($notificationID);
@@ -386,12 +444,12 @@ class DoctorsController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Thông báo đã được đánh dấu là đã đọc.']);
     }
-    // thông báo chưa đọc 
+    // thông báo chưa đọc
     public function getUnreadNotifications(Request $request, $doctorID)
     {
         // Lấy thông tin bác sĩ từ thông tin người dùng đã đăng nhập (token)
         $doctor = $request->user();  // Lấy bác sĩ hiện tại từ token
-    
+
         // Kiểm tra xem bác sĩ có quyền truy cập thông báo của chính mình không
         if ($doctor->id != $doctorID) {
             return response()->json([
@@ -399,18 +457,18 @@ class DoctorsController extends Controller
                 'message' => 'Truy cập trái phép vào thông báo của bác sĩ.',
             ], 403); // Nếu không phải bác sĩ hiện tại, trả về lỗi 403
         }
-    
+
         // Lấy các thông báo chưa đọc của bác sĩ
         $unreadNotifications = $doctor->unreadNotifications;
-    
+
         // Trả về thông báo chưa đọc của bác sĩ
         return response()->json([
             'success' => true,
             'notifications' => $unreadNotifications,
         ], 200);
     }
-    
-    // xóa thông báo đã đọc 
+
+    // xóa thông báo đã đọc
     public function deleteNotification($notificationID)
     {
         $notification = auth()->user()->notifications()->find($notificationID);

@@ -119,15 +119,24 @@ class AppointmentsController extends Controller
             ], 500);
         }
     }
-    public function apiGetAppointmentsByUser($userID)
+    public function apiGetAppointmentsByUser()
     {
         try {
-            $appointments = Appointment::where('user_id', $userID)->get();
+            $user = Auth::user(); // lấy user đang đăng nhập
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chưa đăng nhập.',
+                ], 401);
+            }
+
+            $appointments = Appointment::where('user_id', $user->id)->get();
 
             if ($appointments->isEmpty()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy cuộc hẹn nào cho userID này.',
+                    'message' => 'Không tìm thấy cuộc hẹn nào cho tài khoản này.',
                 ]);
             }
 

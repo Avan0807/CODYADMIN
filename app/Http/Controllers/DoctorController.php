@@ -108,4 +108,5 @@ class DoctorController extends Controller
 
         return redirect()->route('doctor.index')->with('success', 'Bác sĩ đã được xóa');
     }
+
 }
