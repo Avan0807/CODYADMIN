@@ -279,7 +279,7 @@ class CartController extends Controller
     public function apiAddProductToCart(Request $request, $userID, $productId)
     {
         try {
-            // Kiểm tra người dùng đã đăng nhập chưa
+            // ✅ Kiểm tra người dùng đã đăng nhập chưa
             if (!Auth::check()) {
                 return response()->json([
                     'success' => false,
@@ -287,7 +287,7 @@ class CartController extends Controller
                 ], 401);
             }
 
-            // Kiểm tra user có đúng không
+            // ✅ Kiểm tra user có đúng không
             if (Auth::id() !== (int) $userID) {
                 return response()->json([
                     'success' => false,
@@ -295,9 +295,10 @@ class CartController extends Controller
                 ], 403);
             }
 
-            // Kiểm tra dữ liệu đầu vào
+            // ✅ Validate dữ liệu đầu vào
             $validator = Validator::make($request->all(), [
                 'quantity' => 'required|integer|min:1',
+                'ref' => 'nullable|string', // Cho phép nhận hash_ref từ app
             ]);
 
             if ($validator->fails()) {
@@ -308,7 +309,7 @@ class CartController extends Controller
                 ], 422);
             }
 
-            // Kiểm tra sản phẩm có tồn tại không
+            // ✅ Kiểm tra sản phẩm
             $product = Product::find($productId);
             if (!$product || $product->stock < $request->quantity) {
                 return response()->json([
@@ -317,22 +318,35 @@ class CartController extends Controller
                 ], 400);
             }
 
-            // Thêm sản phẩm vào giỏ hàng
-            $cartItem = Cart::create([
-                'user_id' => $userID,
-                'product_id' => $productId,
-                'quantity' => $request->quantity,
-                'amount' => $request->quantity * $product->price,
-                'price' => $product->price, // ✅ Thêm giá sản phẩm
-                'status' => 'new',
-            ]);
+            // ✅ Xử lý affiliate hash_ref (nếu có)
+            $doctor_id = null;
+            $commission = 0;
+            if ($request->filled('ref')) {
+                $affiliate = DB::table('affiliate_links')->where('hash_ref', $request->ref)->first();
+                if ($affiliate) {
+                    $doctor_id = $affiliate->doctor_id;
+                    $commission = ($product->price * $request->quantity) * ($product->commission_percentage / 100);
+                }
+            }
 
+            // ✅ Thêm sản phẩm vào giỏ hàng
+            $cartItem = Cart::create([
+                'user_id'    => $userID,
+                'product_id' => $productId,
+                'quantity'   => $request->quantity,
+                'price'      => $product->price,
+                'amount'     => $request->quantity * $product->price,
+                'status'     => 'new',
+                'doctor_id'  => $doctor_id,
+                'commission' => $commission,
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Thêm sản phẩm vào giỏ hàng thành công.',
                 'cart' => $cartItem,
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -341,7 +355,6 @@ class CartController extends Controller
             ], 500);
         }
     }
-
 
 
     public function apiRemoveFromCartByUser(Request $request, $userId, $productId)

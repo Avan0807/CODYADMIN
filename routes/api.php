@@ -96,17 +96,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('doctor-reviews/{doctor_id}', [ApiDoctorReviewController::class, 'index']);
 
 
-// ================== ĐƠN HÀNG  ==================
-
-// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
-Route::middleware('auth:sanctum')->group(function () {
-    // Tạo đơn hàng mới
-    Route::post('/order/store', [ApiOrderController::class, 'store']);
-});
-
-
-
-
 // ================== ADMIN - QUẢN LÝ ĐƠN HÀNG ==================
 
 // Route yêu cầu xác thực để admin cập nhật trạng thái đơn hàng
@@ -325,6 +314,14 @@ Route::middleware('auth:sanctum')->delete('/appointments/doctor/{appointmentID}/
 Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsController::class, 'getAllPatientsForDoctor']);
 
 
+
+// ================== ĐƠN HÀNG  ==================
+
+// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
+Route::middleware('auth:sanctum')->group(function () {
+    // Tạo đơn hàng mới
+    Route::post('/order/store', [ApiOrderController::class, 'store']);
+});
 
 
 // ================== CART ROUTES ==================

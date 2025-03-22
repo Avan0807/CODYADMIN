@@ -33,90 +33,89 @@ class ApiOrderController extends Controller
      */
     public function store(Request $request)
     {
-        // ✅ Kiểm tra nếu user chưa đăng nhập
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Bạn cần đăng nhập để đặt hàng.'], 401);
-        }
-
-        // ✅ Kiểm tra giỏ hàng có sản phẩm không
-        $cartItems = Cart::where('user_id', Auth::id())->whereNull('order_id')->get();
-        if ($cartItems->isEmpty()) {
-            return response()->json(['error' => 'Giỏ hàng của bạn đang trống!'], 400);
-        }
-
-        // ✅ Lấy sản phẩm đầu tiên trong giỏ hàng
-        $firstProduct = $cartItems->first();
-
-        // ✅ Kiểm tra dữ liệu đầu vào
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'address1'   => 'required|string|max:255',
-            'address2'   => 'nullable|string|max:255',
-            'phone'      => 'required|string|max:15',
-            'email'      => 'required|email|max:255',
-            'post_code'  => 'nullable|string|max:20',
-            'shipping_id' => 'nullable|exists:shippings,id',
-            'coupon'     => 'nullable|string',
-            'payment_method' => 'required|string|in:cod,paypal,bank_transfer',
-            'country'    => 'nullable|string|max:255' // ✅ Bổ sung country vào validate
+        // Validate đầu vào
+        $validated = $request->validate([
+            'first_name' => 'string|required',
+            'last_name'  => 'string|required',
+            'address1'   => 'string|required',
+            'address2'   => 'string|nullable',
+            'coupon'     => 'nullable|numeric',
+            'phone'      => 'numeric|required',
+            'post_code'  => 'string|nullable',
+            'email'      => 'string|required',
+            'shipping'   => 'nullable|exists:shippings,id',
+            'payment_method' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => 'Dữ liệu không hợp lệ.',
-                'details' => $validator->errors()
-            ], 400);
+        // Kiểm tra giỏ hàng
+        $cartQuery = Cart::where('user_id', auth()->id())->whereNull('order_id');
+        if (!$cartQuery->exists()) {
+            return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
         }
 
-        // ✅ Tính tổng giá trị đơn hàng
-        $subTotal = $cartItems->sum(function ($item) {
-            return $item->price * $item->quantity;
-        });
+        // Tạo đơn hàng
+        $order_data = $request->all();
+        $order_data['order_number'] = 'ORD-' . strtoupper(Str::random(10));
+        $order_data['user_id'] = auth()->id();
+        $order_data['shipping_id'] = $request->shipping;
+        $order_data['sub_total'] = Helper::totalCartPrice();
+        $order_data['quantity'] = Helper::cartCount();
 
-        // ✅ Lấy phí vận chuyển (nếu có)
-        $shipping = Shipping::find($request->shipping_id);
-        $shippingCost = $shipping ? $shipping->price : 0;
+        // Tính tổng tiền
+        $shipping = Shipping::find($request->shipping);
+        $order_data['total_amount'] = $order_data['sub_total'] + ($shipping ? $shipping->price : 0);
 
-        // ✅ Áp dụng mã giảm giá (nếu có)
-        $couponValue = session('coupon')['value'] ?? 0;
+        // Áp dụng coupon nếu có
+        if ($request->has('coupon')) {
+            $order_data['coupon'] = $request->coupon;
+            $order_data['total_amount'] -= $request->coupon;
+        }
 
-        // ✅ Tính tổng tiền đơn hàng
-        $totalAmount = $subTotal + $shippingCost - $couponValue;
+        // Xử lý thanh toán
+        $order_data['payment_method'] = $request->payment_method ?? 'cod';
+        $order_data['payment_status'] = in_array($order_data['payment_method'], ['paypal', 'cardpay']) ? 'paid' : 'Unpaid';
 
-        // ✅ Tạo đơn hàng mới
-        $order = new Order();
-        $order->user_id = Auth::id();
-        $order->product_id = $firstProduct->product_id;
-        $order->order_number = 'ORD-' . strtoupper(Str::random(10));
-        $order->sub_total = $subTotal;
-        $order->total_amount = $totalAmount;
-        $order->quantity = $cartItems->sum('quantity');
-        $order->shipping_id = $request->shipping ?? null; // Thêm fallback nếu không có giá trị
-        $order->coupon = $couponValue;
-        $order->payment_method = $request->payment_method;
-        $order->payment_status = $request->payment_method === 'paypal' ? 'paid' : 'unpaid';
-        $order->status = "new";
+        // Tạo order
+        $order = Order::create($order_data);
 
-        // ✅ Thông tin khách hàng
-        $order->first_name = $request->first_name;
-        $order->last_name = $request->last_name;
-        $order->email = $request->email;
-        $order->phone = $request->phone;
-        $order->post_code = $request->post_code;
-        $order->address1 = $request->address1;
-        $order->address2 = $request->address2;
-        $order->country = $request->country ?? 'Vietnam'; // ✅ Thêm country mặc định nếu không có
+        // Xử lý affiliate nếu có
+        if ($request->has('hash_ref')) {
+            $affiliate = AffiliateLink::where('hash_ref', $request->hash_ref)->first();
+            if ($affiliate) {
+                $doctor_id = (int)$affiliate->doctor_id;
+                $order->doctor_id = $doctor_id;
+                $order->save();
 
-        // 🔥 Lưu đơn hàng vào database
-        $order->save();
+                // Tính hoa hồng
+                $totalCommission = 0;
+                $carts = $cartQuery->get();
+                foreach ($carts as $cart) {
+                    $product = Product::find($cart->product_id);
+                    if ($product) {
+                        $commission = ($cart->price * $cart->quantity) * ($product->commission_percentage / 100);
+                        $totalCommission += $commission;
+                    }
+                }
 
-        // ✅ Gán order_id vào giỏ hàng
-        Cart::where('user_id', Auth::id())->whereNull('order_id')->update(['order_id' => $order->id]);
+                $order->commission = $totalCommission;
+                $order->save();
+
+                AffiliateOrder::create([
+                    'order_id' => $order->id,
+                    'doctor_id' => $doctor_id,
+                    'commission' => $totalCommission,
+                    'status' => 'new',
+                ]);
+            }
+        }
+
+        // Cập nhật giỏ hàng
+        $cartQuery->update(['order_id' => $order->id]);
 
         return response()->json([
-            'message' => 'Đơn hàng của bạn đã được tạo thành công!',
-            'order' => $order
+            'message' => 'Đơn hàng đã được tạo thành công.',
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
         ], 201);
     }
 
@@ -263,7 +262,7 @@ class ApiOrderController extends Controller
         try {
             // Lấy thông tin bác sĩ đăng nhập
             $user = auth()->user();
-    
+
             // Kiểm tra xem user có phải là doctor hay không
             $doctor = Doctor::where('id', $user->id)->first();
             if (!$doctor) {
@@ -272,7 +271,7 @@ class ApiOrderController extends Controller
                     'message' => 'Bạn không có quyền truy cập vào dữ liệu này!',
                 ], 403);
             }
-    
+
             // Lấy năm mới nhất có dữ liệu trong bảng
             $latestYear = AffiliateOrder::where('doctor_id', $doctor->id)
                 ->selectRaw('YEAR(created_at) as year')
@@ -280,7 +279,7 @@ class ApiOrderController extends Controller
                 ->limit(1)
                 ->pluck('year')
                 ->first() ?? \Carbon\Carbon::now()->year;
-    
+
             // Lấy tổng hoa hồng theo tháng của bác sĩ hiện tại
             $items = AffiliateOrder::whereYear('created_at', $latestYear)
                 ->where('doctor_id', $doctor->id)
@@ -289,20 +288,20 @@ class ApiOrderController extends Controller
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
-    
+
             // Khởi tạo kết quả với 12 tháng
             $result = [];
             for ($i = 1; $i <= 12; $i++) {
                 $monthName = date('F', mktime(0, 0, 0, $i, 1)); // Ví dụ: January, February...
                 $result[$monthName] = 0;
             }
-    
+
             // Gán dữ liệu thực tế vào mảng kết quả
             foreach ($items as $item) {
                 $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
                 $result[$monthName] = intval($item->total_commission);
             }
-    
+
             return response()->json([
                 'success' => true,
                 'doctor_id' => $doctor->id,
@@ -317,7 +316,7 @@ class ApiOrderController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function storeDoctor(Request $request) {
         if (!Auth::check()) {
