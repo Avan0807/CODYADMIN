@@ -349,7 +349,6 @@ class DoctorsController extends Controller
 
     public function updateApi(Request $request)
     {
-        // ✅ Kiểm tra bác sĩ đã đăng nhập chưa
         $doctor = Auth::user();
 
         if (!$doctor) {
@@ -359,31 +358,17 @@ class DoctorsController extends Controller
             ], 401);
         }
 
-        // ✅ Validate dữ liệu gửi lên
         $request->validate([
-            'name' => 'required',
-            'specialization' => 'required',
-            'experience' => 'required|integer',
-            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
-            'phone' => 'required',
-            'status' => 'required',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password' => 'nullable|min:6',
+            'workplace' => 'required|string|max:255',
         ]);
 
-        $data = $request->only([
-            'name', 'specialization', 'services', 'experience',
-            'working_hours', 'location', 'workplace', 'phone',
-            'email', 'status', 'rating', 'consultation_fee',
-            'bio', 'points'
-        ]);
+        $data = [];
 
-        // ✅ Nếu có cập nhật mật khẩu
-        if ($request->filled('password')) {
-            $data['password'] = bcrypt($request->password);
+        if ($request->filled('workplace')) {
+            $data['workplace'] = $request->workplace;
         }
 
-        // ✅ Nếu có ảnh mới
         if ($request->hasFile('photo')) {
             if ($doctor->photo && Storage::exists('public/' . $doctor->photo)) {
                 Storage::delete('public/' . $doctor->photo);
@@ -391,15 +376,15 @@ class DoctorsController extends Controller
             $data['photo'] = $request->file('photo')->store('photos', 'public');
         }
 
-        // ✅ Cập nhật thông tin
         $doctor->update($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Cập nhật thông tin bác sĩ thành công',
+            'message' => 'Cập nhật thành công ảnh và địa chỉ công tác',
             'doctor' => $doctor->fresh()
         ]);
     }
+
 
 
     // Lấy thông báo cho bác sĩ đang đăng nhập

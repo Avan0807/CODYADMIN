@@ -139,7 +139,7 @@ class ApiAffiliateController extends Controller
     // ✅ API lấy danh sách sản phẩm tiếp thị của bác sĩ đang đăng nhập
     public function getAffiliateProducts()
     {
-        $doctor = Auth::user(); // Lấy bác sĩ đăng nhập
+        $doctor = Auth::user();
 
         if (!$doctor) {
             return response()->json([
@@ -148,19 +148,20 @@ class ApiAffiliateController extends Controller
             ], 401);
         }
 
-        // Lấy danh sách sản phẩm tiếp thị
         $affiliateProducts = AffiliateLink::where('doctor_id', $doctor->id)
-            ->with('product') // Lấy thông tin sản phẩm liên kết
+            ->with('product')
             ->get()
             ->map(function ($affiliate) {
-                // Nếu commission_percentage bị NULL, lấy từ bảng ProductCommission hoặc mặc định 10%
+                $product = $affiliate->product;
+
                 $commissionPercentage = $affiliate->commission_percentage
-                    ?? $affiliate->product->commission_percentage
+                    ?? $product->commission_percentage
                     ?? 0;
 
-
                 return [
-                    'product_name' => $affiliate->product->name,
+                    'product_id' => $affiliate->product_id,
+                    'product_name' => $product->title ?? 'Không có tên',
+                    'product_photo' => $product->photo ?? null,
                     'product_link' => $affiliate->product_link,
                     'commission_percentage' => $commissionPercentage . '%',
                 ];
@@ -172,5 +173,6 @@ class ApiAffiliateController extends Controller
             'data' => $affiliateProducts
         ], 200);
     }
+
 
 }
