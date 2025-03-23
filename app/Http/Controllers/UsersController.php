@@ -202,7 +202,7 @@ class UsersController extends Controller
                 $fileName = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $filePath = 'uploads/photos/' . $fileName;
 
-                Storage::disk('s3')->put($filePath, file_get_contents($file), 'public');
+                Storage::disk('s3')->put($filePath, file_get_contents($file));
                 $validatedData['photo'] = Storage::disk('s3')->url($filePath);
 
                 // Xóa ảnh cũ trên S3 nếu có
