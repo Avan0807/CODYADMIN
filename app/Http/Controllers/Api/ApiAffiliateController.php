@@ -14,37 +14,37 @@ class ApiAffiliateController extends Controller
     public function generateLink($product_slug)
     {
         $doctorID = Auth::id();
-    
+
         // ✅ Tìm sản phẩm theo slug
         $product = Product::where('slug', $product_slug)->firstOrFail();
-    
+
         // ✅ Xóa các bản ghi trùng lặp, chỉ giữ lại 1 bản ghi duy nhất
         AffiliateLink::where('doctor_id', $doctorID)
             ->where('product_id', $product->id)
             ->orderBy('id', 'DESC')
             ->skip(1)
             ->delete();
-    
+
         // ✅ Kiểm tra xem link đã tồn tại chưa
         $existingLink = AffiliateLink::where([
             ['doctor_id', $doctorID],
             ['product_id', $product->id]
         ])->first();
-    
+
         $hashRef = "";
         $product_link = "";
         $commissionPercentage = 0;
-    
+
         // ✅ Lấy commission từ bảng products nếu chưa có
         if (!$existingLink || is_null($existingLink->commission_percentage)) {
             $commissionData = Product::where('id', $product->id)->first();
             $commissionPercentage = $commissionData ? $commissionData->commission_percentage : 0;
         }
-    
+
         if ($existingLink) {
             $hashRef = $existingLink->hash_ref;
             $product_link = "https://toikhoe.vn/deep-link/product-detail/{$product->slug}?ref={$hashRef}";
-    
+
             // ✅ Cập nhật link hoặc commission nếu cần
             $existingLink->update([
                 'product_link' => $product_link,
@@ -53,10 +53,10 @@ class ApiAffiliateController extends Controller
         } else {
             // ✅ Tạo hash_ref mới
             $hashRef = hash('sha256', $doctorID . $product->id . time());
-    
+
             // ✅ Tạo link duy nhất
             $product_link = "https://toikhoe.vn/deep-link/product-detail/{$product->slug}?ref={$hashRef}";
-    
+
             // ✅ Lưu link mới vào DB
             $existingLink = AffiliateLink::create([
                 'doctor_id' => $doctorID,
@@ -66,10 +66,10 @@ class ApiAffiliateController extends Controller
                 'commission_percentage' => $commissionPercentage
             ]);
         }
-    
+
         // ✅ Open App Link (cùng link với product_link)
         $openAppLink = $product_link;
-    
+
         return response()->json([
             'message' => $existingLink->wasRecentlyCreated ? 'Link Affiliate được tạo thành công!' : 'Link Affiliate đã tồn tại!',
             'product_link' => $product_link,  // ✅ Dùng chung một link duy nhất
@@ -79,8 +79,8 @@ class ApiAffiliateController extends Controller
             'data' => $existingLink
         ], $existingLink->wasRecentlyCreated ? 201 : 200);
     }
-    
-    
+
+
     public function trackClick(Request $request, $hash_ref)
     {
         // ✅ Tìm affiliate link theo hash_ref
@@ -154,9 +154,10 @@ class ApiAffiliateController extends Controller
             ->get()
             ->map(function ($affiliate) {
                 // Nếu commission_percentage bị NULL, lấy từ bảng ProductCommission hoặc mặc định 10%
-                $commissionPercentage = $affiliate->commission_percentage ??
-                    Product::where('product_id', $affiliate->product_id)->value('commission_percentage') ??
-                    0;
+                $commissionPercentage = $affiliate->commission_percentage
+                    ?? $affiliate->product->commission_percentage
+                    ?? 0;
+
 
                 return [
                     'product_name' => $affiliate->product->name,

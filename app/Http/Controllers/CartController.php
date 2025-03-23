@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Wishlist;
 use App\Models\Cart;
+use App\Models\AffiliateLink;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -279,7 +280,7 @@ class CartController extends Controller
     public function apiAddProductToCart(Request $request, $userID, $productId)
     {
         try {
-            // ✅ Kiểm tra người dùng đã đăng nhập chưa
+            // ✅ Kiểm tra đăng nhập
             if (!Auth::check()) {
                 return response()->json([
                     'success' => false,
@@ -287,18 +288,18 @@ class CartController extends Controller
                 ], 401);
             }
 
-            // ✅ Kiểm tra user có đúng không
+            // ✅ Kiểm tra quyền truy cập
             if (Auth::id() !== (int) $userID) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Bạn không có quyền thêm sản phẩm vào giỏ hàng này.',
+                    'message' => 'Bạn không có quyền thực hiện hành động này.',
                 ], 403);
             }
 
-            // ✅ Validate dữ liệu đầu vào
+            // ✅ Validate input
             $validator = Validator::make($request->all(), [
                 'quantity' => 'required|integer|min:1',
-                'ref' => 'nullable|string', // Cho phép nhận hash_ref từ app
+                'ref' => 'nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -309,33 +310,79 @@ class CartController extends Controller
                 ], 422);
             }
 
-            // ✅ Kiểm tra sản phẩm
+            // ✅ Lấy sản phẩm và tính giá sau giảm
             $product = Product::find($productId);
-            if (!$product || $product->stock < $request->quantity) {
+            if (!$product) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Sản phẩm không đủ hàng trong kho.',
-                ], 400);
+                    'message' => 'Sản phẩm không tồn tại.',
+                ], 404);
             }
 
-            // ✅ Xử lý affiliate hash_ref (nếu có)
+            $price = $product->price - ($product->price * $product->discount / 100);
+            $totalAmount = $price * $request->quantity;
+
+            // ✅ Xử lý ref → doctor_id
             $doctor_id = null;
             $commission = 0;
             if ($request->filled('ref')) {
-                $affiliate = DB::table('affiliate_links')->where('hash_ref', $request->ref)->first();
+                $affiliate = AffiliateLink::where('hash_ref', $request->ref)
+                          ->where('product_id', $productId)
+                          ->first();
                 if ($affiliate) {
                     $doctor_id = $affiliate->doctor_id;
-                    $commission = ($product->price * $request->quantity) * ($product->commission_percentage / 100);
+                    $commission = $totalAmount * ($product->commission_percentage / 100);
                 }
             }
 
-            // ✅ Thêm sản phẩm vào giỏ hàng
+            // ✅ Kiểm tra giỏ hàng đã có sản phẩm chưa
+            $existingCart = Cart::where('user_id', $userID)
+                                ->whereNull('order_id')
+                                ->where('product_id', $productId)
+                                ->first();
+
+            if ($existingCart) {
+                $newQuantity = $existingCart->quantity + $request->quantity;
+                if ($product->stock < $newQuantity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Số lượng tồn kho không đủ.',
+                    ], 400);
+                }
+
+                $existingCart->quantity = $newQuantity;
+                $existingCart->amount = $newQuantity * $price;
+
+                // ✅ Cập nhật ref nếu chưa có
+                if ($doctor_id && !$existingCart->doctor_id) {
+                    $existingCart->doctor_id = $doctor_id;
+                    $existingCart->commission = $existingCart->amount * ($product->commission_percentage / 100);
+                }
+
+                $existingCart->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Đã cập nhật sản phẩm trong giỏ hàng.',
+                    'cart' => $existingCart,
+                ]);
+            }
+
+            // ✅ Kiểm tra tồn kho trước khi tạo mới
+            if ($product->stock < $request->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Số lượng tồn kho không đủ.',
+                ], 400);
+            }
+
+            // ✅ Tạo mới giỏ hàng
             $cartItem = Cart::create([
                 'user_id'    => $userID,
                 'product_id' => $productId,
                 'quantity'   => $request->quantity,
-                'price'      => $product->price,
-                'amount'     => $request->quantity * $product->price,
+                'price'      => $price,
+                'amount'     => $totalAmount,
                 'status'     => 'new',
                 'doctor_id'  => $doctor_id,
                 'commission' => $commission,
@@ -355,6 +402,7 @@ class CartController extends Controller
             ], 500);
         }
     }
+
 
 
     public function apiRemoveFromCartByUser(Request $request, $userId, $productId)

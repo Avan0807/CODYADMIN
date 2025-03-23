@@ -14,14 +14,13 @@ class ApiCampaignNotificationsController extends Controller
      */
     public function getNotificationsForAuthenticatedUser(Request $request)
     {
-        $user = Auth::guard('user')->user();
-        $doctor = Auth::guard('doctor')->user();
+        $user = auth()->user();
 
         if ($user) {
             $notifications = CampaignNotification::whereIn('target_audience', ['user', 'both'])
                                                  ->latest()
                                                  ->get();
-        } elseif ($doctor) {
+        } elseif ($user) {
             $notifications = CampaignNotification::whereIn('target_audience', ['doctor', 'both'])
                                                  ->latest()
                                                  ->get();

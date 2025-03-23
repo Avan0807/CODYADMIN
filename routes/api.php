@@ -325,11 +325,7 @@ Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsCont
 // ================== ĐƠN HÀNG  ==================
 
 // Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
-Route::middleware('auth:sanctum')->group(function () {
-    // Tạo đơn hàng mới
-    Route::post('/order/store', [ApiOrderController::class, 'store']);
-});
-
+Route::middleware('auth:sanctum')->post('/order/store', [ApiOrderController::class, 'store']);
 
 // ================== CART ROUTES ==================
 
