@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Cart;
-use App\Models\Wishlist;
+use App\Models\AffiliateLink;
 use Illuminate\Http\Request;
 
 class ApiCartController extends Controller
@@ -196,9 +196,10 @@ class ApiCartController extends Controller
     /**
      * Kiểm tra số lượng tồn kho của sản phẩm trước khi thanh toán (API).
      */
-    public function checkoutNow(Request $request, $product_id)
+    public function checkoutNow(Request $request, $slug)
     {
-        $product = Product::find($product_id);
+        $product = Product::where('slug', $slug)->first();
+
         if (!$product) {
             return response()->json(['error' => 'Sản phẩm không hợp lệ'], 400);
         }
@@ -208,11 +209,13 @@ class ApiCartController extends Controller
 
         $hash_ref = $request->query('ref');
         $doctor_id = null;
+        $affiliate_hash_ref = null;
 
         if ($hash_ref) {
             $affiliate = AffiliateLink::where('hash_ref', $hash_ref)->first();
             if ($affiliate) {
                 $doctor_id = $affiliate->doctor_id;
+                $affiliate_hash_ref = $affiliate->hash_ref;
             }
         }
 
@@ -249,8 +252,8 @@ class ApiCartController extends Controller
             'success' => true,
             'message' => 'Sản phẩm đã được thêm vào giỏ hàng',
             'cart' => $cart,
+            'hash_ref' => $affiliate_hash_ref, // trả ra luôn ở đây
         ]);
     }
-
 
 }

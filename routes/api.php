@@ -346,7 +346,8 @@ Route::middleware('auth:sanctum')->delete('/delcart/{userId}/{productId}', [Cart
 Route::middleware('auth:sanctum')->put('/updatecart/{userId}/{productId}', [CartController::class, 'apiUpdateUserCartQuantity']);
 
 // Mua hàng trực tiếp
-Route::middleware('auth:sanctum')->post('/cart/checkout-now/{product_id}', [ApiCartController::class, 'checkoutNow']);
+Route::middleware('auth:sanctum')->post('/cart/checkout-now/{slug}', [ApiCartController::class, 'checkoutNow']);
+
 
 
 // ================== POST ROUTES ==================

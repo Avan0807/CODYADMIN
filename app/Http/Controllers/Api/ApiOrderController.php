@@ -114,8 +114,6 @@ class ApiOrderController extends Controller
     }
 
 
-
-
     /**
      * Hiển thị chi tiết đơn hàng (API).
      */
