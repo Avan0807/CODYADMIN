@@ -170,7 +170,11 @@ Route::prefix('doctor')->group(function () {
 // ================== DOCTOR INCOME CHART (ADMIN) ==================
 
 // API thống kê thu nhập bác sĩ theo tháng (chỉ admin hoặc xác thực)
-Route::middleware('auth:sanctum')->get('/doctor-income-chart', [ApiOrderController::class, 'apiDoctorIncomeChart']);
+Route::middleware('auth:sanctum')->get('/doctor-income-chart', [ApiDoctorController::class, 'apiDoctorIncomeChart']);
+// API thống kê lịch hẹn của bác sĩ theo tháng
+Route::middleware('auth:sanctum')->get('/doctor-appointment-chart', [ApiDoctorController::class, 'apiDoctorAppointmentChart']);
+// API thống kê affiliate của bác sĩ theo tháng
+Route::middleware('auth:sanctum')->get('/doctor-affiliate-chart', [ApiDoctorController::class, 'apiDoctorAffiliateChart']);
 
 // =================== DOCTOR review ===================
 Route::get('doctor-reviews/{doctor_id}', [ApiReviewDoctorController::class, 'index']);

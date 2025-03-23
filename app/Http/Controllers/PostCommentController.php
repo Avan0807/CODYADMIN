@@ -152,22 +152,59 @@ class PostCommentController extends Controller
 
             $comments = cache()->remember($cacheKey, now()->addMinutes(10), function () use ($postId) {
                 return PostComment::where('post_id', $postId)
-                    ->with(['user_info:id,name,email,phone', 'doctor_info:id,name,email,phone', 'replies:id,comment,parent_id,status,created_at'])
+                    ->with([
+                        'user_info:id,name,email,phone',
+                        'doctor_info:id,name,email,phone',
+                        'replies' => function ($query) {
+                            $query->select(
+                                    'id',
+                                    'comment',
+                                    'parent_id',
+                                    'status',
+                                    'created_at',
+                                    'user_id',
+                                    'doctor_id',
+                                    'post_id',
+                                    'replied_comment',
+                                    'updated_at'
+                                )
+                                ->where('status', 'active')
+                                ->with([
+                                    'user_info:id,name,email,phone',
+                                    'doctor_info:id,name,email,phone',
+                                ]);
+                        }
+                    ])
                     ->where('status', 'active')
+                    ->orderByDesc('created_at')
                     ->paginate(10);
             });
 
-            // Duyệt qua các bình luận để thêm thông tin user_info và doctor_info nếu có
             $comments->getCollection()->transform(function ($comment) {
-                // Nếu có user_id, lấy thông tin user
-                if ($comment->user_id) {
-                    $comment->user_info = $comment->user_info ? $comment->user_info->only(['name', 'email', 'phone']) : null;
-                }
+                // Lọc thông tin chỉ giữ lại tên
+                $user = $comment->user_info ? collect($comment->user_info)->only(['name']) : null;
+                $doctor = $comment->doctor_info ? collect($comment->doctor_info)->only(['name']) : null;
 
-                // Nếu có doctor_id, lấy thông tin doctor
-                if ($comment->doctor_id) {
-                    $comment->doctor_info = $comment->doctor_info ? $comment->doctor_info->only(['name', 'email', 'phone']) : null;
-                }
+                $comment->user_info = $user;
+                $comment->doctor_info = $doctor;
+
+                // Gán tên và loại người bình luận
+                $comment->author_name = $doctor['name'] ?? $user['name'] ?? 'Ẩn danh';
+                $comment->author_type = $doctor ? 'doctor' : ($user ? 'user' : 'Ẩn danh');
+
+                // Replies
+                $comment->replies = $comment->replies->map(function ($reply) {
+                    $user = $reply->user_info ? collect($reply->user_info)->only(['name']) : null;
+                    $doctor = $reply->doctor_info ? collect($reply->doctor_info)->only(['name']) : null;
+
+                    $reply->user_info = $user;
+                    $reply->doctor_info = $doctor;
+
+                    $reply->author_name = $doctor['name'] ?? $user['name'] ?? 'Ẩn danh';
+                    $reply->author_type = $doctor ? 'doctor' : ($user ? 'user' : 'Ẩn danh');
+
+                    return $reply;
+                });
 
                 return $comment;
             });
@@ -184,6 +221,7 @@ class PostCommentController extends Controller
             ], 500);
         }
     }
+
 
     public function apiCreateComment(Request $request)
     {

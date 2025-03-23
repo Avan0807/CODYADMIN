@@ -57,26 +57,42 @@ class Post extends Model
     {
         return Post::with(['tag_info', 'author_info'])->where('slug', $slug)->where('status', 'active')->first();
     }
+    public function user_info()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
+    public function doctor_info()
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(PostComment::class, 'parent_id')->where('status', 'active')
+            ->with([
+                'user_info:id,name,email,phone',
+                'doctor_info:id,name,email,phone',
+            ]);
+    }
     public function comments()
     {
-        return $this->hasMany(PostComment::class)->whereNull('parent_id')->where('status', 'active')->with('user_info')->orderBy('id', 'DESC');
+        return $this->hasMany(PostComment::class)
+            ->whereNull('parent_id')
+            ->where('status', 'active')
+            ->with([
+                'user_info:id,name,email,phone',
+                'doctor_info:id,name,email,phone',
+                'replies' // replies đã có with trong quan hệ rồi
+            ])
+            ->orderBy('id', 'DESC');
     }
+
     public function allComments()
     {
         return $this->hasMany(PostComment::class)->where('status', 'active');
     }
 
-
-    // public static function getProductByCat($slug){
-    //     // dd($slug);
-    //     return Category::with('products')->where('slug',$slug)->first();
-    //     // return Product::where('cat_id',$id)->where('child_cat_id',null)->paginate(10);
-    // }
-
-    // public static function getBlogByCategory($id){
-    //     return Post::where('post_cat_id',$id)->paginate(8);
-    // }
     public static function getBlogByTag($slug)
     {
         // dd($slug);
@@ -91,4 +107,6 @@ class Post extends Model
         }
         return 0;
     }
+
+
 }

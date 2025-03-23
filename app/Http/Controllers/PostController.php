@@ -211,7 +211,7 @@ class PostController extends Controller
                 $fileName = 'posts/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
 
                 // Upload lên S3
-                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file));
+                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file), 'public');
 
                 if ($uploaded) {
                     $photoUrl = Storage::disk('s3')->url($fileName);
