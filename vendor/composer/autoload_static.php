@@ -682,6 +682,7 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Http\\Controllers\\AjaxController' => __DIR__ . '/../..' . '/app/Http/Controllers/AjaxController.php',
         'App\\Http\\Controllers\\ApiController' => __DIR__ . '/../..' . '/app/Http/Controllers/ApiController.php',
         'App\\Http\\Controllers\\Api\\ApiAffiliateController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiAffiliateController.php',
+        'App\\Http\\Controllers\\Api\\ApiAffiliateOrdersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiAffiliateOrdersController.php',
         'App\\Http\\Controllers\\Api\\ApiAppointmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiAppointmentController.php',
         'App\\Http\\Controllers\\Api\\ApiAuthAdminController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiAuthAdminController.php',
         'App\\Http\\Controllers\\Api\\ApiAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiAuthController.php',

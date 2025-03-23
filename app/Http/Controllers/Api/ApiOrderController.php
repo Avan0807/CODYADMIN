@@ -34,20 +34,56 @@ class ApiOrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name' => 'required|string',
-            'last_name'  => 'required|string',
-            'address1'   => 'required|string',
-            'phone'      => 'required|numeric',
-            'email'      => 'required|string|email',
-            'shipping_id' => 'nullable|exists:shippings,id',
-            'payment_method' => 'nullable|string',
+            'first_name'      => 'required|string',
+            'last_name'       => 'required|string',
+            'address1'        => 'required|string',
+            'phone'           => 'required|numeric',
+            'email'           => 'required|string|email',
+            'shipping_id'     => 'nullable|exists:shippings,id',
+            'payment_method'  => 'nullable|string',
+            'hash_ref'        => 'nullable|string',
         ]);
 
         $userId = auth()->id();
 
-        $carts = Cart::where('user_id', $userId)->whereNull('order_id')->get();
+        $carts = Cart::where('user_id', $userId)
+                     ->whereNull('order_id')
+                     ->get();
+
         if ($carts->isEmpty()) {
             return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
+        }
+
+        // ✅ Xử lý hash_ref => lấy doctor_id
+        $hash_ref = $request->input('hash_ref');
+        $doctor_id = null;
+
+        if ($hash_ref) {
+            $affiliate = AffiliateLink::where('hash_ref', $hash_ref)->first();
+            if ($affiliate) {
+                $doctor_id = $affiliate->doctor_id;
+
+
+                // Gắn doctor_id + commission vào cart nếu chưa có
+                foreach ($carts as $cart) {
+                    if (!$cart->doctor_id) {
+                        $product = Product::find($cart->product_id);
+                        if ($product) {
+                            $cart->doctor_id = $doctor_id;
+                            $cart->commission = $cart->amount * ($product->commission_percentage / 100);
+                            $cart->save();
+                        }
+                    }
+                }
+            }
+        }
+
+        // ✅ Check tồn kho
+        foreach ($carts as $cart) {
+            $product = Product::find($cart->product_id);
+            if (!$product || $product->stock < $cart->quantity) {
+                return response()->json(['error' => "Sản phẩm {$product->name} không đủ hàng"], 400);
+            }
         }
 
         $sub_total = $carts->sum('amount');
@@ -63,27 +99,39 @@ class ApiOrderController extends Controller
         }
 
         $order = Order::create([
-            'order_number' => 'ORD-' . strtoupper(Str::random(10)),
-            'user_id' => $userId,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'address1' => $request->address1,
-            'address2' => $request->address2,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'shipping_id' => $request->shipping_id,
-            'quantity' => $carts->sum('quantity'),
-            'sub_total' => $sub_total,
-            'total_amount' => $total_amount,
-            'payment_method' => $request->payment_method ?? 'cod',
-            'payment_status' => in_array($request->payment_method, ['paypal', 'cardpay']) ? 'paid' : 'Unpaid',
+            'order_number'    => 'ORD-' . strtoupper(Str::random(10)),
+            'user_id'         => $userId,
+            'first_name'      => $request->first_name,
+            'last_name'       => $request->last_name,
+            'address1'        => $request->address1,
+            'address2'        => $request->address2,
+            'email'           => $request->email,
+            'phone'           => $request->phone,
+            'shipping_id'     => $request->shipping_id,
+            'quantity'        => $carts->sum('quantity'),
+            'sub_total'       => $sub_total,
+            'total_amount'    => $total_amount,
+            'payment_method'  => $request->payment_method ?? 'cod',
+            'payment_status'  => in_array($request->payment_method, ['paypal', 'cardpay']) ? 'paid' : 'Unpaid',
         ]);
 
         $totalCommission = 0;
-        $doctor_id = null;
 
         foreach ($carts as $cart) {
+            $product = Product::find($cart->product_id);
+
+            // Trừ kho
+            $product->stock -= $cart->quantity;
+            $product->save();
+
+            // Gán đơn hàng vào giỏ
             $cart->order_id = $order->id;
+
+            // Đảm bảo có commission
+            if ($cart->doctor_id && $cart->commission === null) {
+                $cart->commission = $cart->amount * ($product->commission_percentage / 100);
+            }
+
             $cart->save();
 
             if ($cart->doctor_id) {
@@ -92,17 +140,20 @@ class ApiOrderController extends Controller
             }
         }
 
+        // Ghi nhận affiliate nếu có
         if ($doctor_id) {
             $order->update([
-                'doctor_id' => $doctor_id,
+                'doctor_id'  => $doctor_id,
                 'commission' => $totalCommission,
             ]);
 
+            $order->refresh(); // 🛠️ cập nhật lại dữ liệu từ DB
+
             AffiliateOrder::create([
-                'order_id' => $order->id,
-                'doctor_id' => $doctor_id,
+                'order_id'   => $order->id,
+                'doctor_id'  => $doctor_id,
                 'commission' => $totalCommission,
-                'status' => 'new',
+                'status'     => 'new',
             ]);
         }
 
@@ -110,6 +161,7 @@ class ApiOrderController extends Controller
             'success' => true,
             'message' => 'Đơn hàng đã được tạo thành công!',
             'order_id' => $order->id,
+            'doctor_id' => $order->doctor_id,
         ]);
     }
 

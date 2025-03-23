@@ -41,6 +41,7 @@ return array(
     'App\\Http\\Controllers\\AjaxController' => $baseDir . '/app/Http/Controllers/AjaxController.php',
     'App\\Http\\Controllers\\ApiController' => $baseDir . '/app/Http/Controllers/ApiController.php',
     'App\\Http\\Controllers\\Api\\ApiAffiliateController' => $baseDir . '/app/Http/Controllers/Api/ApiAffiliateController.php',
+    'App\\Http\\Controllers\\Api\\ApiAffiliateOrdersController' => $baseDir . '/app/Http/Controllers/Api/ApiAffiliateOrdersController.php',
     'App\\Http\\Controllers\\Api\\ApiAppointmentController' => $baseDir . '/app/Http/Controllers/Api/ApiAppointmentController.php',
     'App\\Http\\Controllers\\Api\\ApiAuthAdminController' => $baseDir . '/app/Http/Controllers/Api/ApiAuthAdminController.php',
     'App\\Http\\Controllers\\Api\\ApiAuthController' => $baseDir . '/app/Http/Controllers/Api/ApiAuthController.php',

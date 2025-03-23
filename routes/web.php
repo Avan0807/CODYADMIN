@@ -56,8 +56,8 @@ Route::get('blog-tag/{slug}','FrontendController@blogByTag')->name('blog.tag');
 
 
 // Product Review
-Route::resource('/review','ProductReviewController');
-Route::post('product/{slug}/review', 'ReviewController@store')->name('review.store.product');
+//Route::resource('/review','ProductReviewController');
+//Route::post('product/{slug}/review', 'ReviewController@store')->name('review.store.product');
 
 // Post Comment
 Route::post('post/{slug}/comment','PostCommentController@store')->name('post-comment.store');
