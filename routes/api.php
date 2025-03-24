@@ -36,7 +36,7 @@ use App\Http\Controllers\Api\ApiAffiliateOrdersController;
 use App\Http\Controllers\Api\ApiClinicController;
 use App\Http\Controllers\Api\ApiMeetingController;
 
-// Meettings 
+// Meettings
 Route::get('meetings', [ApiMeetingController::class, 'apiGetAllMeeting']);
 Route::middleware('auth:sanctum')->get('doctor/{doctorId}/meetings', [ApiMeetingController::class, 'apiGetDoctorMeetings']);
 Route::middleware('auth:sanctum')->post('create-meeting', [ApiMeetingController::class, 'apiCreateMeeting']);
@@ -187,7 +187,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('doctor-reviews', [ApiReviewDoctorController::class, 'store']);
 });
 
-// lấy danh sách phòng khám 
+// lấy danh sách phòng khám
 Route::get('/clinics', [ApiClinicController::class, 'index']);
 
 // logout users
@@ -293,7 +293,7 @@ Route::middleware('auth:sanctum')->get('/appointments', [AppointmentsController:
 Route::middleware('auth:sanctum')->get('/appointments/user', [AppointmentsController::class, 'apiGetAppointmentsByUser']);
 
 // Lấy các lịch hẹn sắp tới của user
-Route::middleware('auth:sanctum')->get('/appointments/upcoming', [AppointmentsController::class, 'apiGetCurrentAppointments']);
+Route::middleware('auth:sanctum')->get('/appointments/{userID}/upcoming', [AppointmentsController::class, 'apiGetCurrentAppointments']);
 
 // Lấy thông tin chi tiết của lịch hẹn
 Route::middleware('auth:sanctum')->get('/appointment-info/{appointmentID}', [AppointmentsController::class, 'apiGetAppointmentInfo']);
