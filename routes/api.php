@@ -34,8 +34,12 @@ use App\Http\Controllers\Api\ApiCampaignNotificationsController;
 use App\Http\Controllers\Api\ApiFollowersDoctorController;
 use App\Http\Controllers\Api\ApiAffiliateOrdersController;
 use App\Http\Controllers\Api\ApiClinicController;
+use App\Http\Controllers\Api\ApiMeetingController;
 
-
+// Meettings 
+Route::get('meetings', [ApiMeetingController::class, 'apiGetAllMeeting']);
+Route::middleware('auth:sanctum')->get('doctor/{doctorId}/meetings', [ApiMeetingController::class, 'apiGetDoctorMeetings']);
+Route::middleware('auth:sanctum')->post('create-meeting', [ApiMeetingController::class, 'apiCreateMeeting']);
 
 // Các route liên quan đến thông báo chiến dịch cho người dùng đã xác thực (user, doctor)
 Route::middleware(['auth:sanctum'])->get('/campaign-notifications/authenticated', [ApiCampaignNotificationsController::class, 'getNotificationsForAuthenticatedUser']);
@@ -334,7 +338,8 @@ Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsCont
 
 // Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
 Route::middleware('auth:sanctum')->post('/order/store', [ApiOrderController::class, 'store']);
-
+// Lấy danh sách đơn hàng theo trạng thái
+Route::middleware('auth:sanctum')->get('/order/status', [ApiOrderController::class, 'getOrdersByStatus']);
 
 // ================== CART ROUTES ==================
 

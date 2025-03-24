@@ -199,18 +199,18 @@ class ApiCartController extends Controller
     public function checkoutNow(Request $request, $slug)
     {
         $product = Product::where('slug', $slug)->first();
-
+    
         if (!$product) {
             return response()->json(['error' => 'Sản phẩm không hợp lệ'], 400);
         }
-
+    
         $userId = auth()->id();
         $price = $product->price - ($product->price * $product->discount / 100);
-
+    
         $hash_ref = $request->query('ref');
         $doctor_id = null;
         $affiliate_hash_ref = null;
-
+    
         if ($hash_ref) {
             $affiliate = AffiliateLink::where('hash_ref', $hash_ref)->first();
             if ($affiliate) {
@@ -218,12 +218,12 @@ class ApiCartController extends Controller
                 $affiliate_hash_ref = $affiliate->hash_ref;
             }
         }
-
+    
         $cart = Cart::where('user_id', $userId)
                     ->whereNull('order_id')
                     ->where('product_id', $product->id)
                     ->first();
-
+    
         if ($cart) {
             $cart->quantity += 1;
             $cart->amount = $cart->quantity * $price;
@@ -231,7 +231,7 @@ class ApiCartController extends Controller
             if ($product->stock <= 0) {
                 return response()->json(['error' => 'Sản phẩm đã hết hàng'], 400);
             }
-
+    
             $cart = new Cart([
                 'user_id' => $userId,
                 'product_id' => $product->id,
@@ -240,14 +240,14 @@ class ApiCartController extends Controller
                 'amount' => $price,
             ]);
         }
-
+    
         if ($doctor_id && !$cart->doctor_id) {
             $cart->doctor_id = $doctor_id;
             $cart->commission = $cart->amount * ($product->commission_percentage / 100);
         }
-
+    
         $cart->save();
-
+    
         return response()->json([
             'success' => true,
             'message' => 'Sản phẩm đã được thêm vào giỏ hàng',
@@ -255,5 +255,6 @@ class ApiCartController extends Controller
             'hash_ref' => $affiliate_hash_ref, // trả ra luôn ở đây
         ]);
     }
+    
 
 }

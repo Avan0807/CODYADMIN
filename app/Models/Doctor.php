@@ -56,4 +56,8 @@ class Doctor extends Authenticatable
         return $this->belongsToMany(User::class, 'doctor_followers', 'doctor_id', 'user_id');
     }
 
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class, 'created_by_id');
+    }
 }
