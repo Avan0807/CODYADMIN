@@ -131,7 +131,10 @@ class AppointmentsController extends Controller
                 ], 401);
             }
 
-            $appointments = Appointment::where('user_id', $user->id)->get();
+            // Eager load thông tin người dùng và bác sĩ
+            $appointments = Appointment::with(['user', 'doctor'])
+                ->where('user_id', $user->id)
+                ->get();
 
             if ($appointments->isEmpty()) {
                 return response()->json([
@@ -139,6 +142,13 @@ class AppointmentsController extends Controller
                     'message' => 'Không tìm thấy cuộc hẹn nào cho tài khoản này.',
                 ]);
             }
+
+            // Thêm thông tin tên vào từng cuộc hẹn
+            $appointments->transform(function ($appointment) {
+                $appointment->user_name = $appointment->user->name; // Thêm tên người dùng
+                $appointment->doctor_name = $appointment->doctor->name; // Thêm tên bác sĩ
+                return $appointment;
+            });
 
             return response()->json([
                 'success' => true,
@@ -152,6 +162,7 @@ class AppointmentsController extends Controller
             ], 500);
         }
     }
+
 
     public function apiGetCurrentAppointments($userID)
     {
