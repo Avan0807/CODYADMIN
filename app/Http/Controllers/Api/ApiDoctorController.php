@@ -441,29 +441,29 @@ class ApiDoctorController extends Controller
         try {
             $user = auth()->user();
             $doctor = Doctor::find($user->id);
-
+    
             if (!$doctor) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không có quyền truy cập.',
                 ], 403);
             }
-
+    
             $latestYear = AffiliateOrder::where('doctor_id', $doctor->id)
                 ->selectRaw('YEAR(created_at) as year')
                 ->orderBy('year', 'desc')
                 ->limit(1)
                 ->pluck('year')
                 ->first() ?? now()->year;
-
+    
+            // Cập nhật truy vấn để không lọc theo status nữa
             $items = AffiliateOrder::whereYear('created_at', $latestYear)
                 ->where('doctor_id', $doctor->id)
-                ->where('status', 'delivered') // lọc đơn đã giao
                 ->selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders, SUM(commission) as total_commission')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
-
+    
             $result = [];
             for ($i = 1; $i <= 12; $i++) {
                 $monthName = date('F', mktime(0, 0, 0, $i, 1));
@@ -472,7 +472,7 @@ class ApiDoctorController extends Controller
                     'commission' => 0,
                 ];
             }
-
+    
             foreach ($items as $item) {
                 $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
                 $result[$monthName] = [
@@ -480,7 +480,7 @@ class ApiDoctorController extends Controller
                     'commission' => (float) $item->total_commission,
                 ];
             }
-
+    
             return response()->json([
                 'success' => true,
                 'year' => $latestYear,
@@ -494,5 +494,6 @@ class ApiDoctorController extends Controller
             ], 500);
         }
     }
+    
 
 }
