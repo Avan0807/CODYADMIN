@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\ApiCompanyNewsController;
 use App\Http\Controllers\Api\ApiCampaignNotificationsController;
 use App\Http\Controllers\Api\ApiFollowersDoctorController;
 use App\Http\Controllers\Api\ApiAffiliateOrdersController;
+use App\Http\Controllers\Api\ApiClinicController;
 
 
 
@@ -181,6 +182,9 @@ Route::get('doctor-reviews/{doctor_id}', [ApiReviewDoctorController::class, 'ind
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('doctor-reviews', [ApiReviewDoctorController::class, 'store']);
 });
+
+// lấy danh sách phòng khám 
+Route::get('/clinics', [ApiClinicController::class, 'index']);
 
 // logout users
 Route::middleware('auth:sanctum')->post('logout', [ApiAuthController::class, 'logout']);

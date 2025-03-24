@@ -46,16 +46,6 @@ class ApiDoctorReviewController extends Controller
     public function store(Request $request)
     {
         try {
-            // Kiểm tra nếu người dùng đã đánh giá bác sĩ này
-            $existingReview = DoctorReview::where('doctor_id', $request->doctor_id)
-                                         ->where('user_id', Auth::id())
-                                         ->first();
-
-            if ($existingReview) {
-                return response()->json([
-                    'error' => 'Bạn đã đánh giá bác sĩ này rồi.',
-                ], 400);
-            }
 
             $request->validate([
                 'doctor_id' => 'required|exists:doctors,id',
