@@ -35,7 +35,14 @@ use App\Http\Controllers\Api\ApiFollowersDoctorController;
 use App\Http\Controllers\Api\ApiAffiliateOrdersController;
 use App\Http\Controllers\Api\ApiClinicController;
 use App\Http\Controllers\Api\ApiMeetingController;
+use App\Http\Controllers\Api\ApiShippingController;
 
+// Shipppp
+Route::group(['prefix' => 'shipping', 'namespace' => 'API'], function () {
+    Route::get('/provinces', [ApiShippingController::class, 'getProvinces']);
+    Route::get('/districts/{province_id}', [ApiShippingController::class, 'getDistricts']);
+    Route::post('/calculate', [ApiShippingController::class, 'calculateShipping']);
+});
 // Meettings
 Route::get('meetings', [ApiMeetingController::class, 'apiGetAllMeeting']);
 Route::middleware('auth:sanctum')->get('doctor/{doctorId}/meetings', [ApiMeetingController::class, 'apiGetDoctorMeetings']);

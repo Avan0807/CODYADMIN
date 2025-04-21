@@ -123,15 +123,23 @@
     {{-- Shipping --}}
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#shippingCollapse" aria-expanded="true" aria-controls="shippingCollapse">
-          <i class="fas fa-truck"></i>
-          <span>Vận chuyển</span>
+        <i class="fas fa-truck"></i>
+        <span>Vận chuyển</span>
         </a>
         <div id="shippingCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
+        <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Tùy chọn vận chuyển:</h6>
             <a class="collapse-item" href="{{route('shipping.index')}}">Vận chuyển</a>
             <a class="collapse-item" href="{{route('shipping.create')}}">Thêm vận chuyển</a>
-          </div>
+
+            <h6 class="collapse-header mt-3">Vị trí địa lý:</h6>
+            <a class="collapse-item" href="{{route('shipping.provinces')}}">Tỉnh/thành phố</a>
+            <a class="collapse-item" href="{{route('shipping.province.create')}}">Thêm tỉnh/thành phố</a>
+
+            <h6 class="collapse-header mt-3">Quy tắc phí vận chuyển:</h6>
+            <a class="collapse-item" href="{{route('shipping.locations')}}">Quy tắc tính phí</a>
+            <a class="collapse-item" href="{{route('shipping.location.create')}}">Thêm quy tắc mới</a>
+        </div>
         </div>
     </li>
 

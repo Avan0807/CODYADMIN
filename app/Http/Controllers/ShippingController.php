@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shipping;
-use App\Models\Coupon;
+use App\Models\Province;
+use App\Models\District;
+use App\Models\ShippingLocation;
 use Illuminate\Contracts\View\View as ViewContract;
 
 class ShippingController extends Controller
@@ -131,4 +133,129 @@ class ShippingController extends Controller
             return redirect()->back();
         }
     }
+
+    // Quản lý tỉnh/thành phố
+    public function provinces()
+    {
+        $provinces = Province::orderBy('name')->paginate(20);
+        return view('backend.shipping.provinces', compact('provinces'));
+    }
+
+    // Thêm tỉnh/thành phố mới
+    public function createProvince()
+    {
+        return view('backend.shipping.province-create');
+    }
+
+    // Lưu tỉnh/thành phố mới
+    public function storeProvince(Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|string',
+            'region_id' => 'required|integer|between:1,3',
+        ]);
+
+        $data = $request->all();
+        $status = Province::create($data);
+
+        if($status){
+            request()->session()->flash('success','Thêm tỉnh/thành phố thành công');
+        } else {
+            request()->session()->flash('error','Đã xảy ra lỗi, vui lòng thử lại');
+        }
+        return redirect()->route('shipping.provinces');
+    }
+
+    // Sửa tỉnh/thành phố
+    public function editProvince($id)
+    {
+        $province = Province::find($id);
+        if(!$province){
+            request()->session()->flash('error','Không tìm thấy tỉnh/thành phố');
+            return redirect()->back();
+        }
+        return view('backend.shipping.province-edit', compact('province'));
+    }
+
+    // Cập nhật tỉnh/thành phố
+    public function updateProvince(Request $request, $id)
+    {
+        $province = Province::find($id);
+        if(!$province){
+            request()->session()->flash('error','Không tìm thấy tỉnh/thành phố');
+            return redirect()->back();
+        }
+
+        $this->validate($request, [
+            'name' => 'required|string',
+            'region_id' => 'required|integer|between:1,3',
+        ]);
+
+        $data = $request->all();
+        $status = $province->update($data);
+
+        if($status){
+            request()->session()->flash('success','Cập nhật tỉnh/thành phố thành công');
+        } else {
+            request()->session()->flash('error','Đã xảy ra lỗi, vui lòng thử lại');
+        }
+        return redirect()->route('shipping.provinces');
+    }
+
+    // Xóa tỉnh/thành phố
+    public function destroyProvince($id)
+    {
+        $province = Province::find($id);
+        if(!$province){
+            request()->session()->flash('error','Không tìm thấy tỉnh/thành phố');
+            return redirect()->back();
+        }
+
+        $status = $province->delete();
+        if($status){
+            request()->session()->flash('success','Đã xóa tỉnh/thành phố');
+        } else {
+            request()->session()->flash('error','Đã xảy ra lỗi, vui lòng thử lại');
+        }
+        return redirect()->route('shipping.provinces');
+    }
+
+    // Quản lý shipping_locations
+    public function locations()
+    {
+        $locations = ShippingLocation::with(['shipping', 'fromProvince', 'toProvince'])->paginate(15);
+        return view('backend.shipping.locations', compact('locations'));
+    }
+
+    // Thêm quy tắc tính phí vận chuyển mới
+    public function createLocation()
+    {
+        $shippings = Shipping::where('status', 'active')->get();
+        $provinces = Province::orderBy('name')->get();
+        return view('backend.shipping.location-create', compact('shippings', 'provinces'));
+    }
+
+    // Lưu quy tắc tính phí vận chuyển mới
+    public function storeLocation(Request $request)
+    {
+        $this->validate($request, [
+            'shipping_id' => 'required|exists:shippings,id',
+            'from_province_id' => 'required|exists:provinces,id',
+            'to_province_id' => 'required|exists:provinces,id',
+            'price' => 'required|numeric|min:0',
+            'weight_price' => 'required|numeric|min:0',
+        ]);
+
+        $data = $request->all();
+        $status = ShippingLocation::create($data);
+
+        if($status){
+            request()->session()->flash('success','Thêm quy tắc tính phí vận chuyển thành công');
+        } else {
+            request()->session()->flash('error','Đã xảy ra lỗi, vui lòng thử lại');
+        }
+        return redirect()->route('shipping.locations');
+    }
+
+
 }

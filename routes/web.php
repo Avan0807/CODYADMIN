@@ -109,6 +109,22 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     Route::resource('/order','OrderController');
     // Shipping
     Route::resource('/shipping','ShippingController');
+
+    // Thêm routes mới
+    Route::get('shipping-provinces', 'ShippingController@provinces')->name('shipping.provinces');
+    Route::get('shipping-province/create', 'ShippingController@createProvince')->name('shipping.province.create');
+    Route::post('shipping-province', 'ShippingController@storeProvince')->name('shipping.province.store');
+    Route::get('shipping-province/{id}/edit', 'ShippingController@editProvince')->name('shipping.province.edit');
+    Route::patch('shipping-province/{id}', 'ShippingController@updateProvince')->name('shipping.province.update');
+    Route::delete('shipping-province/{id}', 'ShippingController@destroyProvince')->name('shipping.province.destroy');
+
+    Route::get('shipping-locations', 'ShippingController@locations')->name('shipping.locations');
+    Route::get('shipping-location/create', 'ShippingController@createLocation')->name('shipping.location.create');
+    Route::post('shipping-location', 'ShippingController@storeLocation')->name('shipping.location.store');
+    Route::get('shipping-location/{id}/edit', 'ShippingController@editLocation')->name('shipping.location.edit');
+    Route::patch('shipping-location/{id}', 'ShippingController@updateLocation')->name('shipping.location.update');
+    Route::delete('shipping-location/{id}', 'ShippingController@destroyLocation')->name('shipping.location.destroy');
+
     // Coupon
     Route::resource('/coupon','CouponController');
     // Settings
