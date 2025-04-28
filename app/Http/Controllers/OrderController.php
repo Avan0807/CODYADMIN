@@ -333,7 +333,7 @@ class OrderController extends Controller
 
 
     /**
-     * Lấy dữ liệu thống kê thu nhập theo tháng của doctor (phía admin).
+     * Lấy dữ liệu thống kê thu nhập theo bác sĩ theo tháng (phía admin).
      */
     public function doctorincomeChart(Request $request)
     {
@@ -344,20 +344,22 @@ class OrderController extends Controller
             ->pluck('year')
             ->first() ?? \Carbon\Carbon::now()->year; // Nếu không có dữ liệu, lấy năm hiện tại
 
-            $items = AffiliateOrder::whereYear('created_at', $latestYear)
-            ->whereIn('status', ['delivered']) // Chỉ lấy trạng thái hợp lệ
+        // Lấy dữ liệu tổng hoa hồng theo tháng
+        $items = AffiliateOrder::whereYear('created_at', $latestYear)
             ->selectRaw('MONTH(created_at) as month, SUM(commission) as total_commission')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-
         $result = [];
+
+        // Khởi tạo giá trị cho tất cả các tháng
         for ($i = 1; $i <= 12; $i++) {
             $monthName = date('F', mktime(0, 0, 0, $i, 1));
             $result[$monthName] = 0; // Mặc định nếu không có dữ liệu
         }
 
+        // Cập nhật dữ liệu cho các tháng có dữ liệu
         foreach ($items as $item) {
             $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
             $result[$monthName] = intval($item->total_commission);

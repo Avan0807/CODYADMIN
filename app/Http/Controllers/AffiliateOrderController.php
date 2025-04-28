@@ -15,18 +15,27 @@ class AffiliateOrderController extends Controller
      */
     public function index()
     {
+        // Check total count of all affiliate orders without any conditions
+        $allOrders = AffiliateOrder::count();
+        \Log::info("Total affiliate orders: " . $allOrders);
+
+        // Check how many orders have related orders
+        $ordersWithRelatedOrders = AffiliateOrder::whereHas('order')->count();
+        \Log::info("Orders with related orders: " . $ordersWithRelatedOrders);
+
+        // Original query
         $affiliateOrders = AffiliateOrder::whereHas('order', function ($query) {
             $query->whereNotNull('doctor_id');
         })->with(['doctor', 'order'])->get();
 
+        \Log::info("Filtered affiliate orders: " . $affiliateOrders->count());
+
         return view('backend.affiliate_orders.index', compact('affiliateOrders'));
     }
-
 
     /**
      * Cập nhật trạng thái đơn hàng Affiliate.
      */
-
     public function updateStatus(Request $request, $id)
     {
         $affiliateOrder = AffiliateOrder::findOrFail($id);
@@ -50,5 +59,4 @@ class AffiliateOrderController extends Controller
 
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
-
 }

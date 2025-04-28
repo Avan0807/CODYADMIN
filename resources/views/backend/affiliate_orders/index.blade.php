@@ -22,6 +22,7 @@
                         <th>Mã đơn hàng</th>
                         <th>Hoa hồng</th>
                         <th>Trạng thái</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,6 +52,22 @@
                                 {{ $statusText[$order->status] ?? 'Không xác định' }}
                             </span>
                         </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{$order->id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Cập nhật trạng thái
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{$order->id}}">
+                                    <form method="POST" action="{{ route('admin.affiliate.orders.update', $order->id) }}">
+                                        @csrf
+                                        <button type="submit" name="status" value="new" class="dropdown-item {{ $order->status == 'new' ? 'active' : '' }}">Mới</button>
+                                        <button type="submit" name="status" value="process" class="dropdown-item {{ $order->status == 'process' ? 'active' : '' }}">Đang xử lý</button>
+                                        <button type="submit" name="status" value="delivered" class="dropdown-item {{ $order->status == 'delivered' ? 'active' : '' }}">Đã giao</button>
+                                        <button type="submit" name="status" value="cancel" class="dropdown-item {{ $order->status == 'cancel' ? 'active' : '' }}">Đã hủy</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -69,6 +86,10 @@
     <style>
         div.dataTables_wrapper div.dataTables_paginate {
             display: block !important;
+        }
+        .dropdown-item.active {
+            background-color: #4e73df;
+            color: white;
         }
     </style>
 @endpush
@@ -91,42 +112,50 @@
             "columnDefs": [
                 {
                     "orderable": false,
-                    "targets": []
+                    "targets": [5] // Column "Hành động" không sắp xếp được
                 }
             ]
         });
 
-        // Sweet alert
-        function deleteData(id){
-        }
-    </script>
-    <script>
+        // Xác nhận trước khi đổi trạng thái
+        $('form button[type="submit"]').click(function(e){
+            var currentStatus = $(this).closest('tr').find('td:eq(4) span').text().trim();
+            var newStatus = $(this).text().trim();
+
+            if(currentStatus !== newStatus) {
+                e.preventDefault();
+                var form = $(this).closest('form');
+                var statusValue = $(this).val();
+
+                swal({
+                    title: "Xác nhận thay đổi trạng thái?",
+                    text: "Bạn muốn thay đổi trạng thái từ '" + currentStatus + "' sang '" + newStatus + "'?",
+                    icon: "warning",
+                    buttons: ["Hủy", "Xác nhận"],
+                    dangerMode: true,
+                })
+                .then((willChange) => {
+                    if (willChange) {
+                        // Gửi form với status đã chọn
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'status',
+                            value: statusValue
+                        }).appendTo(form);
+
+                        form.submit();
+                    }
+                });
+            }
+        });
+
+        // Setup CSRF token cho AJAX requests
         $(document).ready(function(){
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-
-            $('.dltBtn').click(function(e){
-                var form = $(this).closest('form');
-                var dataID = $(this).data('id');
-                e.preventDefault();
-                swal({
-                    title: "Bạn có chắc không?",
-                    text: "Sau khi xóa, bạn sẽ không thể khôi phục dữ liệu này!",
-                    icon: "cảnh báo",
-                    buttons: true,
-                    dangerMode: true,
-                })
-                .then((willDelete) => {
-                    if (willDelete) {
-                        form.submit();
-                    } else {
-                        swal("Dữ liệu của bạn an toàn!");
-                    }
-                });
-            })
-        })
+        });
     </script>
 @endpush
