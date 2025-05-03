@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Contracts\View\View as ViewContract;
 use Exception;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
     /**
@@ -197,14 +197,31 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $status  = $product->delete();
-
-        if ($status) {
-            request()->session()->flash('success', 'Đã xóa sản phẩm thành công');
-        } else {
-            request()->session()->flash('error', 'Đã xảy ra lỗi khi xóa sản phẩm');
+        try {
+            // Bắt đầu transaction để đảm bảo tính toàn vẹn dữ liệu
+            DB::beginTransaction();
+            
+            // Xóa các bản ghi liên quan trong medicine_logs (nếu có)
+            DB::table('medicine_logs')->where('product_id', $id)->delete();
+            
+            // Sau đó xóa sản phẩm
+            $product = Product::findOrFail($id);
+            $status = $product->delete();
+            
+            // Hoàn tất transaction
+            DB::commit();
+            
+            if ($status) {
+                request()->session()->flash('success', 'Đã xóa sản phẩm và thông báo liên quan thành công');
+            } else {
+                request()->session()->flash('error', 'Đã xảy ra lỗi khi xóa sản phẩm');
+            }
+        } catch (\Exception $e) {
+            // Rollback transaction nếu có lỗi
+            DB::rollBack();
+            request()->session()->flash('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
+        
         return redirect()->route('product.index');
     }
 

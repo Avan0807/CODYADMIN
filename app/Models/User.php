@@ -77,5 +77,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Doctor::class, 'doctor_followers', 'user_id', 'doctor_id');
     }
-
+    public function meetings()
+    {
+        return $this->morphMany(Meeting::class, 'created_by');
+    }
 }

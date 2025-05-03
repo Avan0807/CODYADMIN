@@ -36,6 +36,15 @@ use App\Http\Controllers\Api\ApiAffiliateOrdersController;
 use App\Http\Controllers\Api\ApiClinicController;
 use App\Http\Controllers\Api\ApiMeetingController;
 use App\Http\Controllers\Api\ApiShippingController;
+use App\Http\Controllers\Api\ApiBannerController;
+use App\Http\Controllers\Api\ApiSpecialtiesController;
+
+// Lấy dữ liệu theo chuyên khoa
+Route::get('specialty/{specialtyId}/data', [ApiSpecialtiesController::class, 'getSpecialtyData']);
+
+// Banner
+Route::get('banners', [ApiBannerController::class, 'index']);
+Route::get('banners/latest', [ApiBannerController::class, 'getLatest']);
 
 // Shipppp
 Route::group(['prefix' => 'shipping', 'namespace' => 'API'], function () {

@@ -58,6 +58,6 @@ class Doctor extends Authenticatable
 
     public function meetings()
     {
-        return $this->hasMany(Meeting::class, 'created_by_id');
+        return $this->morphMany(Meeting::class, 'created_by');
     }
 }
