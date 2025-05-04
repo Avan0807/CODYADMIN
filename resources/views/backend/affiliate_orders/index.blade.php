@@ -14,7 +14,7 @@
     <div class="card-body">
         <div class="table-responsive">
             @if(count($affiliateOrders) > 0)
-            <table class="table table-bordered table-hover nowrap" id="affiliate-orders-dataTable" style="width:100%">
+            <table class="table table-bordered table-hover" id="affiliate-orders-dataTable" style="width:100%">
                 <thead class="thead-light">
                     <tr>
                         <th>#</th>
@@ -81,7 +81,7 @@
 @endsection
 
 @push('styles')
-    <link href="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <link href="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
     <style>
         div.dataTables_wrapper div.dataTables_paginate {
@@ -94,68 +94,96 @@
     </style>
 @endpush
 
-@push('scripts')
-    <!-- Page level plugins -->
-    <script src="{{ asset('backend/vendor/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('backend/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="{{ asset('backend/js/demo/datatables-demo.js') }}"></script>
-    <script>
-        $('#affiliate-orders-dataTable').DataTable({
+@push('scripts')
+
+  <!-- Page level plugins -->
+  <script src="{{asset('backend/vendor/datatables/jquery.dataTables.min.js')}}"></script>
+  <script src="{{asset('backend/vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
+  <script>
+      $('affiliate-orders-dataTable').DataTable( {
             "paging": true,
             "pageLength": 10,
             "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
             "ordering": true,
             "searching": true,
-            "columnDefs": [
+            "columnDefs":[
                 {
-                    "orderable": false,
-                    "targets": [5] // Column "Hành động" không sắp xếp được
+                    "orderable":false,
+                    "targets":[10]
                 }
             ]
-        });
+        } );
 
-        // Xác nhận trước khi đổi trạng thái
-        $('form button[type="submit"]').click(function(e){
-            var currentStatus = $(this).closest('tr').find('td:eq(4) span').text().trim();
-            var newStatus = $(this).text().trim();
-
-            if(currentStatus !== newStatus) {
-                e.preventDefault();
-                var form = $(this).closest('form');
-                var statusValue = $(this).val();
-
-                swal({
-                    title: "Xác nhận thay đổi trạng thái?",
-                    text: "Bạn muốn thay đổi trạng thái từ '" + currentStatus + "' sang '" + newStatus + "'?",
-                    icon: "warning",
-                    buttons: ["Hủy", "Xác nhận"],
-                    dangerMode: true,
-                })
-                .then((willChange) => {
-                    if (willChange) {
-                        // Gửi form với status đã chọn
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'status',
-                            value: statusValue
-                        }).appendTo(form);
-
-                        form.submit();
-                    }
-                });
+        // Sweet alert
+        function deleteData(id){
+        }
+  </script>
+  <script>
+      $(document).ready(function(){
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
-        // Setup CSRF token cho AJAX requests
-        $(document).ready(function(){
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        $('.dltBtn').click(function(e){
+            var form=$(this).closest('form');
+            var dataID=$(this).data('id');
+            e.preventDefault();
+            swal({
+                title: "Bạn có chắc không?",
+                text: "Sau khi xóa, bạn sẽ không thể khôi phục dữ liệu này!",
+                icon: "cảnh báo",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    form.submit();
+                } else {
+                    swal("Dữ liệu của bạn an toàn!");
                 }
             });
-        });
-    </script>
+        })
+      })
+  </script>
+
+  <script>
+      $(document).ready(function () {
+          $('.commission-input').on('change blur keypress', function (event) {
+              if (event.type === "keypress" && event.which !== 13) return;
+
+              let inputField = $(this);
+              let commissionValue = inputField.val();
+              let productId = inputField.data('id');
+              let statusMessage = inputField.closest('td').find('.commission-status');
+              let url = "{{ route('products-affiliate.update-commission', ':id') }}".replace(':id', productId);
+
+              // Hiện loading khi đang cập nhật
+              inputField.prop('disabled', true);
+              statusMessage.text('⏳ Đang cập nhật...').removeClass('d-none text-success').addClass('text-warning');
+
+              $.ajax({
+                  url: url,
+                  type: 'POST',
+                  data: {
+                      _token: "{{ csrf_token() }}",
+                      commission_percentage: commissionValue
+                  },
+                  success: function (response) {
+                      inputField.prop('disabled', false);
+                      statusMessage.text('✔ Đã lưu').removeClass('text-warning').addClass('text-success').fadeIn().delay(1000).fadeOut();
+                  },
+                  error: function (xhr) {
+                      inputField.prop('disabled', false);
+                      swal("Lỗi!", "Không thể cập nhật hoa hồng, thử lại sau!", "error");
+                  }
+              });
+          });
+      });
+  </script>
 @endpush
