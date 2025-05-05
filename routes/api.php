@@ -52,6 +52,7 @@ Route::group(['prefix' => 'shipping', 'namespace' => 'API'], function () {
     Route::get('/districts/{province_id}', [ApiShippingController::class, 'getDistricts']);
     Route::post('/calculate', [ApiShippingController::class, 'calculateShipping']);
 });
+
 // Meettings
 Route::get('meetings', [ApiMeetingController::class, 'apiGetAllMeeting']);
 Route::middleware('auth:sanctum')->get('doctor/{doctorId}/meetings', [ApiMeetingController::class, 'apiGetDoctorMeetings']);
@@ -63,8 +64,6 @@ Route::middleware(['auth:sanctum'])->get('/campaign-notifications/authenticated'
 Route::middleware(['auth:sanctum'])->get('/campaign-notifications/authenticated/latest', [ApiCampaignNotificationsController::class, 'getLatestFiveForAuthenticatedUser']);
 // Lấy chi tiết một thông báo chiến dịch theo ID cho người dùng đã xác thực (user, doctor)
 Route::middleware(['auth:sanctum'])->get('/campaign-notifications/{id}', [ApiCampaignNotificationsController::class, 'getNotificationDetail']);
-
-
 
 // Các route liên quan đến tin tức công ty (public, không cần xác thực)
 // Lấy tất cả tin tức của công ty
