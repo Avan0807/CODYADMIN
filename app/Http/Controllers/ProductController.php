@@ -18,9 +18,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::get(); 
+        $products = Product::with(['category', 'subCategory'])->get();
         return view('backend.product.index')->with('products', $products);
     }
+
 
 
     /**
@@ -28,12 +29,13 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $brand = Brand::get();
-        $category = Category::where('is_parent', 1)->get();
-        return view('backend.product.create')
-            ->with('categories', $category)
-            ->with('brands', $brand);
+        $brands = Brand::get();
+        $categories = Category::whereNull('parent_id')->get(); // là danh mục cha
+
+        return view('backend.product.create', compact('categories', 'brands'));
     }
+
+
 
     /**
      * Lưu sản phẩm mới vào CSDL.
@@ -72,7 +74,7 @@ class ProductController extends Controller
             'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
             'discount.max' => 'Giảm giá không được lớn hơn 100.'
         ]);
-        
+
 
         $data = $request->all();
 
@@ -119,19 +121,16 @@ class ProductController extends Controller
     /**
      * Trang chỉnh sửa sản phẩm.
      */
-    public function edit($id)
-    {
-        $brand    = Brand::get();
-        $product  = Product::findOrFail($id);
-        $category = Category::where('is_parent', 1)->get();
-        $items    = Product::where('id', $id)->get();
 
-        return view('backend.product.edit')
-            ->with('product', $product)
-            ->with('brands', $brand)
-            ->with('categories', $category)
-            ->with('items', $items);
-    }
+     public function edit($id)
+     {
+         $product = Product::findOrFail($id);
+         $brands = Brand::get();
+         $categories = Category::whereNull('parent_id')->get(); // cha
+         $subcategories = Category::where('parent_id', $product->cat_id)->get(); // con
+
+         return view('backend.product.edit', compact('product', 'brands', 'categories', 'subcategories'));
+     }
 
     /**
      * Cập nhật sản phẩm trong CSDL.
@@ -200,17 +199,17 @@ class ProductController extends Controller
         try {
             // Bắt đầu transaction để đảm bảo tính toàn vẹn dữ liệu
             DB::beginTransaction();
-            
+
             // Xóa các bản ghi liên quan trong medicine_logs (nếu có)
             DB::table('medicine_logs')->where('product_id', $id)->delete();
-            
+
             // Sau đó xóa sản phẩm
             $product = Product::findOrFail($id);
             $status = $product->delete();
-            
+
             // Hoàn tất transaction
             DB::commit();
-            
+
             if ($status) {
                 request()->session()->flash('success', 'Đã xóa sản phẩm và thông báo liên quan thành công');
             } else {
@@ -221,7 +220,7 @@ class ProductController extends Controller
             DB::rollBack();
             request()->session()->flash('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
-        
+
         return redirect()->route('product.index');
     }
 
@@ -230,7 +229,7 @@ class ProductController extends Controller
     public function apiGetAllProducts(Request $request)
     {
         try {
-            $products = Product::getAllProduct();
+            $products = Product::with(['category', 'subCategory', 'brand'])->paginate(10);
             return response()->json([
                 'success' => true,
                 'products' => $products,
@@ -245,13 +244,12 @@ class ProductController extends Controller
         }
     }
 
+
     public function apiGetProductById($id)
     {
         try {
-            // Tìm sản phẩm theo ID
-            $product = Product::find($id);
+            $product = Product::with(['category', 'subCategory', 'brand', 'reviews'])->find($id);
 
-            // Nếu không tìm thấy sản phẩm
             if (!$product) {
                 return response()->json([
                     'success' => false,
@@ -259,7 +257,6 @@ class ProductController extends Controller
                 ], 404);
             }
 
-            // Trả về dữ liệu sản phẩm
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy thông tin sản phẩm thành công.',
@@ -275,6 +272,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
     public function updateCommission(Request $request, $id)
     {
         $product = Product::findOrFail($id);

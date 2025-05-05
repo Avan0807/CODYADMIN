@@ -33,11 +33,11 @@
             @foreach($categories as $category)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{$category->title}}</td>
+                    <td>{{$category->name}}</td>
                     <td>{{$category->slug}}</td>
-                    <td>{{(($category->is_parent==1)? 'Có': 'Không')}}</td>
+                    <td>{{ $category->children->count() > 0 ? 'Có' : 'Không' }}</td>
                     <td>
-                        {{$category->parent_info->title ?? ''}}
+                        {{$category->parent->name ?? ''}}
                     </td>
                     <td>
                         @if($category->photo)

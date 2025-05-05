@@ -10,107 +10,96 @@ use Illuminate\Support\Str;
 class ApiCategoryController extends Controller
 {
     /**
-     * Danh sách danh mục (API).
+     * Lấy tất cả danh mục, bao gồm cha và con.
      */
     public function index()
     {
-        $categories = Category::getAllCategory();
+        $categories = Category::with('parent')->orderBy('id', 'DESC')->get();
         return response()->json($categories);
     }
 
     /**
-     * Tạo mới danh mục (API).
+     * Tạo mới danh mục.
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'title'     => 'string|required',
-            'summary'   => 'string|nullable',
-            'photo'     => 'string|nullable',
+        $request->validate([
+            'name'      => 'required|string|max:255',
+            'summary'   => 'nullable|string',
+            'photo'     => 'nullable|string',
             'status'    => 'required|in:active,inactive',
-            'is_parent' => 'sometimes|in:1',
             'parent_id' => 'nullable|exists:categories,id',
         ]);
 
-        $data = $request->all();
-        $slug = Str::slug($request->title);
-        $count = Category::where('slug', $slug)->count();
-
-        if ($count > 0) {
-            $slug = $slug . '-' . date('ymdis') . '-' . rand(0, 999);
+        $slug = Str::slug($request->name);
+        if (Category::where('slug', $slug)->exists()) {
+            $slug .= '-' . now()->format('YmdHis') . '-' . rand(10, 99);
         }
-        $data['slug'] = $slug;
-        $data['is_parent'] = $request->input('is_parent', 0);
 
-        $category = Category::create($data);
+        $category = Category::create([
+            'name'      => $request->name,
+            'slug'      => $slug,
+            'summary'   => $request->summary,
+            'photo'     => $request->photo,
+            'status'    => $request->status,
+            'parent_id' => $request->parent_id,
+        ]);
 
-        if ($category) {
-            return response()->json(['success' => 'Thêm danh mục thành công'], 201);
-        } else {
-            return response()->json(['error' => 'Có lỗi xảy ra, vui lòng thử lại!'], 400);
-        }
+        return response()->json(['success' => 'Tạo danh mục thành công', 'data' => $category], 201);
     }
 
     /**
-     * Cập nhật danh mục (API).
+     * Cập nhật danh mục.
      */
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
 
-        $this->validate($request, [
-            'title'     => 'string|required',
-            'summary'   => 'string|nullable',
-            'photo'     => 'string|nullable',
+        $request->validate([
+            'name'      => 'required|string|max:255',
+            'summary'   => 'nullable|string',
+            'photo'     => 'nullable|string',
             'status'    => 'required|in:active,inactive',
-            'is_parent' => 'sometimes|in:1',
-            'parent_id' => 'nullable|exists:categories,id',
+            'parent_id' => 'nullable|exists:categories,id|not_in:' . $id, // tránh chọn chính nó làm cha
         ]);
 
-        $data = $request->all();
-        $data['is_parent'] = $request->input('is_parent', 0);
+        $category->update([
+            'name'      => $request->name,
+            'summary'   => $request->summary,
+            'photo'     => $request->photo,
+            'status'    => $request->status,
+            'parent_id' => $request->parent_id,
+        ]);
 
-        $status = $category->fill($data)->save();
-
-        if ($status) {
-            return response()->json(['success' => 'Cập nhật danh mục thành công']);
-        } else {
-            return response()->json(['error' => 'Có lỗi xảy ra, vui lòng thử lại!'], 400);
-        }
+        return response()->json(['success' => 'Cập nhật danh mục thành công']);
     }
 
     /**
-     * Xóa danh mục (API).
+     * Xóa danh mục và chuyển các danh mục con về null.
      */
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        $child_cat_id = Category::where('parent_id', $id)->pluck('id');
 
-        $status = $category->delete();
+        // Gỡ liên kết con trước khi xóa
+        Category::where('parent_id', $id)->update(['parent_id' => null]);
 
-        if ($status) {
-            if (count($child_cat_id) > 0) {
-                Category::shiftChild($child_cat_id);
-            }
-            return response()->json(['success' => 'Xóa danh mục thành công']);
-        } else {
-            return response()->json(['error' => 'Có lỗi xảy ra khi xóa danh mục'], 400);
-        }
+        $category->delete();
+
+        return response()->json(['success' => 'Xóa danh mục thành công']);
     }
 
     /**
-     * Lấy danh sách danh mục con dựa trên danh mục cha (API).
+     * Lấy danh sách danh mục con theo ID danh mục cha.
      */
-    public function getChildByParent(Request $request)
+    public function getChildByParent($id)
     {
-        $category  = Category::findOrFail($request->id);
-        $child_cat = Category::getChildByParentID($request->id);
+        $parent = Category::findOrFail($id);
+        $children = $parent->children()->get();
 
-        if (count($child_cat) <= 0) {
-            return response()->json(['status' => false, 'msg' => '', 'data' => null]);
-        } else {
-            return response()->json(['status' => true, 'msg' => '', 'data' => $child_cat]);
-        }
+        return response()->json([
+            'status' => true,
+            'data' => $children,
+        ]);
     }
 }

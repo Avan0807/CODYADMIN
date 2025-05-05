@@ -19,10 +19,10 @@
                     <tr>
                         <th>#</th>
                         <th>Tiêu đề</th>
-                        <th>Loại</th>
+                        <th>Danh mục</th>
                         <th>Nổi bật</th>
                         <th>Giá</th>
-                        <th>Tình trạng</th> 
+                        <th>Tình trạng</th>
                         <th>Thương hiệu</th>
                         <th>Kho</th>
                         <th>Ảnh</th>
@@ -33,79 +33,77 @@
                 </thead>
                 <tbody>
                     @foreach($products as $product)
-                    @php
-                        $sub_cat_info=DB::table('categories')->select('title')->where('id',$product->child_cat_id)->get();
-                        $brands=DB::table('brands')->select('title')->where('id',$product->brand_id)->get();
-                    @endphp
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{$product->title}}</td>
-                        <td>{{$product->cat_info['title']}}
-                            <sub>
-                                {{$product->sub_cat_info->title ?? ''}}
-                            </sub>
+                        <td>{{ $product->title }}</td>
+                        <td>
+                            {{ $product->category->name ?? '---' }}
+                            <br>
+                            <small class="text-muted">{{ $product->subCategory->name ?? '' }}</small>
                         </td>
-                        <td>{{(($product->is_featured==1)? 'Có': 'Không')}}</td>
+                        <td>{{ $product->is_featured ? 'Có' : 'Không' }}</td>
                         <td>{{ number_format($product->price, 0, ',', '.') }}đ</td>
                         <td>
                             @php
-                                $conditionTranslations = [
+                                $conditionMap = [
                                     'new' => 'Mới',
                                     'default' => 'Mặc định',
                                     'hot' => 'Nổi bật'
                                 ];
-                            echo $conditionTranslations[$product->condition] ?? $product->condition;
                             @endphp
+                            {{ $conditionMap[$product->condition] ?? $product->condition }}
                         </td>
-                        <td> {{ucfirst($product->brand->title)}}</td>
+                        <td>{{ ucfirst($product->brand->title ?? 'Không rõ') }}</td>
                         <td>
-                            @if($product->stock>0)
-                            <span class="badge badge-primary">{{$product->stock}}</span>
-                            @else
-                            <span class="badge badge-danger">{{$product->stock}}</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if($product->photo)
-                                @php
-                                    $photo=explode(',',$product->photo);
-                                @endphp
-                                <img src="{{$photo[0]}}" class="img-fluid zoom" style="max-width:80px" alt="{{$product->photo}}">
-                            @else
-                                <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
-                            @endif
+                            <span class="badge badge-{{ $product->stock > 0 ? 'primary' : 'danger' }}">
+                                {{ $product->stock }}
+                            </span>
                         </td>
                         <td>
-                            @if($product->status=='active')
-                                <span class="badge badge-success">Hoạt Động</span>
-                            @else
-                                <span class="badge badge-warning">Không Hoạt Động</span>
-                            @endif
+                            @php $photo = explode(',', $product->photo); @endphp
+                            <img src="{{ $photo[0] ?? asset('backend/img/thumbnail-default.jpg') }}"
+                                 class="img-fluid zoom"
+                                 style="max-width:80px" alt="product image">
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ $product->status == 'active' ? 'success' : 'warning' }}">
+                                {{ $product->status == 'active' ? 'Hoạt Động' : 'Không Hoạt Động' }}
+                            </span>
                         </td>
                         <td>
                             <div class="input-group commission-group">
                                 <input type="number" class="form-control commission-input"
-                                      data-id="{{ $product->id }}"
-                                      value="{{ number_format($product->commission_percentage, 2) }}"
-                                      min="0" max="100" step="0.01">
+                                       data-id="{{ $product->id }}"
+                                       value="{{ number_format($product->commission_percentage, 2) }}"
+                                       min="0" max="100" step="0.01">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                             <small class="text-success commission-status d-none">✔ Đã lưu</small>
                         </td>
-                        <td>
-                            <a href="{{route('product.edit',$product->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
-                        <form method="POST" action="{{route('product.destroy',[$product->id])}}">
-                            @csrf
-                            @method('delete')
-                                <button class="btn btn-danger btn-sm dltBtn" data-id={{$product->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                        </form>
+                        <td class="text-center">
+                            <a href="{{ route('product.edit', $product->id) }}"
+                               class="btn btn-primary btn-sm"
+                               style="height:30px; width:30px; border-radius:50%"
+                               title="Chỉnh sửa">
+                               <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="POST" action="{{ route('product.destroy', $product->id) }}" class="d-inline-block">
+                                @csrf
+                                @method('delete')
+                                <button class="btn btn-danger btn-sm dltBtn"
+                                        style="height:30px; width:30px; border-radius:50%"
+                                        title="Xoá">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+
             @else
             <h6 class="text-center">Không tìm thấy sản phẩm nào!!! Vui lòng thêm sản phẩm mới</h6>
             @endif
@@ -120,8 +118,8 @@
   <style>
       div.dataTables_wrapper div.dataTables_paginate {
           display: block !important;
-      } 
-      
+      }
+
       .zoom {
         transition: transform .2s; /* Animation */
       }

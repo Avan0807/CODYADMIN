@@ -16,7 +16,8 @@ class Doctor extends Authenticatable
     protected $fillable = [
         'name', 'specialization', 'services', 'experience', 'working_hours',
         'location', 'workplace', 'phone', 'email', 'photo', 'status',
-        'rating', 'consultation_fee', 'bio', 'password', 'points'
+        'rating', 'consultation_fee', 'bio', 'password', 'points', 'short_bio',
+        'total_commission'
     ];
 
     protected $hidden = [
@@ -33,29 +34,42 @@ class Doctor extends Authenticatable
         'updated_at' => 'datetime',
     ];
 
-    // 🔹 Bổ sung quan hệ với `Appointment`
+    // 🔹 Quan hệ với lịch hẹn
     public function appointments()
     {
         return $this->hasMany(Appointment::class, 'doctor_id');
     }
+
+    // 🔹 Quan hệ với đơn affiliate
     public function affiliateOrders()
     {
         return $this->hasMany(AffiliateOrder::class);
     }
-    // Trong model Doctor
+
+    // 🔹 Quan hệ với đánh giá bác sĩ
     public function reviews()
     {
         return $this->hasMany(DoctorReview::class);
     }
+
+    // 🔹 Quan hệ followers (nhiều user theo dõi 1 bác sĩ)
     public function doctorFollowers()
     {
         return $this->hasMany(DoctorFollower::class, 'doctor_id');
     }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'doctor_followers', 'doctor_id', 'user_id');
     }
 
+    // 🔹 Quan hệ với các chuyên khoa (nhiều-nhiều với categories)
+    public function specializations()
+    {
+        return $this->belongsToMany(Category::class, 'doctor_specializations', 'doctor_id', 'category_id');
+    }
+
+    // 🔹 Quan hệ các buổi tư vấn / meeting
     public function meetings()
     {
         return $this->morphMany(Meeting::class, 'created_by');

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Post;
-use App\Models\PostCategory;
+use App\Models\Category;
 use App\Models\PostTag;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -29,14 +29,17 @@ class PostController extends Controller
      */
     public function create()
     {
-        $categories = PostCategory::get();
+        $categories = Category::type('other')->orderBy('name')->get();
         $tags       = PostTag::get();
         $users      = User::get();
+
         return view('backend.post.create')
             ->with('users', $users)
             ->with('categories', $categories)
             ->with('tags', $tags);
     }
+
+
 
     /**
      * Lưu bài viết mới.
@@ -102,7 +105,7 @@ class PostController extends Controller
     public function edit($id)
     {
         $post       = Post::findOrFail($id);
-        $categories = PostCategory::get();
+        $categories = Category::type('other')->orderBy('name')->get();
         $tags       = PostTag::get();
         $users      = User::get();
 
@@ -180,104 +183,97 @@ class PostController extends Controller
 
     public function apiCreatePost(Request $request)
     {
-        // Xác thực bác sĩ (token)
-        $doctor = $request->user(); // Bác sĩ đã đăng nhập
+        $doctor = $request->user(); // Authenticated doctor
 
-        if (!$doctor) {
+        if (!$doctor || !$doctor->doctorID) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chỉ bác sĩ mới có quyền tạo bài viết!',
-            ], 403); // Lỗi 403 - Forbidden
+                'message' => 'Bạn không có quyền thực hiện thao tác này.',
+            ], 403);
         }
 
-        // Xác thực dữ liệu đầu vào
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'tags' => 'required|string|max:255',
-            'summary' => 'required|string|max:500',
-            'description' => 'required|string',
-            'photo' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048', // Chấp nhận file ảnh, max 2MB
-            'quote' => 'nullable|string',
-            'post_cat_id' => 'required|exists:post_categories,id',
-            'post_tag_id' => 'nullable|exists:post_tags,id',
-            'status' => 'required|string|in:active,inactive',
+            'title'        => 'required|string|max:255',
+            'tags'         => 'required|string|max:255',
+            'summary'      => 'required|string|max:500',
+            'description'  => 'required|string',
+            'photo'        => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
+            'quote'        => 'nullable|string',
+            'post_cat_id'  => 'required|exists:post_categories,id',
+            'post_tag_id'  => 'nullable|exists:post_tags,id',
+            'status'       => 'required|in:active,inactive',
         ]);
 
         try {
-            // Xử lý upload ảnh lên S3 nếu có
             $photoUrl = null;
             if ($request->hasFile('photo')) {
                 $file = $request->file('photo');
                 $fileName = 'posts/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-                // Upload lên S3
-                $uploaded = Storage::disk('s3')->put($fileName, file_get_contents($file));
-
-                if ($uploaded) {
-                    $photoUrl = Storage::disk('s3')->url($fileName);
-                }
+                Storage::disk('s3')->put($fileName, file_get_contents($file));
+                $photoUrl = Storage::disk('s3')->url($fileName);
             }
 
-            // Tạo bài viết mới
             $post = Post::create([
-                'title' => $validated['title'],
-                'tags' => $validated['tags'],
-                'summary' => $validated['summary'],
-                'description' => $validated['description'],
-                'photo' => $photoUrl, // Lưu link ảnh trên S3
-                'quote' => $validated['quote'] ?? null,
-                'post_cat_id' => $validated['post_cat_id'],
-                'post_tag_id' => $validated['post_tag_id'] ?? null,
-                'status' => $validated['status'],
-                'added_by' => $doctor->doctorID, // Lưu ID bác sĩ
+                'title'        => $validated['title'],
+                'slug'         => Str::slug($validated['title']) . '-' . uniqid(),
+                'tags'         => $validated['tags'],
+                'summary'      => $validated['summary'],
+                'description'  => $validated['description'],
+                'photo'        => $photoUrl,
+                'quote'        => $validated['quote'] ?? null,
+                'post_cat_id'  => 'required|exists:categories,id',
+                'post_tag_id'  => $validated['post_tag_id'] ?? null,
+                'status'       => $validated['status'],
+                'added_by'     => $doctor->doctorID,
             ]);
 
             return response()->json([
                 'success' => true,
-                'data' => $post,
                 'message' => 'Bài viết đã được tạo thành công!',
-            ], 201); // Mã 201 - Created
+                'data'    => $post
+            ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể tạo bài viết!',
-                'error' => $e->getMessage(),
-            ], 500); // Lỗi 500 - Server Error
+                'message' => 'Tạo bài viết thất bại!',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
+    // 1 lỗi nhỏ là do tách user và doctor nên sẽ hiển thị cả doctor và user do cùng id
     public function apiGetAllPosts()
     {
         try {
-            // Lấy danh sách bài đăng với phân trang
-            $posts = Post::with(['category', 'doctor'])->where('status', 'active')->orderBy('id', 'DESC')->paginate(10);
+            $posts = Post::with(['category', 'doctor', 'user'])
+                ->where('status', 'active')
+                ->orderByDesc('id')
+                ->paginate(10);
 
-
-            if ($posts->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không có bài đăng nào.',
-                ], 404);
-            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách bài đăng thành công.',
-                'posts' => $posts,
-            ], 200);
+                'data'    => $posts,
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể lấy danh sách bài đăng.',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
     public function apiGetPostBySlug($slug)
     {
         try {
-            // Lấy bài đăng theo slug
-            $post = Post::with(['tag_info', 'author_info'])->where('slug', $slug)->where('status', 'active')->first();
+            $post = Post::with(['category', 'tag_info', 'doctor', 'user'])
+                ->where('slug', $slug)
+                ->where('status', 'active')
+                ->first();
 
             if (!$post) {
                 return response()->json([
@@ -289,14 +285,15 @@ class PostController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy bài đăng thành công.',
-                'post' => $post,
-            ], 200);
+                'data'    => $post,
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể lấy bài đăng.',
-                'error' => $e->getMessage(),
+                'message' => 'Lỗi khi lấy bài viết.',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
 }

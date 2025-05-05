@@ -6,48 +6,101 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable=['title','slug','summary','photo','status','is_parent','parent_id','added_by'];
+    protected $fillable = [
+        'name', 'slug', 'type', 'parent_id', 'icon', 'status',
+        'display_order', 'summary', 'photo'
+    ];
 
-    public function parent_info(){
-        return $this->hasOne('App\Models\Category','id','parent_id');
-    }
-    public static function getAllCategory(){
-        return  Category::orderBy('id','DESC')->with('parent_info')->paginate(10);
-    }
+    // ===== QUAN HỆ PHÂN CẤP =====
 
-    public static function shiftChild($cat_id){
-        return Category::whereIn('id',$cat_id)->update(['is_parent'=>1]);
-    }
-    public static function getChildByParentID($id){
-        return Category::where('parent_id',$id)->orderBy('id','ASC')->pluck('title','id');
+    // Danh mục cha (1-1)
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    public function child_cat(){
-        return $this->hasMany('App\Models\Category','parent_id','id')->where('status','active');
+    // Danh mục con (1-n)
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
     }
-    public static function getAllParentWithChild(){
-        return Category::with('child_cat')->where('is_parent',1)->where('status','active')->orderBy('title','ASC')->get();
+
+    // ===== QUAN HỆ DỮ LIỆU LIÊN KẾT =====
+
+    // Sản phẩm thuộc danh mục
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'cat_id','id');
     }
-    public function products(){
-        return $this->hasMany('App\Models\Product','cat_id','id')->where('status','active');
+
+    // Bài viết thuộc danh mục
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'post_cat_id');
     }
-    public function sub_products(){
-        return $this->hasMany('App\Models\Product','child_cat_id','id')->where('status','active');
+
+    // Bác sĩ thuộc chuyên khoa
+    public function doctors()
+    {
+        return $this->hasMany(Doctor::class, 'specialist_cat_id');
     }
-    public static function getProductByCat($slug){
-        // dd($slug);
-        return Category::with('products')->where('slug',$slug)->first();
-        // return Product::where('cat_id',$id)->where('child_cat_id',null)->paginate(10);
+
+    // ===== SCOPES =====
+
+    // Lọc theo loại danh mục
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
     }
-    public static function getProductBySubCat($slug){
-        // return $slug;
-        return Category::with('sub_products')->where('slug',$slug)->first();
+
+    // Lọc danh mục gốc
+    public function scopeRoot($query)
+    {
+        return $query->whereNull('parent_id');
     }
-    public static function countActiveCategory(){
-        $data=Category::where('status','active')->count();
-        if($data){
-            return $data;
+
+    // ===== STATIC METHODS =====
+
+    // Lấy toàn bộ danh mục có danh mục con (dùng cho admin, treeview)
+    public static function getTree($type = null)
+    {
+        $query = self::with('children')->whereNull('parent_id');
+        if ($type) {
+            $query->where('type', $type);
         }
-        return 0;
+        return $query->orderBy('display_order')->get();
     }
+
+    // Đếm tổng số danh mục theo type
+    public static function countByType($type)
+    {
+        return self::where('type', $type)->count();
+    }
+
+    // Tìm theo slug
+    public static function findBySlug($slug)
+    {
+        return self::where('slug', $slug)->first();
+    }
+
+    public static function getAllParentWithChild()
+    {
+        return self::whereNull('parent_id')
+            ->with(['children' => function ($query) {
+                $query->where('status', 'active');
+            }])
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+    }
+    public static function countActiveCategory()
+    {
+        return self::where('status', 'active')->count();
+    }
+
+    public static function getAllCategory()
+    {
+        return self::orderBy('id', 'DESC')->get();
+    }
+
 }

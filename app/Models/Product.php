@@ -3,90 +3,103 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Cart;
 use App\Models\Wishlist;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\ProductReview;
-use Illuminate\Support\Facades\Cache;
 
 class Product extends Model
 {
     protected $fillable = [
-        'title', 'slug', 'summary', 'description', 'cat_id', 'child_cat_id',
-        'price', 'brand_id', 'discount', 'status', 'photo', 'size', 'stock',
-        'is_featured', 'condition', 'commission_percentage'
+        'title', 'slug', 'summary', 'description',
+        'photo', 'stock', 'size', 'condition', 'status',
+        'price', 'discount', 'is_featured',
+        'cat_id', 'child_cat_id', 'brand_id',
+        'commission_percentage',
     ];
 
     protected $casts = [
-        'price' => 'float',
+        'price' => 'decimal:2',
         'discount' => 'float',
         'is_featured' => 'boolean',
         'stock' => 'integer',
         'commission_percentage' => 'float',
     ];
 
+    // Scope chỉ lấy sản phẩm đang hoạt động
     public function scopeActive($query)
     {
-        return $query->where('status', 1);
+        return $query->where('status', 'active');
     }
 
-    public function cat_info()
+    // Quan hệ với danh mục chính
+    public function category()
     {
-        return $this->hasOne(Category::class, 'id', 'cat_id');
+        return $this->belongsTo(Category::class, 'cat_id');
     }
 
-    public function sub_cat_info()
+    // Quan hệ với danh mục con
+    public function subCategory()
     {
-        return $this->hasOne(Category::class, 'id', 'child_cat_id');
+        return $this->belongsTo(Category::class, 'child_cat_id');
     }
 
-    public static function getAllProduct()
+    // Quan hệ với thương hiệu
+    public function brand()
     {
-        return Product::with(['cat_info', 'sub_cat_info'])
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 
-    public function rel_prods()
+    // Quan hệ với đánh giá sản phẩm
+    public function reviews()
     {
-        return $this->hasMany(Product::class, 'cat_id', 'cat_id')
-            ->where('status', 'active')
-            ->orderBy('id', 'DESC')
-            ->limit(8);
+        return $this->hasMany(ProductReview::class, 'product_id')->with('user_info');
     }
 
-    public function getReview()
-    {
-        return $this->hasMany(ProductReview::class, 'product_id', 'id')->with('user_info');
-    }
-
-    public static function getProductBySlug($slug)
-    {
-        return Product::with(['cat_info', 'rel_prods', 'getReview'])
-            ->where('slug', $slug)
-            ->firstOrFail();
-    }
-
-    public static function countActiveProduct()
-    {
-        return Cache::remember('active_products_count', 60, function () {
-            return Product::where('status', 'active')->count();
-        });
-    }
-
+    // Quan hệ với giỏ hàng
     public function carts()
     {
         return $this->hasMany(Cart::class)->whereNotNull('order_id');
     }
 
+    // Quan hệ với wishlist
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class)->whereNotNull('cart_id');
     }
 
-    public function brand()
+    // Sản phẩm liên quan trong cùng danh mục
+    public function relatedProducts()
     {
-        return $this->hasOne(Brand::class, 'id', 'brand_id');
+        return $this->hasMany(Product::class, 'cat_id', 'cat_id')
+            ->where('status', 'active')
+            ->orderByDesc('id')
+            ->limit(8);
+    }
+
+    // Lấy toàn bộ sản phẩm kèm danh mục & sub
+    public static function getAllProduct()
+    {
+        return self::with(['category', 'subCategory'])
+            ->orderByDesc('id')
+            ->paginate(10);
+    }
+
+    // Lấy chi tiết sản phẩm theo slug
+    public static function getProductBySlug($slug)
+    {
+        return self::with(['category', 'relatedProducts', 'reviews'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+    }
+
+    // Đếm tổng số sản phẩm đang hoạt động (cache 60s)
+    public static function countActiveProduct()
+    {
+        return Cache::remember('active_products_count', 60, function () {
+            return self::where('status', 'active')->count();
+        });
     }
 }

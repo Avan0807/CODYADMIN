@@ -6,107 +6,145 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    protected $fillable = ['title', 'tags', 'summary', 'slug', 'description', 'photo', 'quote', 'post_cat_id', 'post_tag_id', 'added_by', 'status'];
+    protected $fillable = [
+        'title', 'tags', 'summary', 'slug', 'description', 'photo', 'quote',
+        'post_cat_id', 'post_tag_id', 'added_by', 'status'
+    ];
 
-
+    /**
+     * Quan hệ đến danh mục (sử dụng bảng categories).
+     */
     public function category()
     {
-        return $this->hasOne('App\Models\PostCategory', 'id', 'post_cat_id');
+        return $this->belongsTo(Category::class, 'post_cat_id');
     }
+
+    /**
+     * Alias cho category nếu cần dùng tên cũ.
+     */
     public function cat_info()
     {
-        return $this->hasOne('App\Models\PostCategory', 'id', 'post_cat_id');
+        return $this->category();
     }
+
+    /**
+     * Quan hệ đến thẻ tag (1 bài viết có thể có nhiều tags).
+     */
     public function tags()
     {
         return $this->belongsToMany(PostTag::class, 'post_tags', 'post_id', 'tag_id');
     }
 
+    /**
+     * Tag chính (nếu dùng post_tag_id đơn lẻ).
+     */
     public function tag_info()
     {
-        return $this->hasOne('App\Models\PostTag', 'id', 'post_tag_id');
+        return $this->hasOne(PostTag::class, 'id', 'post_tag_id');
     }
 
+    /**
+     * Bài viết do User tạo (nếu không phải bác sĩ).
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'added_by');
     }
 
+    /**
+     * Bài viết do Bác sĩ tạo.
+     */
     public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'added_by');
     }
+
+    protected $appends = ['doctor_info'];
+    /**
+     * Ưu tiên trả về thông tin người tạo (doctor hoặc user).
+     */
     public function getAuthorInfoAttribute()
     {
-        // Ưu tiên Doctor trước
-        if ($this->doctor) {
-            return $this->doctor;
-        }
-
-        // Nếu không có doctor, kiểm tra user
-        return $this->user;
+        return $this->doctor ?: $this->user;
     }
+
+    /**
+     * Lấy tất cả bài viết (dùng trong dashboard).
+     */
     public static function getAllPost()
     {
-        return Post::with(['cat_info', 'author_info'])->orderBy('id', 'DESC')->paginate(10);
+        return self::with(['cat_info', 'doctor_info'])->orderBy('id', 'DESC')->paginate(10);
     }
-    // public function get_comments(){
-    //     return $this->hasMany('App\Models\PostComment','post_id','id');
-    // }
+
+    /**
+     * Lấy bài viết theo slug.
+     */
     public static function getPostBySlug($slug)
     {
-        return Post::with(['tag_info', 'author_info'])->where('slug', $slug)->where('status', 'active')->first();
+        return self::with(['tag_info', 'doctor_info'])->where('slug', $slug)->where('status', 'active')->first();
     }
+
+    /**
+     * Quan hệ đến User trong bình luận.
+     */
     public function user_info()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Quan hệ đến Doctor trong bình luận.
+     */
     public function doctor_info()
     {
-        return $this->belongsTo(Doctor::class, 'doctor_id');
+        return $this->hasOne(Doctor::class, 'id', 'added_by');
     }
 
+
+    /**
+     * Các phản hồi trong bình luận.
+     */
     public function replies()
     {
-        return $this->hasMany(PostComment::class, 'parent_id')->where('status', 'active')
-            ->with([
-                'user_info:id,name,email,phone',
-                'doctor_info:id,name,email,phone',
-            ]);
+        return $this->hasMany(PostComment::class, 'parent_id')
+            ->where('status', 'active')
+            ->with(['user_info:id,name,email,phone', 'doctor_info:id,name,email,phone']);
     }
+
+    /**
+     * Danh sách bình luận cấp 1.
+     */
     public function comments()
     {
         return $this->hasMany(PostComment::class)
             ->whereNull('parent_id')
             ->where('status', 'active')
-            ->with([
-                'user_info:id,name,email,phone',
-                'doctor_info:id,name,email,phone',
-                'replies' // replies đã có with trong quan hệ rồi
-            ])
+            ->with(['user_info:id,name,email,phone', 'doctor_info:id,name,email,phone', 'replies'])
             ->orderBy('id', 'DESC');
     }
 
+    /**
+     * Tất cả bình luận (không phân cấp).
+     */
     public function allComments()
     {
         return $this->hasMany(PostComment::class)->where('status', 'active');
     }
 
+    /**
+     * Lấy bài viết theo tag (slug).
+     */
     public static function getBlogByTag($slug)
     {
-        // dd($slug);
-        return Post::where('tags', $slug)->paginate(8);
+        return self::where('tags', $slug)->paginate(8);
     }
 
+    /**
+     * Đếm số lượng bài viết đang hoạt động.
+     */
     public static function countActivePost()
     {
-        $data = Post::where('status', 'active')->count();
-        if ($data) {
-            return $data;
-        }
-        return 0;
+        return self::where('status', 'active')->count() ?? 0;
     }
-
 
 }

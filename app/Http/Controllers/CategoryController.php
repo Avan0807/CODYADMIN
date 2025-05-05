@@ -27,9 +27,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $parent_cats = Category::where('is_parent', 1)
-                               ->orderBy('title', 'ASC')
-                               ->get();
+        $parent_cats = Category::whereNull('parent_id')->where('status', 'active')->orderBy('name')->get();
+
         return view('backend.category.create')->with('parent_cats', $parent_cats);
     }
 
@@ -42,7 +41,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'title'      => 'string|required',
+            'name'       => 'string|required', // đổi từ 'title' => 'name'
             'summary'    => 'string|nullable',
             'photo'      => 'string|nullable',
             'status'     => 'required|in:active,inactive',
@@ -51,7 +50,7 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->all();
-        $slug = Str::slug($request->title);
+        $slug = Str::slug($request->name); // đổi từ $request->title
         $count = Category::where('slug', $slug)->count();
         if ($count > 0) {
             $slug = $slug . '-' . date('ymdis') . '-' . rand(0, 999);
@@ -88,8 +87,13 @@ class CategoryController extends Controller
      */
     public function edit($id): ViewContract
     {
-        $parent_cats = Category::where('is_parent', 1)->get();
         $category    = Category::findOrFail($id);
+
+        $parent_cats = Category::whereNull('parent_id')
+                ->where('status', 'active')
+                ->where('id', '!=', $category->id) // tránh chọn chính nó làm cha
+                ->orderBy('name')
+                ->get();
 
         return view('backend.category.edit')
             ->with('category', $category)
@@ -108,7 +112,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $this->validate($request, [
-            'title'      => 'string|required',
+            'name'       => 'string|required', // đổi từ 'title'
             'summary'    => 'string|nullable',
             'photo'      => 'string|nullable',
             'status'     => 'required|in:active,inactive',
@@ -161,13 +165,15 @@ class CategoryController extends Controller
      */
     public function getChildByParent(Request $request)
     {
-        $category  = Category::findOrFail($request->id);
-        $child_cat = Category::getChildByParentID($request->id);
+        $category = Category::findOrFail($request->id);
 
-        if (count($child_cat) <= 0) {
+        $child_cat = Category::where('parent_id', $request->id)->pluck('name', 'id');
+
+        if ($child_cat->isEmpty()) {
             return response()->json(['status' => false, 'msg' => '', 'data' => null]);
         } else {
             return response()->json(['status' => true, 'msg' => '', 'data' => $child_cat]);
         }
     }
+
 }
