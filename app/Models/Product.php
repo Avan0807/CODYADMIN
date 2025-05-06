@@ -102,4 +102,13 @@ class Product extends Model
             return self::where('status', 'active')->count();
         });
     }
+    public static function getApiProducts($limit = 10)
+    {
+        return self::with(['category', 'subCategory'])
+            ->active()
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+    }
+
 }

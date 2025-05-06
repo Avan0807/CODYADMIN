@@ -30,8 +30,8 @@ class ApiSpecialtiesController extends Controller
             ->where('doctor_specializations.specialization_id', $specialtyId)
             ->where('doctors.status', 'active')
             ->select('doctors.*')
-            ->groupBy('doctors.id')
             ->get();
+
 
 
         // 3. Lấy bài viết có danh mục là chuyên khoa này (post_cat_id trỏ về id của categories)
@@ -43,13 +43,13 @@ class ApiSpecialtiesController extends Controller
             ->get(['id', 'title', 'slug', 'summary', 'description', 'photo', 'created_at']);
 
         // 4. Lấy sản phẩm có parent_id là ID chuyên khoa này (dùng bảng categories với type = product)
-        $products = DB::table('categories')
-            ->where('parent_id', $specialtyId)
-            ->where('type', 'product')
+        $products = DB::table('products')
+            ->where('cat_id', $specialtyId)
             ->where('status', 'active')
             ->orderBy('id')
             ->limit(10)
-            ->get(['id', 'name', 'slug', 'summary', 'photo']);
+            ->get(['id', 'title', 'slug', 'summary', 'photo']);
+
 
         return response()->json([
             'success' => true,
