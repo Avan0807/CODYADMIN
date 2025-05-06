@@ -59,13 +59,19 @@ class Post extends Model
         return $this->belongsTo(Doctor::class, 'added_by');
     }
 
-    protected $appends = ['doctor_info'];
+    protected $appends = ['author_info'];
     /**
      * Ưu tiên trả về thông tin người tạo (doctor hoặc user).
      */
     public function getAuthorInfoAttribute()
     {
-        return $this->doctor ?: $this->user;
+        // Ưu tiên Doctor trước
+        if ($this->doctor) {
+            return $this->doctor;
+        }
+
+        // Nếu không có doctor, kiểm tra user
+        return $this->user;
     }
 
     /**
@@ -73,7 +79,7 @@ class Post extends Model
      */
     public static function getAllPost()
     {
-        return self::with(['cat_info', 'doctor_info'])->orderBy('id', 'DESC')->paginate(10);
+        return self::with(['cat_info', 'author_info'])->orderBy('id', 'DESC')->paginate(10);
     }
 
     /**
@@ -81,7 +87,7 @@ class Post extends Model
      */
     public static function getPostBySlug($slug)
     {
-        return self::with(['tag_info', 'doctor_info'])->where('slug', $slug)->where('status', 'active')->first();
+        return self::with(['tag_info', 'author_info'])->where('slug', $slug)->where('status', 'active')->first();
     }
 
     /**
