@@ -68,7 +68,11 @@ class Doctor extends Authenticatable
     {
         return $this->belongsToMany(Category::class, 'doctor_specializations', 'doctor_id', 'category_id');
     }
-
+    // Quan hệ 1-1 tới chuyên khoa chính (category)
+    public function specialistCategory()
+    {
+        return $this->belongsTo(Category::class, 'specialist_cat_id');
+    }
     // 🔹 Quan hệ các buổi tư vấn / meeting
     public function meetings()
     {

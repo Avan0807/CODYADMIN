@@ -16,85 +16,85 @@ class AppointmentsController extends Controller
 {
 
     public function apiCreateAppointment(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'doctor_id' => 'required|exists:doctors,id',
-        'date' => 'required|date|after_or_equal:today',
-        'time' => 'required|date_format:H:i',
-        'consultation_type' => 'required|in:Online,Offline,At Home',
-        'notes' => 'nullable|string',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Validation failed',
-            'errors' => $validator->errors(),
-        ], 422);
-    }
-
-    try {
-        // Lấy ID người dùng hiện tại từ Auth
-        $userId = Auth::id();
-
-        if (!$userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể xác thực người dùng.',
-            ], 401);
-        }
-
-        // Tạo lịch hẹn mới
-        $appointment = Appointment::create([
-            'doctor_id' => $request->doctor_id,
-            'user_id' => $userId,
-            'date' => $request->date,
-            'time' => $request->time,
-            'status' => 'Chờ duyệt',
-            'approval_status' => 'Chờ duyệt',
-            'notes' => $request->notes,
-            'consultation_type' => $request->consultation_type,
+    {
+        $validator = Validator::make($request->all(), [
+            'doctor_id' => 'required|exists:doctors,id',
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+            'consultation_type' => 'required|in:Online,Offline,At Home',
+            'notes' => 'nullable|string',
         ]);
 
-        // Lấy thông tin bệnh nhân
-        $user = Auth::user();
-
-        // Lấy thông tin bác sĩ
-        $doctor = Doctor::find($request->doctor_id);
-
-        // Gửi thông báo cho bác sĩ
-        if ($doctor) {
-            $doctor->notify(new StatusNotification([
-                'title' => 'Yêu cầu lịch hẹn mới',
-                'message' => "Bạn có một yêu cầu lịch hẹn mới từ bệnh nhân {$user->name} vào ngày {$appointment->date} lúc {$appointment->time}.",
-                'appointment_id' => $appointment->id,
-                'type' => 'appointment_request',
-            ]));
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        // Gửi thông báo cho bệnh nhân
-        if ($user) {
-            $user->notify(new StatusNotification([
-                'title' => 'Lịch hẹn của bạn đang chờ duyệt',
-                'message' => "Bạn đã đặt lịch hẹn với bác sĩ {$doctor->name} vào ngày {$appointment->date} lúc {$appointment->time}. Vui lòng chờ xác nhận.",
-                'appointment_id' => $appointment->id,
-                'type' => 'appointment_pending',
-            ]));
-        }
+        try {
+            // Lấy ID người dùng hiện tại từ Auth
+            $userId = Auth::id();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Yêu cầu đặt lịch khám đã được gửi và thông báo đã được gửi.',
-            'appointment' => $appointment,
-        ], 201);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Không thể gửi yêu cầu đặt lịch khám.',
-            'error' => $e->getMessage(),
-        ], 500);
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
+            }
+
+            // Tạo lịch hẹn mới
+            $appointment = Appointment::create([
+                'doctor_id' => $request->doctor_id,
+                'user_id' => $userId,
+                'date' => $request->date,
+                'time' => $request->time,
+                'status' => 'Chờ duyệt',
+                'approval_status' => 'Chờ duyệt',
+                'notes' => $request->notes,
+                'consultation_type' => $request->consultation_type,
+            ]);
+
+            // Lấy thông tin bệnh nhân
+            $user = Auth::user();
+
+            // Lấy thông tin bác sĩ
+            $doctor = Doctor::find($request->doctor_id);
+
+            // Gửi thông báo cho bác sĩ
+            if ($doctor) {
+                $doctor->notify(new StatusNotification([
+                    'title' => 'Yêu cầu lịch hẹn mới',
+                    'message' => "Bạn có một yêu cầu lịch hẹn mới từ bệnh nhân {$user->name} vào ngày {$appointment->date} lúc {$appointment->time}.",
+                    'appointment_id' => $appointment->id,
+                    'type' => 'appointment_request',
+                ]));
+            }
+
+            // Gửi thông báo cho bệnh nhân
+            if ($user) {
+                $user->notify(new StatusNotification([
+                    'title' => 'Lịch hẹn của bạn đang chờ duyệt',
+                    'message' => "Bạn đã đặt lịch hẹn với bác sĩ {$doctor->name} vào ngày {$appointment->date} lúc {$appointment->time}. Vui lòng chờ xác nhận.",
+                    'appointment_id' => $appointment->id,
+                    'type' => 'appointment_pending',
+                ]));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Yêu cầu đặt lịch khám đã được gửi và thông báo đã được gửi.',
+                'appointment' => $appointment,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể gửi yêu cầu đặt lịch khám.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
 
     /**
      * Lấy danh sách tất cả các cuộc hẹn.
@@ -119,6 +119,7 @@ class AppointmentsController extends Controller
             ], 500);
         }
     }
+
     public function apiGetAppointmentsByUser()
     {
         try {

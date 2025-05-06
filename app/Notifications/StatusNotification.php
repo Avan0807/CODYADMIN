@@ -25,23 +25,25 @@ class StatusNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => $this->details['title'],  // Tiêu đề thông báo
-            'message' => $this->details['message'] ?? 'No message provided',  // Đảm bảo message có sẵn
-            'actionURL' => $this->details['actionURL'],  // URL để người dùng có thể click
-            'type' => $this->details['fas'] ?? 'info',  // Loại thông báo (dùng icon font awesome nếu có)
+            'title' => $this->details['title'],
+            'message' => $this->details['message'] ?? 'No message provided',
+            'actionURL' => $this->details['actionURL'] ?? null, // ✅ tránh lỗi
+            'type' => $this->details['fas'] ?? 'info',
             'notifiable_type' => \App\Models\User::class,
         ];
     }
+
 
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
             'title' => $this->details['title'],
             'message' => $this->details['message'] ?? 'No message provided',
-            'actionURL' => $this->details['actionURL'],
+            'actionURL' => $this->details['actionURL'] ?? null, // ✅ tránh lỗi
             'fas' => $this->details['fas'] ?? 'info',
             'time' => now()->format('F d, Y h:i A'),
             'notifiable_type' => \App\Models\User::class,
         ]);
     }
+
 }
