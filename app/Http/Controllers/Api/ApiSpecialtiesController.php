@@ -33,7 +33,6 @@ class ApiSpecialtiesController extends Controller
             ->get();
 
 
-
         // 3. Lấy bài viết có danh mục là chuyên khoa này (post_cat_id trỏ về id của categories)
         $news = DB::table('posts')
             ->where('post_cat_id', $specialtyId)

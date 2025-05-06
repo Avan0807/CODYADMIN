@@ -263,8 +263,7 @@ class DoctorsController extends Controller
     public function apiGetAllDoctors(Request $request)
     {
         try {
-            $doctors = Doctor::with('specialistCategory')->get();
-
+            $doctors = Doctor::with('specializations')->get();
 
             return response()->json([
                 'success' => true,
