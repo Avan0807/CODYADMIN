@@ -223,7 +223,7 @@ class ApiProductController extends Controller
     public function findBySlug($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with(['cat_info', 'sub_cat_info']) // Load danh mục và danh mục con
+            ->with(['category', 'subCategory']) // Load danh mục và danh mục con
             ->first();
 
         if (!$product) {
@@ -255,32 +255,35 @@ class ApiProductController extends Controller
                 'brand_id' => $product->brand_id,
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at,
-                'cat_info' => $product->cat_info ? [
-                    'id' => $product->cat_info->id,
-                    'title' => $product->cat_info->title,
-                    'slug' => $product->cat_info->slug,
-                    'summary' => $product->cat_info->summary,
-                    'photo' => $product->cat_info->photo,
-                    'is_parent' => $product->cat_info->is_parent,
-                    'parent_id' => $product->cat_info->parent_id,
-                    'status' => $product->cat_info->status,
-                    'created_at' => $product->cat_info->created_at,
-                    'updated_at' => $product->cat_info->updated_at,
+
+                'cat_info' => $product->category ? [
+                    'id' => $product->category->id,
+                    'title' => $product->category->title,
+                    'slug' => $product->category->slug,
+                    'summary' => $product->category->summary,
+                    'photo' => $product->category->photo,
+                    'is_parent' => $product->category->is_parent,
+                    'parent_id' => $product->category->parent_id,
+                    'status' => $product->category->status,
+                    'created_at' => $product->category->created_at,
+                    'updated_at' => $product->category->updated_at,
                 ] : null,
-                'sub_cat_info' => $product->sub_cat_info ? [
-                    'id' => $product->sub_cat_info->id,
-                    'title' => $product->sub_cat_info->title,
-                    'slug' => $product->sub_cat_info->slug,
-                    'summary' => $product->sub_cat_info->summary,
-                    'photo' => $product->sub_cat_info->photo,
-                    'is_parent' => $product->sub_cat_info->is_parent,
-                    'parent_id' => $product->sub_cat_info->parent_id,
-                    'status' => $product->sub_cat_info->status,
-                    'created_at' => $product->sub_cat_info->created_at,
-                    'updated_at' => $product->sub_cat_info->updated_at,
+
+                'sub_cat_info' => $product->subCategory ? [
+                    'id' => $product->subCategory->id,
+                    'title' => $product->subCategory->title,
+                    'slug' => $product->subCategory->slug,
+                    'summary' => $product->subCategory->summary,
+                    'photo' => $product->subCategory->photo,
+                    'is_parent' => $product->subCategory->is_parent,
+                    'parent_id' => $product->subCategory->parent_id,
+                    'status' => $product->subCategory->status,
+                    'created_at' => $product->subCategory->created_at,
+                    'updated_at' => $product->subCategory->updated_at,
                 ] : null
             ]
         ], 200);
+
     }
 
     public function trackAffiliate(Request $request, $product_slug)
