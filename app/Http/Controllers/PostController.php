@@ -243,7 +243,7 @@ class PostController extends Controller
         }
     }
 
-    // 1 lỗi nhỏ là do tách user và doctor nên sẽ hiển thị cả doctor và user do cùng id
+
     public function apiGetAllPosts()
     {
         try {

@@ -39,7 +39,6 @@
                     <td>{{$post->title}}</td>
                     <td>{{ $post->cat_info->name }}</td>
                     <td>{{$post->tags}}</td>
-
                     <td>
                       @foreach($doctor_info as $data)
                           {{$data->name}}

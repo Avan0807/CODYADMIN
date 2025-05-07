@@ -79,7 +79,7 @@ class Post extends Model
      */
     public static function getAllPost()
     {
-        return self::with(['cat_info', 'author_info'])->orderBy('id', 'DESC')->paginate(10);
+        return self::with(['cat_info', 'user', 'doctor'])->orderBy('id', 'DESC')->paginate(10);
     }
 
     /**
@@ -153,4 +153,13 @@ class Post extends Model
         return self::where('status', 'active')->count() ?? 0;
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'active')->whereNotNull('published_at');
+    }
 }
