@@ -223,7 +223,7 @@ class ApiProductController extends Controller
     public function findBySlug($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with(['category', 'subCategory']) // Load danh mục và danh mục con
+            ->with(['category', 'subCategory'])
             ->first();
 
         if (!$product) {
@@ -255,10 +255,9 @@ class ApiProductController extends Controller
                 'brand_id' => $product->brand_id,
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at,
-
                 'cat_info' => $product->category ? [
                     'id' => $product->category->id,
-                    'title' => $product->category->title,
+                    'name' => $product->category->name,
                     'slug' => $product->category->slug,
                     'summary' => $product->category->summary,
                     'photo' => $product->category->photo,
@@ -268,10 +267,9 @@ class ApiProductController extends Controller
                     'created_at' => $product->category->created_at,
                     'updated_at' => $product->category->updated_at,
                 ] : null,
-
                 'sub_cat_info' => $product->subCategory ? [
                     'id' => $product->subCategory->id,
-                    'title' => $product->subCategory->title,
+                    'name' => $product->subCategory->name,
                     'slug' => $product->subCategory->slug,
                     'summary' => $product->subCategory->summary,
                     'photo' => $product->subCategory->photo,
@@ -283,7 +281,6 @@ class ApiProductController extends Controller
                 ] : null
             ]
         ], 200);
-
     }
 
     public function trackAffiliate(Request $request, $product_slug)
