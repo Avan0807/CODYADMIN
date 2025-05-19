@@ -276,10 +276,18 @@ class ProductController extends Controller
     }
 
 
-    public function apiGetProductById($id)
+    /**
+     * API lấy thông tin sản phẩm theo slug.
+     */
+    public function apiGetProductBySlug($slug)
     {
         try {
-            $product = Product::with(['category', 'subCategory', 'brand', 'reviews'])->find($id);
+            // Tìm sản phẩm theo slug thay vì ID
+            $product = Product::with(['categories', 'brand', 'reviews', 'images'])
+                    ->withCount('reviews')
+                    ->withAvg('reviews', 'rate')
+                    ->where('slug', $slug)
+                    ->first();
 
             if (!$product) {
                 return response()->json([
@@ -288,13 +296,30 @@ class ProductController extends Controller
                 ], 404);
             }
 
+            // Xử lý dữ liệu trước khi trả về
+            $mainCategory = null;
+            $subCategories = [];
+
+            if ($product->categories->isNotEmpty()) {
+                // Lấy danh mục đầu tiên làm danh mục chính
+                $mainCategory = $product->categories->first();
+
+                // Các danh mục còn lại là danh mục phụ
+                $subCategories = $product->categories->skip(1)->values();
+            }
+
+            // Tạo object để trả về, tương thích với code frontend cũ
+            $formattedProduct = $product->toArray();
+            $formattedProduct['category'] = $mainCategory;
+            $formattedProduct['sub_categories'] = $subCategories;
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy thông tin sản phẩm thành công.',
-                'product' => $product,
+                'product' => $formattedProduct,
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error in fetching product: ' . $e->getMessage());
+            Log::error('Error in fetching product by slug: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,

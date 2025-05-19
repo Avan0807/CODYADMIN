@@ -290,7 +290,7 @@ Route::middleware('auth:sanctum')->delete('/doctor/notifications/{notificationID
 Route::get('/products', [ProductController::class, 'apiGetAllProducts']);
 
 // Lấy chi tiết sản phẩm theo ID (public)
-Route::get('/products/{id}', [ProductController::class, 'apiGetProductById']);
+Route::get('/products/{slug}', [ProductController::class, 'apiGetProductBySlug']);
 
 // Thêm sản phẩm mới (nên thêm xác thực để tránh lạm dụng)
 Route::middleware('auth:sanctum')->post('/productsadd', [ApiProductController::class, 'store']);
