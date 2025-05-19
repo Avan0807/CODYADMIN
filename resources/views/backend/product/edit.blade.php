@@ -31,22 +31,19 @@
         <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}> Có
       </div>
 
-      <div class="form-group">
+    <div class="form-group">
         <label>Danh Mục <span class="text-danger">*</span></label>
-        <select name="cat_id" id="cat_id" class="form-control">
-          <option value="">-- Chọn danh mục --</option>
-          @foreach($categories as $cat)
-            <option value="{{ $cat->id }}" {{ old('cat_id', $product->cat_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-          @endforeach
+        <select name="categories[]" class="form-control select2" multiple="multiple">
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}"
+                    {{ in_array($category->id, old('categories', $product->categories->pluck('id')->toArray())) ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
         </select>
-        @error('cat_id')<span class="text-danger">{{ $message }}</span>@enderror
-      </div>
-
-      <div class="form-group {{ $product->child_cat_id ? '' : 'd-none' }}" id="child_cat_div">
-        <label>Danh Mục Con</label>
-        <select name="child_cat_id" id="child_cat_id" class="form-control"></select>
-        @error('child_cat_id')<span class="text-danger">{{ $message }}</span>@enderror
-      </div>
+        @error('categories')<span class="text-danger">{{ $message }}</span>@enderror
+        <small class="text-info">Bạn có thể chọn nhiều danh mục bằng cách giữ phím Ctrl và click chuột</small>
+    </div>
 
       <div class="form-group">
         <label>Giá (VNĐ)</label>
@@ -111,11 +108,21 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('backend/summernote/summernote.min.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endpush
 
 @push('scripts')
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{ asset('backend/summernote/summernote.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Chọn một hoặc nhiều danh mục",
+            allowClear: true
+        });
+    });
+</script>
 <script>
   $('#lfm').filemanager('image');
   $('textarea[name="summary"]').summernote({ height: 100 });

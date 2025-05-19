@@ -18,10 +18,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with(['category', 'subCategory'])->get();
+        $products = Product::with(['categories'])->get();
         return view('backend.product.index')->with('products', $products);
     }
-
 
 
     /**
@@ -30,11 +29,11 @@ class ProductController extends Controller
     public function create()
     {
         $brands = Brand::get();
-        $categories = Category::whereNull('parent_id')->get(); // là danh mục cha
+        // Lấy tất cả các danh mục, không chỉ danh mục cha
+        $categories = Category::orderBy('name')->get();
 
         return view('backend.product.create', compact('categories', 'brands'));
     }
-
 
 
     /**
@@ -50,9 +49,9 @@ class ProductController extends Controller
             'photo'       => 'string|required',
             'size'        => 'nullable',
             'stock'       => "required|numeric|min:0",
-            'cat_id'      => 'required|exists:categories,id',
+            'categories'  => 'required|array', // Đổi thành array
+            'categories.*' => 'exists:categories,id', // Kiểm tra từng ID
             'brand_id'    => 'required|exists:brands,id',
-            'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
@@ -62,7 +61,9 @@ class ProductController extends Controller
             'title.required' => 'Tiêu đề là bắt buộc.',
             'summary.required' => 'Tóm tắt là bắt buộc.',
             'photo.required' => 'Hình ảnh là bắt buộc.',
-            'cat_id.required' => 'Danh mục là bắt buộc.',
+            'categories.required' => 'Danh mục là bắt buộc.',
+            'categories.array' => 'Danh mục không hợp lệ.',
+            'categories.*.exists' => 'Danh mục không tồn tại.',
             'brand_id.required' => 'Thương hiệu là bắt buộc.',
             'stock.required' => 'Số lượng là bắt buộc.',
             'price.required' => 'Giá là bắt buộc.',
@@ -75,8 +76,7 @@ class ProductController extends Controller
             'discount.max' => 'Giảm giá không được lớn hơn 100.'
         ]);
 
-
-        $data = $request->all();
+        $data = $request->except('categories'); // Loại trừ categories khỏi dữ liệu
 
         // Xử lý slug
         $slug  = Str::slug($request->title);
@@ -96,17 +96,25 @@ class ProductController extends Controller
         $size = $request->input('size');
         $data['size'] = $size ? implode(',', $size) : '';
 
-        // Lưu dữ liệu
-        $status = Product::create($data);
+        // Bắt đầu transaction để đảm bảo tính nhất quán
+        DB::beginTransaction();
+        try {
+            // Lưu dữ liệu sản phẩm
+            $product = Product::create($data);
 
-        // Thông báo kết quả
-        if ($status) {
+            // Lưu mối quan hệ với danh mục
+            if ($request->has('categories')) {
+                $product->categories()->attach($request->categories);
+            }
+
+            DB::commit();
             request()->session()->flash('success', 'Sản phẩm đã được thêm');
-        } else {
-            request()->session()->flash('error', 'Vui lòng thử lại!!');
+            return redirect()->route('product.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            request()->session()->flash('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+            return back()->withInput();
         }
-
-        return redirect()->route('product.index');
     }
 
 
@@ -121,16 +129,15 @@ class ProductController extends Controller
     /**
      * Trang chỉnh sửa sản phẩm.
      */
+    public function edit($id)
+    {
+        $product = Product::with('categories')->findOrFail($id);
+        $brands = Brand::get();
+        // Lấy tất cả danh mục thay vì chỉ danh mục cha
+        $categories = Category::orderBy('name')->get();
 
-     public function edit($id)
-     {
-         $product = Product::findOrFail($id);
-         $brands = Brand::get();
-         $categories = Category::whereNull('parent_id')->get(); // cha
-         $subcategories = Category::where('parent_id', $product->cat_id)->get(); // con
-
-         return view('backend.product.edit', compact('product', 'brands', 'categories', 'subcategories'));
-     }
+        return view('backend.product.edit', compact('product', 'brands', 'categories'));
+    }
 
     /**
      * Cập nhật sản phẩm trong CSDL.
@@ -146,9 +153,9 @@ class ProductController extends Controller
             'photo'       => 'string|required',
             'size'        => 'nullable',
             'stock'       => "required|numeric|min:0",
-            'cat_id'      => 'required|exists:categories,id',
+            'categories'  => 'required|array', // Đổi thành array
+            'categories.*' => 'exists:categories,id', // Kiểm tra từng ID
             'brand_id'    => 'required|exists:brands,id',
-            'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
@@ -158,7 +165,9 @@ class ProductController extends Controller
             'title.required' => 'Tiêu đề là bắt buộc.',
             'summary.required' => 'Tóm tắt là bắt buộc.',
             'photo.required' => 'Hình ảnh là bắt buộc.',
-            'cat_id.required' => 'Danh mục là bắt buộc.',
+            'categories.required' => 'Danh mục là bắt buộc.',
+            'categories.array' => 'Danh mục không hợp lệ.',
+            'categories.*.exists' => 'Danh mục không tồn tại.',
             'brand_id.required' => 'Thương hiệu là bắt buộc.',
             'stock.required' => 'Số lượng là bắt buộc.',
             'price.required' => 'Giá là bắt buộc.',
@@ -171,7 +180,7 @@ class ProductController extends Controller
             'discount.max' => 'Giảm giá không được lớn hơn 100.'
         ]);
 
-        $data = $request->all();
+        $data = $request->except('categories'); // Loại trừ categories khỏi dữ liệu
         $data['is_featured'] = $request->input('is_featured', 0);
 
         // Xử lý size (nếu có)
@@ -182,13 +191,29 @@ class ProductController extends Controller
             $data['size'] = '';
         }
 
-        $status = $product->fill($data)->save();
-        if ($status) {
+        // Bắt đầu transaction để đảm bảo tính nhất quán
+        DB::beginTransaction();
+        try {
+            // Cập nhật thông tin sản phẩm
+            $product->fill($data)->save();
+
+            // Cập nhật mối quan hệ với danh mục
+            if ($request->has('categories')) {
+                // Sử dụng sync để xóa các quan hệ cũ và thêm các quan hệ mới
+                $product->categories()->sync($request->categories);
+            } else {
+                // Xóa tất cả các quan hệ nếu không có danh mục nào được chọn
+                $product->categories()->detach();
+            }
+
+            DB::commit();
             request()->session()->flash('success', 'Cập nhật sản phẩm thành công');
-        } else {
-            request()->session()->flash('error', 'Vui lòng thử lại!!');
+            return redirect()->route('product.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            request()->session()->flash('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+            return back()->withInput();
         }
-        return redirect()->route('product.index');
     }
 
     /**
@@ -229,7 +254,13 @@ class ProductController extends Controller
     public function apiGetAllProducts(Request $request)
     {
         try {
-            $products = Product::with(['category', 'subCategory', 'brand'])->paginate(10);
+            // Sử dụng mối quan hệ n-n với categories thay vì category và subCategory
+            // Thêm các mối quan hệ images, brand và reviews theo model mới
+            $products = Product::with(['categories', 'brand', 'images'])
+                        ->withCount('reviews')
+                        ->withAvg('reviews', 'rate')
+                        ->paginate(10);
+
             return response()->json([
                 'success' => true,
                 'products' => $products,

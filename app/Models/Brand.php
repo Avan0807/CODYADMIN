@@ -1,22 +1,44 @@
 <?php
 
 namespace App\Models;
-use App\Models\Product;
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Brand extends Model
 {
-    protected $fillable=['title','slug','status'];
+    protected $fillable = ['title', 'slug', 'status'];
 
-    // public static function getProductByBrand($id){
-    //     return Product::where('brand_id',$id)->paginate(10);
-    // }
-    public function products(){
-        return $this->hasMany('App\Models\Product','brand_id','id')->where('status','active');
+    // Liên kết: 1 brand -> nhiều product
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'brand_id', 'id')->where('status', 'active');
     }
-    public static function getProductByBrand($slug){
-        // dd($slug);
-        return Brand::with('products')->where('slug',$slug)->first();
-        // return Product::where('cat_id',$id)->where('child_cat_id',null)->paginate(10);
+
+    // Liên kết: nhiều brand -> nhiều category (qua bảng trung gian)
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_brand', 'brand_id', 'category_id')
+                    ->withTimestamps();
+    }
+
+    // Hàm lấy brand kèm sản phẩm
+    public static function getProductByBrand($slug)
+    {
+        return self::with('products')->where('slug', $slug)->first();
+    }
+        protected static function booted()
+    {
+        static::creating(function ($brand) {
+            if (empty($brand->slug)) {
+                $brand->slug = Str::slug($brand->title);
+            }
+        });
+
+        static::updating(function ($brand) {
+            if (empty($brand->slug)) {
+                $brand->slug = Str::slug($brand->title);
+            }
+        });
     }
 }

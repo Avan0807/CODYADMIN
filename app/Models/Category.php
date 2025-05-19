@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Cache;
 
 class Category extends Model
 {
@@ -44,6 +45,13 @@ class Category extends Model
     {
         return $this->hasMany(Doctor::class, 'specialist_cat_id');
     }
+    public function brands()
+    {
+        return $this->belongsToMany(Brand::class, 'category_brand', 'category_id', 'brand_id')
+                    ->select('brands.id', 'brands.title', 'brands.slug', 'brands.logo')
+                    ->withTimestamps();
+    }
+
 
     // ===== SCOPES =====
 
@@ -86,21 +94,28 @@ class Category extends Model
     public static function getAllParentWithChild()
     {
         return self::whereNull('parent_id')
-            ->with(['children' => function ($query) {
-                $query->where('status', 'active');
-            }])
+            ->with(['children.children']) // preload luôn cấp 2
             ->where('status', 'active')
-            ->orderBy('name')
+            ->orderBy('display_order')
             ->get();
     }
-    public static function countActiveCategory()
+
+
+    public function child_cat()
     {
-        return self::where('status', 'active')->count();
+        return $this->hasMany(Category::class, 'parent_id', 'id')->where('status', 'active');
     }
 
-    public static function getAllCategory()
+    /**
+     * Đếm số lượng danh mục đang hoạt động
+     *
+     * @return int
+     */
+    public static function countActiveCategory()
     {
-        return self::orderBy('id', 'DESC')->get();
+        return Cache::remember('active_categories_count', 60, function () {
+            return self::where('status', 'active')->count();
+        });
     }
 
 }

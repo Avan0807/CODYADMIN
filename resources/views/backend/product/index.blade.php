@@ -37,9 +37,16 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $product->title }}</td>
                         <td>
-                            {{ $product->category->name ?? '---' }}
-                            <br>
-                            <small class="text-muted">{{ $product->subCategory->name ?? '' }}</small>
+                            @if($product->categories->isNotEmpty())
+                                @foreach($product->categories as $key => $category)
+                                    {{ $category->name }}
+                                    @if(!$loop->last)
+                                        <br>
+                                    @endif
+                                @endforeach
+                            @else
+                                ---
+                            @endif
                         </td>
                         <td>{{ $product->is_featured ? 'Có' : 'Không' }}</td>
                         <td>{{ number_format($product->price, 0, ',', '.') }}đ</td>
