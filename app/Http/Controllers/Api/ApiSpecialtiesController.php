@@ -43,11 +43,15 @@ class ApiSpecialtiesController extends Controller
 
         // 4. Lấy sản phẩm có parent_id là ID chuyên khoa này (dùng bảng categories với type = product)
         $products = DB::table('products')
-            ->where('cat_id', $specialtyId)
-            ->where('status', 'active')
-            ->orderBy('id')
+            ->join('category_product', 'products.id', '=', 'category_product.product_id')
+            ->where('category_product.category_id', $specialtyId)
+            ->where('products.status', 'active')
+            ->orderBy('products.id')
             ->limit(10)
-            ->get(['id', 'title', 'slug', 'summary', 'photo']);
+            ->get([
+                'products.id', 'products.title', 'products.slug', 'products.summary', 'products.photo'
+            ]);
+
 
 
         return response()->json([
