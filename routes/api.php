@@ -38,6 +38,10 @@ use App\Http\Controllers\Api\ApiMeetingController;
 use App\Http\Controllers\Api\ApiShippingController;
 use App\Http\Controllers\Api\ApiBannerController;
 use App\Http\Controllers\Api\ApiSpecialtiesController;
+use App\Http\Controllers\Api\ApiCategoryController;
+
+
+
 
 // Lấy dữ liệu theo chuyên khoa
 Route::get('specialty/{specialtyId}/data', [ApiSpecialtiesController::class, 'getSpecialtyData']);

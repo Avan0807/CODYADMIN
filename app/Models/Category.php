@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Cache;
 
 class Category extends Model
 {
@@ -105,17 +104,4 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, 'parent_id', 'id')->where('status', 'active');
     }
-
-    /**
-     * Đếm số lượng danh mục đang hoạt động
-     *
-     * @return int
-     */
-    public static function countActiveCategory()
-    {
-        return Cache::remember('active_categories_count', 60, function () {
-            return self::where('status', 'active')->count();
-        });
-    }
-
 }
