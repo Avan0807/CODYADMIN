@@ -40,8 +40,7 @@ use App\Http\Controllers\Api\ApiBannerController;
 use App\Http\Controllers\Api\ApiSpecialtiesController;
 use App\Http\Controllers\Api\ApiCategoryController;
 
-
-
+Route::get('/categories/with-posts', [ApiCategoryController::class, 'getCategoriesWithLatestPosts']);
 
 // Lấy dữ liệu theo chuyên khoa
 Route::get('specialty/{specialtyId}/data', [ApiSpecialtiesController::class, 'getSpecialtyData']);
