@@ -66,6 +66,9 @@ Route::get('/categories/with-posts', [ApiCategoryController::class, 'getCategori
 // Route lấy Dịch vụ y tế (Phương pháp chữa bệnh) - 6 categories con của ID 87
 Route::get('/categories/medical-services', [ApiCategoryController::class, 'getMedicalServices']);
 
+// Route lấy category theo slug và các posts liên quan
+Route::get('/categories/{slug}', [ApiCategoryController::class, 'getCategoryBySlug']);
+
 // Lấy dữ liệu theo chuyên khoa
 Route::get('specialty/{specialtyId}/data', [ApiSpecialtiesController::class, 'getSpecialtyData']);
 
