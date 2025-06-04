@@ -105,6 +105,11 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
 
     // Order
     Route::resource('/order','OrderController');
+    
+    // 🚀 **THÊM MỚI - Ajax routes cho Order DataTables**
+    Route::get('/order/data/ajax','OrderController@getOrdersData')->name('orders.data');
+    Route::post('/order/delete/ajax','OrderController@ajaxDelete')->name('orders.ajax-delete');
+    
     // Shipping
     Route::resource('/shipping','ShippingController');
 

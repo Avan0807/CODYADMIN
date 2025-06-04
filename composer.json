@@ -26,7 +26,8 @@
         "spatie/laravel-newsletter": "^4.11",
         "srmklive/paypal": "~1.0",
         "symfony/mailer": "^5.4",
-        "unisharp/laravel-filemanager": "^2.6"
+        "unisharp/laravel-filemanager": "^2.6",
+        "yajra/laravel-datatables-oracle": "~9.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",

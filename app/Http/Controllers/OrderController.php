@@ -31,7 +31,12 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::orderBy('id', 'DESC')->get();
+        // Chỉ load đơn hàng 30 ngày gần nhất thay vì tất cả
+        $orders = Order::with(['shipping:id,price'])
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderBy('id', 'DESC')
+            ->get(); // Không dùng paginate
+        
         return view('backend.order.index')->with('orders', $orders);
     }
 

@@ -39,8 +39,32 @@ use App\Http\Controllers\Api\ApiShippingController;
 use App\Http\Controllers\Api\ApiBannerController;
 use App\Http\Controllers\Api\ApiSpecialtiesController;
 use App\Http\Controllers\Api\ApiCategoryController;
+use App\Http\Controllers\Api\ApiForumThreadController;
 
+Route::prefix('forum')->group(function () {
+    
+    // Lấy danh sách threads với filter và phân trang
+    Route::get('/threads', [ApiForumThreadController::class, 'getThreads']);
+    
+    // Lấy threads hot nhất
+    Route::get('/threads/hot', [ApiForumThreadController::class, 'getHotThreads']);
+    
+    // Tìm kiếm threads
+    Route::get('/threads/search', [ApiForumThreadController::class, 'searchThreads']);
+    
+    // Lấy threads theo category
+    Route::get('/category/{categoryId}/threads', [ApiForumThreadController::class, 'getThreadsByCategory']);
+    
+    // Lấy chi tiết thread theo slug
+    Route::get('/threads/{slug}', [ApiForumThreadController::class, 'getThreadBySlug']);
+    
+});
+
+// Route lấy 6 danh mục, mỗi danh mục có 3 bài viết mới nhất
 Route::get('/categories/with-posts', [ApiCategoryController::class, 'getCategoriesWithLatestPosts']);
+
+// Route lấy Dịch vụ y tế (Phương pháp chữa bệnh) - 6 categories con của ID 87
+Route::get('/categories/medical-services', [ApiCategoryController::class, 'getMedicalServices']);
 
 // Lấy dữ liệu theo chuyên khoa
 Route::get('specialty/{specialtyId}/data', [ApiSpecialtiesController::class, 'getSpecialtyData']);

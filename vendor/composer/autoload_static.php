@@ -41,6 +41,7 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'c72349b1fe8d0deeedd3a52e8aa814d8' => __DIR__ . '/..' . '/mockery/mockery/library/helpers.php',
         'ce9671a430e4846b44e1c68c7611f9f5' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        '0b47d6d4a00ca9112ba3953b49e7c9a4' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/helper.php',
         '559dba61bcaafa74db6aa5e7e8759117' => __DIR__ . '/../..' . '/app/Http/Helpers.php',
     );
 
@@ -52,6 +53,10 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'p' => 
         array (
             'phpseclib3\\' => 11,
+        ),
+        'Y' => 
+        array (
+            'Yajra\\DataTables\\' => 17,
         ),
         'W' => 
         array (
@@ -224,6 +229,10 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'phpseclib3\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+        ),
+        'Yajra\\DataTables\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src',
         ),
         'Whoops\\' => 
         array (
@@ -691,6 +700,7 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Http\\Controllers\\Api\\ApiCampaignNotificationsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiCampaignNotificationsController.php',
         'App\\Http\\Controllers\\Api\\ApiCartController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiCartController.php',
         'App\\Http\\Controllers\\Api\\ApiCategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiCategoryController.php',
+        'App\\Http\\Controllers\\Api\\ApiClinicController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiClinicController.php',
         'App\\Http\\Controllers\\Api\\ApiCompanyNewsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiCompanyNewsController.php',
         'App\\Http\\Controllers\\Api\\ApiCouponController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiCouponController.php',
         'App\\Http\\Controllers\\Api\\ApiDoctorCommissionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiDoctorCommissionController.php',
@@ -698,6 +708,7 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Http\\Controllers\\Api\\ApiDoctorReviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiDoctorReviewController.php',
         'App\\Http\\Controllers\\Api\\ApiFollowersDoctorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiFollowersDoctorController.php',
         'App\\Http\\Controllers\\Api\\ApiMedicineLogController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiMedicineLogController.php',
+        'App\\Http\\Controllers\\Api\\ApiMeetingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiMeetingController.php',
         'App\\Http\\Controllers\\Api\\ApiMessageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiMessageController.php',
         'App\\Http\\Controllers\\Api\\ApiNotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiNotificationController.php',
         'App\\Http\\Controllers\\Api\\ApiOrderController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiOrderController.php',
@@ -708,6 +719,7 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Http\\Controllers\\Api\\ApiProductReviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiProductReviewController.php',
         'App\\Http\\Controllers\\Api\\ApiReviewDoctorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiReviewDoctorController.php',
         'App\\Http\\Controllers\\Api\\ApiShippingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiShippingController.php',
+        'App\\Http\\Controllers\\Api\\ApiSpecialtiesController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiSpecialtiesController.php',
         'App\\Http\\Controllers\\Api\\ApiUsersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiUsersController.php',
         'App\\Http\\Controllers\\AppointmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/AppointmentController.php',
         'App\\Http\\Controllers\\AppointmentsController' => __DIR__ . '/../..' . '/app/Http/Controllers/AppointmentsController.php',
@@ -777,12 +789,14 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Models\\Clinic' => __DIR__ . '/../..' . '/app/Models/Clinic.php',
         'App\\Models\\CompanyNews' => __DIR__ . '/../..' . '/app/Models/CompanyNews.php',
         'App\\Models\\Coupon' => __DIR__ . '/../..' . '/app/Models/Coupon.php',
+        'App\\Models\\District' => __DIR__ . '/../..' . '/app/Models/District.php',
         'App\\Models\\Doctor' => __DIR__ . '/../..' . '/app/Models/Doctor.php',
         'App\\Models\\DoctorFollower' => __DIR__ . '/../..' . '/app/Models/DoctorFollower.php',
         'App\\Models\\DoctorPayout' => __DIR__ . '/../..' . '/app/Models/DoctorPayout.php',
         'App\\Models\\DoctorReview' => __DIR__ . '/../..' . '/app/Models/DoctorReview.php',
         'App\\Models\\MedicalRecord' => __DIR__ . '/../..' . '/app/Models/MedicalRecord.php',
         'App\\Models\\MedicineLog' => __DIR__ . '/../..' . '/app/Models/MedicineLog.php',
+        'App\\Models\\Meeting' => __DIR__ . '/../..' . '/app/Models/Meeting.php',
         'App\\Models\\Message' => __DIR__ . '/../..' . '/app/Models/Message.php',
         'App\\Models\\Notification' => __DIR__ . '/../..' . '/app/Models/Notification.php',
         'App\\Models\\Order' => __DIR__ . '/../..' . '/app/Models/Order.php',
@@ -792,9 +806,12 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'App\\Models\\PostComment' => __DIR__ . '/../..' . '/app/Models/PostComment.php',
         'App\\Models\\PostTag' => __DIR__ . '/../..' . '/app/Models/PostTag.php',
         'App\\Models\\Product' => __DIR__ . '/../..' . '/app/Models/Product.php',
+        'App\\Models\\ProductImage' => __DIR__ . '/../..' . '/app/Models/ProductImage.php',
         'App\\Models\\ProductReview' => __DIR__ . '/../..' . '/app/Models/ProductReview.php',
+        'App\\Models\\Province' => __DIR__ . '/../..' . '/app/Models/Province.php',
         'App\\Models\\Settings' => __DIR__ . '/../..' . '/app/Models/Settings.php',
         'App\\Models\\Shipping' => __DIR__ . '/../..' . '/app/Models/Shipping.php',
+        'App\\Models\\ShippingLocation' => __DIR__ . '/../..' . '/app/Models/ShippingLocation.php',
         'App\\Models\\TreatmentLog' => __DIR__ . '/../..' . '/app/Models/TreatmentLog.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\Wishlist' => __DIR__ . '/../..' . '/app/Models/Wishlist.php',
@@ -7609,6 +7626,22 @@ class ComposerStaticInit96f9de7928be7f0dd9acfc9a79f8e50c
         'Whoops\\Util\\Misc' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/Misc.php',
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
+        'Yajra\\DataTables\\ApiResourceDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/ApiResourceDataTable.php',
+        'Yajra\\DataTables\\CollectionDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/CollectionDataTable.php',
+        'Yajra\\DataTables\\Contracts\\DataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Contracts/DataTable.php',
+        'Yajra\\DataTables\\Contracts\\Formatter' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Contracts/Formatter.php',
+        'Yajra\\DataTables\\DataTableAbstract' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTableAbstract.php',
+        'Yajra\\DataTables\\DataTables' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTables.php',
+        'Yajra\\DataTables\\DataTablesServiceProvider' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTablesServiceProvider.php',
+        'Yajra\\DataTables\\EloquentDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/EloquentDataTable.php',
+        'Yajra\\DataTables\\Exceptions\\Exception' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Exceptions/Exception.php',
+        'Yajra\\DataTables\\Facades\\DataTables' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Facades/DataTables.php',
+        'Yajra\\DataTables\\Processors\\DataProcessor' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Processors/DataProcessor.php',
+        'Yajra\\DataTables\\Processors\\RowProcessor' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Processors/RowProcessor.php',
+        'Yajra\\DataTables\\QueryDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/QueryDataTable.php',
+        'Yajra\\DataTables\\Utilities\\Config' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Config.php',
+        'Yajra\\DataTables\\Utilities\\Helper' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Helper.php',
+        'Yajra\\DataTables\\Utilities\\Request' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Request.php',
         'phpseclib3\\Common\\Functions\\Strings' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/Common/Functions/Strings.php',
         'phpseclib3\\Crypt\\AES' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/Crypt/AES.php',
         'phpseclib3\\Crypt\\Blowfish' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/Crypt/Blowfish.php',
