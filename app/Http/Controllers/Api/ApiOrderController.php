@@ -62,29 +62,37 @@ class ApiOrderController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
-            'first_name'      => 'required|string',
-            'last_name'       => 'required|string',
-            'address1'        => 'required|string',
-            'phone'           => 'required|numeric',
-            'email'           => 'required|string|email',
-            'shipping_id'     => 'nullable|exists:shippings,id',
-            'payment_method'  => 'nullable|string',
+            'first_name'        => 'required|string',
+            'last_name'         => 'required|string',
+            'address1'          => 'required|string',
+            'phone'             => 'required|numeric',
+            'email'             => 'required|string|email',
+            'shipping_id'       => 'nullable|exists:shippings,id',
+            'payment_method'    => 'nullable|string',
+            
+            // Thêm validation cho các trường mới
+            'from_province_id'  => 'nullable|exists:provinces,id',
+            'to_province_id'    => 'nullable|exists:provinces,id',
+            'shipping_cost'     => 'nullable|numeric',
+            'post_code'         => 'nullable|string',
+            'country'           => 'nullable|string',
         ]);
-    
+
         // Lấy ID người dùng đã đăng nhập
         $userId = auth()->id();
-    
+
         // Lấy các sản phẩm trong giỏ hàng chưa có order_id
         $carts = Cart::where('user_id', $userId)
                     ->whereNull('order_id')
                     ->get();
-    
+
         // Kiểm tra nếu giỏ hàng trống
         if ($carts->isEmpty()) {
             return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
         }
-    
+
         // Kiểm tra tồn kho của từng sản phẩm
         foreach ($carts as $cart) {
             $product = Product::find($cart->product_id);
@@ -92,12 +100,12 @@ class ApiOrderController extends Controller
                 return response()->json(['error' => 'Sản phẩm ' . $product->name . ' không đủ hàng'], 400);
             }
         }
-    
+
         // Tính tổng tiền cho đơn hàng (sub_total)
         $sub_total = $carts->sum('amount');
         $total_amount = $sub_total;
         $shipping_fee = 0;
-    
+
         // Tính phí vận chuyển nếu có
         if ($request->shipping_id) {
             $shipping = Shipping::find($request->shipping_id);
@@ -106,7 +114,13 @@ class ApiOrderController extends Controller
                 $total_amount += $shipping_fee;
             }
         }
-    
+        
+        // Thêm phí vận chuyển custom nếu có
+        if ($request->shipping_cost) {
+            $shipping_fee = $request->shipping_cost;
+            $total_amount = $sub_total + $shipping_fee;
+        }
+
         // Tính tổng hoa hồng của bác sĩ từ tất cả các sản phẩm trong giỏ hàng
         $totalCommission = 0;
         foreach ($carts as $cart) {
@@ -119,37 +133,47 @@ class ApiOrderController extends Controller
             }
         }
 
-        // Tạo đơn hàng
+        // Tạo đơn hàng (thêm các trường mới)
         $order = Order::create([
-            'order_number'    => 'ORD-' . strtoupper(Str::random(10)),
-            'user_id'         => $userId,
-            'first_name'      => $request->first_name,
-            'last_name'       => $request->last_name,
-            'address1'        => $request->address1,
-            'address2'        => $request->address2,
-            'email'           => $request->email,
-            'phone'           => $request->phone,
-            'shipping_id'     => $request->shipping_id,
-            'quantity'        => $carts->sum('quantity'),
-            'sub_total'       => $sub_total,
-            'total_amount'    => $total_amount,
-            'payment_method'  => $request->payment_method ?? 'cod',
-            'payment_status'  => in_array($request->payment_method, ['paypal', 'cardpay']) ? 'paid' : 'Unpaid',
-            'total_commission' => $totalCommission ?: 0, // Đảm bảo giá trị total_commission không phải NULL
+            'order_number'      => 'ORD-' . strtoupper(Str::random(10)),
+            'user_id'           => $userId,
+            'first_name'        => $request->first_name,
+            'last_name'         => $request->last_name,
+            'address1'          => $request->address1,
+            'address2'          => $request->address2,
+            'email'             => $request->email,
+            'phone'             => $request->phone,
+            'post_code'         => $request->post_code,
+            'country'           => $request->country ?? 'VN',
+            'shipping_id'       => $request->shipping_id,
+            'quantity'          => $carts->sum('quantity'),
+            'sub_total'         => $sub_total,
+            'shipping_cost'     => $shipping_fee,
+            'total_amount'      => $total_amount,
+            'payment_method'    => $request->payment_method ?? 'cod',
+            'payment_status'    => in_array($request->payment_method, ['paypal', 'cardpay']) ? 'paid' : 'Unpaid',
+            'total_commission'  => $totalCommission ?: 0,
+            
+            // Thêm các trường vận chuyển mới
+            'from_province_id'  => $request->from_province_id,
+            'to_province_id'    => $request->to_province_id,
         ]);
 
-    
         // Cập nhật giỏ hàng với order_id
         foreach ($carts as $cart) {
             $cart->order_id = $order->id;
             $cart->save();
         }
-    
-        // Trả về kết quả thanh toán và tổng hoa hồng
+
+        // Trả về kết quả thanh toán và tổng hoa hồng (thêm thông tin mới)
         return response()->json([
             'success' => true,
             'message' => 'Thanh toán giỏ hàng thành công!',
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
             'total_amount' => $total_amount,
+            'shipping_cost' => $shipping_fee,
+            'payment_method' => $order->payment_method,
             'total_commission' => $totalCommission,
         ]);
     }

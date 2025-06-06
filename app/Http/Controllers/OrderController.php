@@ -380,9 +380,12 @@ class OrderController extends Controller
     public function apiGetUserOrders()
     {
         try {
-            // Lấy danh sách tất cả đơn hàng của user đang đăng nhập
+            // Lấy danh sách đơn hàng của user với thông tin cần thiết
             $orders = Order::where('user_id', Auth::id())
-                ->with(['cart_info', 'shipping']) // Lấy cả thông tin giỏ hàng & vận chuyển
+                ->with([
+                    'cart_info.product:id,title,photo,price,discount,stock',
+                    'shipping:id,type,price'
+                ])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -398,6 +401,7 @@ class OrderController extends Controller
                 'message' => 'Danh sách đơn hàng của user.',
                 'orders' => $orders,
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

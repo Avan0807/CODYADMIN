@@ -404,7 +404,6 @@ Route::middleware('auth:sanctum')->put('/updatecart/{userId}/{productId}', [Cart
 Route::middleware('auth:sanctum')->post('/cart/checkout-now/{slug}', [ApiCartController::class, 'checkoutNow']);
 
 
-
 // ================== POST ROUTES ==================
 
 // Tạo bài viết mới (yêu cầu xác thực)
