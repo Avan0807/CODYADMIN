@@ -40,24 +40,130 @@ use App\Http\Controllers\Api\ApiBannerController;
 use App\Http\Controllers\Api\ApiSpecialtiesController;
 use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiForumThreadController;
+use App\Http\Controllers\Api\ApiMobileShippingController;
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // ← API TỰ ĐỘNG TÍNH PHÍ KHI ĐIỀN ĐỊA CHỈ
+    Route::post('/shipping/auto-calculate', [ApiOrderController::class, 'autoCalculateShipping']);
+
+    // Các API khác...
+    Route::post('/shipping/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
+    Route::post('/order/store', [ApiOrderController::class, 'store']);
+});
+// API tính phí cố định (thay thế cho GHN)
+Route::post('/shipping/calculate-fixed', function(Request $request) {
+    $request->validate([
+        'service_id' => 'required|integer',
+        'from_district_id' => 'required|integer',
+        'to_district_id' => 'required|integer',
+        'to_ward_code' => 'required|string',
+        'weight' => 'nullable|integer|min:1'
+    ]);
+
+    // Phí cố định theo service và khoảng cách
+    $fixedFees = [
+        53321 => [ // Hàng nhẹ
+            'base_fee' => 15000,
+            'per_km' => 500
+        ],
+        180039 => [ // Hàng nặng
+            'base_fee' => 25000,
+            'per_km' => 800
+        ]
+    ];
+
+    $serviceId = $request->service_id;
+    $weight = $request->weight ?? 500;
+
+    // Tính phí dựa trên service
+    if (isset($fixedFees[$serviceId])) {
+        $baseFee = $fixedFees[$serviceId]['base_fee'];
+        $perKm = $fixedFees[$serviceId]['per_km'];
+
+        // Giả lập tính khoảng cách dựa trên district
+        $distance = abs($request->from_district_id - $request->to_district_id) * 2; // km
+        $distanceFee = $distance * $perKm;
+
+        // Phí theo trọng lượng
+        $weightFee = $weight > 500 ? ($weight - 500) * 10 : 0;
+
+        $totalFee = $baseFee + $distanceFee + $weightFee;
+    } else {
+        // Service không xác định, dùng phí mặc định
+        $totalFee = 16500;
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Tính phí vận chuyển thành công',
+        'data' => [
+            'shipping_fee' => $totalFee,
+            'formatted_fee' => number_format($totalFee, 0, ',', '.') . 'đ',
+            'details' => [
+                'service_fee' => $totalFee,
+                'insurance_fee' => 0,
+                'pickup_fee' => 0,
+                'coupon_value' => 0,
+                'r2s_fee' => 0
+            ],
+            'params' => [
+                'service_id' => $serviceId,
+                'from_district_id' => $request->from_district_id,
+                'to_district_id' => $request->to_district_id,
+                'to_ward_code' => $request->to_ward_code,
+                'weight' => $weight,
+                'estimated_distance' => $distance ?? 0
+            ],
+            'note' => 'Phí tạm tính - Sẽ cập nhật GHN API sau'
+        ],
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
+
+// Shipping APIs
+    Route::prefix('shipping')->group(function () {
+
+        // Master Data
+        Route::get('/provinces', [ApiMobileShippingController::class, 'getProvinces']);
+        Route::get('/districts', [ApiMobileShippingController::class, 'getDistricts']);
+        Route::get('/wards', [ApiMobileShippingController::class, 'getWards']);
+
+        // Shipping Services
+        Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);
+        Route::post('/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
+
+        // Order Management
+        Route::post('/create-order', [ApiMobileShippingController::class, 'createShippingOrder']);
+        Route::get('/track', [ApiMobileShippingController::class, 'trackOrder']);
+    });
+
+// ================== ĐƠN HÀNG  ==================
+
+// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
+Route::middleware('auth:sanctum')->post('/order/store', [ApiOrderController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/order/track-ghn', [ApiOrderController::class, 'trackGHNOrder']);
+// Lấy danh sách đơn hàng theo trạng thái
+Route::middleware('auth:sanctum')->get('/order/status', [ApiOrderController::class, 'getOrdersByStatus']);
 
 Route::prefix('forum')->group(function () {
-    
+
     // Lấy danh sách threads với filter và phân trang
     Route::get('/threads', [ApiForumThreadController::class, 'getThreads']);
-    
+
     // Lấy threads hot nhất
     Route::get('/threads/hot', [ApiForumThreadController::class, 'getHotThreads']);
-    
+
     // Tìm kiếm threads
     Route::get('/threads/search', [ApiForumThreadController::class, 'searchThreads']);
-    
+
     // Lấy threads theo category
     Route::get('/category/{categoryId}/threads', [ApiForumThreadController::class, 'getThreadsByCategory']);
-    
+
     // Lấy chi tiết thread theo slug
     Route::get('/threads/{slug}', [ApiForumThreadController::class, 'getThreadBySlug']);
-    
+
 });
 
 // Route lấy 6 danh mục, mỗi danh mục có 3 bài viết mới nhất
@@ -379,12 +485,7 @@ Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsCont
 
 
 
-// ================== ĐƠN HÀNG  ==================
 
-// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
-Route::middleware('auth:sanctum')->post('/order/store', [ApiOrderController::class, 'store']);
-// Lấy danh sách đơn hàng theo trạng thái
-Route::middleware('auth:sanctum')->get('/order/status', [ApiOrderController::class, 'getOrdersByStatus']);
 
 // ================== CART ROUTES ==================
 

@@ -48,5 +48,10 @@ return [
         'redirect' => 'http://localhost:8000/login/facebook/callback',
      ],
 
+    'ghn' => [
+        'token' => env('GHN_TOKEN'),
+        'shop_id' => env('GHN_SHOP_ID'),
+        'api_url' => env('GHN_BASE_URL'), // hoặc GHN_API_URL nếu bạn giữ tên cũ
+    ],
 
 ];
