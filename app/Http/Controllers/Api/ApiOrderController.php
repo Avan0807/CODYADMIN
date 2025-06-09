@@ -63,7 +63,6 @@ class ApiOrderController extends Controller
         return response()->json($orders);
     }
 
-
 public function store(Request $request)
 {
     $request->validate([
@@ -72,10 +71,11 @@ public function store(Request $request)
         'address1'              => 'required|string',
         'phone'                 => 'required|string',
         'email'                 => 'required|email',
+        'ghn_to_province_id'    => 'required|integer',    
         'ghn_to_district_id'    => 'required|integer',
         'ghn_to_ward_code'      => 'required|string',
-        'ghn_service_id'        => 'required|integer',
-        'shipping_fee'          => 'required|numeric|min:0',
+        'ghn_service_id'        => 'nullable|integer',
+        'shipping_fee'          => 'nullable|numeric|min:0',
         'payment_method'        => 'required|string',
     ]);
 
@@ -86,11 +86,28 @@ public function store(Request $request)
         return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
     }
 
+    // ✅ AUTO CALCULATE SHIPPING FEE nếu chưa có
+    if (!$request->shipping_fee) {
+        $shippingCalculation = $this->calculateShippingForOrder($request, $carts);
+        
+        if (!$shippingCalculation['success']) {
+            return response()->json([
+                'error' => 'Không thể tính phí vận chuyển: ' . $shippingCalculation['message']
+            ], 400);
+        }
+        
+        $shippingFee = $shippingCalculation['shipping_fee'];
+        $serviceId = $shippingCalculation['service_id'];
+    } else {
+        // Dùng shipping_fee từ frontend
+        $shippingFee = $request->shipping_fee;
+        $serviceId = $request->ghn_service_id ?? 53321;
+    }
+
     $subTotal = $carts->sum('amount');
-    $shippingFee = $request->shipping_fee;
     $totalAmount = $subTotal + $shippingFee;
 
-    // ← SỬA THEO STRUCTURE TABLE
+    // Tạo order
     $order = Order::create([
         'order_number'          => 'ORD-' . strtoupper(Str::random(10)),
         'user_id'               => $userId,
@@ -105,14 +122,42 @@ public function store(Request $request)
         'total_amount'          => $totalAmount,
         'payment_method'        => $request->payment_method,
         'payment_status'        => $request->payment_method == 'cod' ? 'unpaid' : 'paid',
-        'status'                => 'new', // ← DÙNG 'new' thay vì 'pending'
+        'status'                => 'new',
 
-        // GHN fields
+        // GHN fields - THÊM PROVINCE
+        'ghn_to_province_id'    => $request->ghn_to_province_id,  // ← THÊM
         'ghn_to_district_id'    => $request->ghn_to_district_id,
         'ghn_to_ward_code'      => $request->ghn_to_ward_code,
-        'ghn_service_id'        => $request->ghn_service_id,
-        'ghn_status'            => 'pending', // ← GHN status riêng
+        'ghn_service_id'        => $serviceId,
+        'ghn_status'            => 'pending',
     ]);
+
+    // ✅ TẠO ĐƠN GHN TỰ ĐỘNG (nếu không phải COD)
+    if ($request->payment_method !== 'cod') {
+        try {
+            $ghnResult = $this->createGHNOrderFromOrder($order);
+            
+            if ($ghnResult['success']) {
+                $order->update([
+                    'ghn_order_code' => $ghnResult['order_code'],
+                    'ghn_status' => 'confirmed',
+                    'ghn_tracking_url' => "https://donhang.ghn.vn/?order_code=" . $ghnResult['order_code']
+                ]);
+                
+                \Log::info('GHN order created for Order #' . $order->id, [
+                    'ghn_order_code' => $ghnResult['order_code']
+                ]);
+            } else {
+                \Log::warning('Failed to create GHN order for Order #' . $order->id, [
+                    'error' => $ghnResult['message']
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('GHN order creation exception for Order #' . $order->id, [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 
     // Update cart
     foreach ($carts as $cart) {
@@ -120,56 +165,175 @@ public function store(Request $request)
         $cart->save();
     }
 
-return response()->json([
-    'success' => true,
-    'message' => 'Đặt hàng thành công!',
-    'data' => [
-        'order' => [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'status' => $order->status,
-            'order_date' => $order->created_at->format('d/m/Y H:i'),
-        ],
-        'customer' => [
-            'name' => $order->first_name . ' ' . $order->last_name,
-            'email' => $order->email,
-            'phone' => $order->phone,
-            'address' => $order->address1,
-        ],
-        'payment' => [
-            'method' => $order->payment_method,
-            'status' => $order->payment_status,
-            'sub_total' => $subTotal,
-            'shipping_fee' => $shippingFee,
-            'total_amount' => $totalAmount,
-            'formatted_sub_total' => number_format($subTotal, 0, ',', '.') . 'đ',
-            'formatted_shipping_fee' => number_format($shippingFee, 0, ',', '.') . 'đ',
-            'formatted_total' => number_format($totalAmount, 0, ',', '.') . 'đ',
-        ],
-        'shipping' => [
-            'service_id' => $order->ghn_service_id,
-            'service_name' => $order->ghn_service_id == 53321 ? 'Hàng nhẹ' : 'Hàng nặng',
-            'district_id' => $order->ghn_to_district_id,
-            'ward_code' => $order->ghn_to_ward_code,
-            'estimated_delivery' => '2-3 ngày làm việc',
-        ],
-        'items' => [
-            'count' => $carts->count(),
-            'total_quantity' => $carts->sum('quantity'),
-            'products' => $carts->map(function($cart) {
-                $product = Product::find($cart->product_id);
-                return [
-                    'name' => $product ? $product->name : 'Sản phẩm không tồn tại',
-                    'quantity' => $cart->quantity,
-                    'price' => $cart->price,
-                    'amount' => $cart->amount,
-                    'formatted_price' => number_format($cart->price, 0, ',', '.') . 'đ',
-                    'formatted_amount' => number_format($cart->amount, 0, ',', '.') . 'đ',
-                ];
-            })
+    return response()->json([
+        'success' => true,
+        'message' => 'Đặt hàng thành công!',
+        'data' => [
+            'order' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'ghn_status' => $order->ghn_status,
+                'ghn_order_code' => $order->ghn_order_code,
+                'tracking_url' => $order->ghn_tracking_url,
+                'order_date' => $order->created_at->format('d/m/Y H:i'),
+            ],
+            'customer' => [
+                'name' => $order->first_name . ' ' . $order->last_name,
+                'email' => $order->email,
+                'phone' => $order->phone,
+                'address' => $order->address1,
+            ],
+            'payment' => [
+                'method' => $order->payment_method,
+                'status' => $order->payment_status,
+                'sub_total' => $subTotal,
+                'shipping_fee' => $shippingFee,
+                'total_amount' => $totalAmount,
+                'formatted_sub_total' => number_format($subTotal, 0, ',', '.') . 'đ',
+                'formatted_shipping_fee' => number_format($shippingFee, 0, ',', '.') . 'đ',
+                'formatted_total' => number_format($totalAmount, 0, ',', '.') . 'đ',
+            ],
+            'shipping' => [
+                'service_id' => $serviceId,
+                'service_name' => $this->getServiceName($serviceId),
+                'province_id' => $order->ghn_to_province_id,   
+                'district_id' => $order->ghn_to_district_id,
+                'ward_code' => $order->ghn_to_ward_code,
+                'estimated_delivery' => '2-3 ngày làm việc',
+                'shipping_source' => $request->shipping_fee ? 'manual' : 'auto_calculated'
+            ],
+            'items' => [
+                'count' => $carts->count(),
+                'total_quantity' => $carts->sum('quantity'),
+                'products' => $carts->map(function($cart) {
+                    $product = Product::find($cart->product_id);
+                    return [
+                        'name' => $product ? $product->title : 'Sản phẩm không tồn tại',
+                        'photo' => $product ? $product->photo : 'Ảnh không tồn tại',
+                        'quantity' => $cart->quantity,
+                        'price' => $cart->price,
+                        'amount' => $cart->amount,
+                        'formatted_price' => number_format($cart->price, 0, ',', '.') . 'đ',
+                        'formatted_amount' => number_format($cart->amount, 0, ',', '.') . 'đ',
+                    ];
+                })
+            ]
         ]
-    ]
-]);
+    ]);
+}
+
+/**
+ * ✅ Helper: Tính shipping fee cho order
+ */
+private function calculateShippingForOrder($request, $carts)
+{
+    try {
+        // Tính trọng lượng
+        $totalWeight = $carts->sum('quantity') * 200; // 200g/sản phẩm
+        
+        // Chọn service tối ưu
+        $serviceId = $request->ghn_service_id ?? $this->selectOptimalService($carts, $totalWeight);
+        
+        // Params để tính phí
+        $params = [
+            'service_id' => $serviceId,
+            'from_district_id' => 1493, // District shop của bạn
+            'to_district_id' => $request->ghn_to_district_id,
+            'to_ward_code' => $request->ghn_to_ward_code,
+            'weight' => $totalWeight,
+            'length' => 20,
+            'width' => 20,
+            'height' => 10,
+            'insurance_value' => 0
+        ];
+
+        \Log::info('Calculating shipping for order with params:', $params);
+
+        // Gọi GHN service
+        $result = $this->ghnService->calculateShippingFee($params);
+
+        if ($result['success']) {
+            return [
+                'success' => true,
+                'shipping_fee' => $result['total_fee'],
+                'service_id' => $serviceId,
+                'source' => 'ghn'
+            ];
+        } else {
+            // Fallback to fixed fee
+            return [
+                'success' => true,
+                'shipping_fee' => $this->calculateFixedFee($params),
+                'service_id' => $serviceId,
+                'source' => 'fixed'
+            ];
+        }
+        
+    } catch (\Exception $e) {
+        \Log::error('Calculate shipping for order exception:', [
+            'message' => $e->getMessage()
+        ]);
+        
+        return [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+}
+
+/**
+ * ✅ Helper: Chọn service tối ưu
+ */
+private function selectOptimalService($carts, $totalWeight)
+{
+    $totalValue = $carts->sum('amount');
+    
+    // Logic chọn service
+    if ($totalWeight > 5000 || $totalValue > 2000000) {
+        return 53320; // Standard cho hàng nặng/giá trị cao
+    }
+    
+    return 53321; // Express cho hàng nhẹ
+}
+
+
+/**
+ * ✅ Helper: Lấy tên service
+ */
+private function getServiceName($serviceId)
+{
+    $services = [
+        53320 => 'GHN Standard',
+        53321 => 'GHN Express',
+    ];
+    
+    return $services[$serviceId] ?? 'GHN Standard';
+}
+
+/**
+ * ✅ Helper: Tạo đơn GHN từ Order
+ */
+private function createGHNOrderFromOrder($order)
+{
+    $orderData = [
+        'to_name' => $order->first_name . ' ' . $order->last_name,
+        'to_phone' => $order->phone,
+        'to_address' => $order->address1,
+        'to_ward_code' => $order->ghn_to_ward_code,
+        'to_district_id' => $order->ghn_to_district_id,
+        'service_id' => $order->ghn_service_id,
+        'cod_amount' => $order->payment_method === 'cod' ? $order->total_amount : 0,
+        'content' => 'Đơn hàng #' . $order->order_number,
+        'weight' => 500,
+        'length' => 20,
+        'width' => 20,
+        'height' => 10,
+        'note' => 'Đơn hàng từ mobile app',
+        'client_order_code' => $order->order_number,
+    ];
+
+    return $this->ghnService->createShippingOrder($orderData);
 }
 
     /**

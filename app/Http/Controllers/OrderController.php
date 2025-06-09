@@ -182,50 +182,38 @@ class OrderController extends Controller
         $this->validate($request, [
             'status' => 'required|in:new,process,delivered,cancel'
         ]);
-        $data = $request->all();
 
-        // Nếu đơn hàng được chuyển sang trạng thái 'delivered'
-        // => Trừ stock của các sản phẩm liên quan và gửi thông báo cho người dùng
-        if ($request->status == 'delivered') {
-            // Trừ stock của các sản phẩm trong giỏ hàng
-            foreach ($order->cart as $cart) {
-                $product = $cart->product;
-                $product->stock -= $cart->quantity;
-                $product->save();
+        $oldStatus = $order->status; // ✅ Lưu trạng thái cũ
+        $newStatus = $request->status;
 
-                // Tìm thông tin nhắc nhở trong bảng medicine_logs
-                $medicineLog = MedicineLog::where('product_id', $cart->product_id)
-                                          ->first();
-
-                // Nếu có thông tin nhắc nhở cho sản phẩm này
-                if ($medicineLog) {
-                    // Lấy tên sản phẩm từ bảng products
-                    $productName = \App\Models\Product::find($cart->product_id)->title;
-
-                    // Chuẩn bị thông tin chi tiết cho thông báo
-                    $notificationDetails = [
-                        'message' => $medicineLog->notification_message,  // Thông báo từ bảng medicine_logs
-                        'product_name' => $productName,  // Tên sản phẩm từ bảng products
-                    ];
-
-                    // Gửi thông báo nhắc lịch uống thuốc cho người dùng
-                    Notification::send($order->user, new MedicineReminderNotification($notificationDetails));
+        // ✅ Chỉ xử lý stock khi trạng thái thực sự thay đổi
+        if ($oldStatus !== $newStatus) {
+            
+            // Trường hợp chuyển sang 'delivered' (trừ stock)
+            if ($newStatus == 'delivered' && $oldStatus != 'delivered') {
+                foreach ($order->cart as $cart) {
+                    $product = $cart->product;
+                    
+                    // ✅ Kiểm tra stock trước khi trừ
+                    if ($product->stock >= $cart->quantity) {
+                        $product->stock -= $cart->quantity;
+                        $product->save();
+                    } else {
+                        return back()->with('error', "Sản phẩm {$product->title} không đủ tồn kho!");
+                    }
+                }
+            }
+            
+            // Trường hợp chuyển từ 'delivered' sang trạng thái khác (hoàn stock)
+            if ($oldStatus == 'delivered' && $newStatus != 'delivered') {
+                foreach ($order->cart as $cart) {
+                    $product = $cart->product;
+                    $product->stock += $cart->quantity; // ✅ Hoàn lại stock
+                    $product->save();
                 }
             }
         }
-
-        // Cập nhật trạng thái đơn hàng
-        $status = $order->fill($data)->save();
-        if ($status) {
-            request()->session()->flash('success', 'Cập nhật đơn hàng thành công');
-        } else {
-            request()->session()->flash('error', 'Không thể cập nhật đơn hàng');
-        }
-
-        // Quay lại trang danh sách đơn hàng
-        return redirect()->route('order.index');
     }
-
 
 
     /**

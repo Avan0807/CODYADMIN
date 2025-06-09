@@ -121,7 +121,7 @@ class Order extends Model
         if ($this->isGHNOrder()) {
             return 'GHN - ' . ucfirst($this->ghn_status ?? 'pending');
         }
-
+        
         return $this->shipping->type ?? 'Legacy Shipping';
     }
 
@@ -133,11 +133,11 @@ class Order extends Model
         if ($this->isGHNOrder() && $this->ghn_tracking_url) {
             return $this->ghn_tracking_url;
         }
-
+        
         if ($this->isGHNOrder() && $this->ghn_order_code) {
             return "https://donhang.ghn.vn/?order_code=" . $this->ghn_order_code;
         }
-
+        
         return null;
     }
 
@@ -149,7 +149,7 @@ class Order extends Model
         if ($this->isGHNOrder()) {
             return $this->ghn_status ?? 'pending';
         }
-
+        
         return $this->status; // Legacy status
     }
 
@@ -159,11 +159,11 @@ class Order extends Model
     public function getFullAddress()
     {
         $address = $this->address1;
-
+        
         if ($this->address2) {
             $address .= ', ' . $this->address2;
         }
-
+        
         return $address;
     }
 
