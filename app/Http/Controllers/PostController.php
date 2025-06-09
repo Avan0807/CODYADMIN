@@ -183,7 +183,7 @@ class PostController extends Controller
 
     public function apiCreatePost(Request $request)
     {
-        $doctor = $request->user(); // Authenticated doctor
+        $doctor = $request->user();
 
         if (!$doctor || !$doctor->doctorID) {
             return response()->json([
@@ -192,53 +192,142 @@ class PostController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'tags'         => 'required|string|max:255',
-            'summary'      => 'required|string|max:500',
-            'description'  => 'required|string',
-            'photo'        => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
-            'quote'        => 'nullable|string',
-            'post_cat_id'  => 'required|exists:post_categories,id',
-            'post_tag_id'  => 'nullable|exists:post_tags,id',
-            'status'       => 'required|in:active,inactive',
-        ]);
+        // Validation rules cơ bản
+        $validationRules = [
+            'title' => 'required|string|max:255',
+            'summary' => 'required|string|max:500',
+            'description' => 'required|string',
+            'post_cat_id' => 'required|exists:categories,id', // Sửa lại table name
+            'post_type' => 'required|in:post,event,story,research,video',
+            'tags' => 'nullable|string|max:255',
+            'quote' => 'nullable|string',
+            'status' => 'in:active,inactive',
+            'image_option' => 'required|in:upload,link,none',
+        ];
+
+        // Validation cho image
+        if ($request->image_option == 'upload') {
+            $validationRules['photo'] = 'required|file|mimes:webp,jpeg,png,jpg,gif|max:2048';
+        } elseif ($request->image_option == 'link') {
+            $validationRules['photo_url'] = 'required|url';
+        }
+
+        // Validation cho từng loại post
+        if ($request->post_type == 'event') {
+            $validationRules['meta_data.event_start_date'] = 'required|date_format:Y-m-d\TH:i';
+            $validationRules['meta_data.event_end_date'] = 'required|date_format:Y-m-d\TH:i|after_or_equal:meta_data.event_start_date';
+            $validationRules['meta_data.location'] = 'required|string';
+        } elseif ($request->post_type == 'video') {
+            $validationRules['meta_data.video_url'] = 'required|url';
+        } elseif ($request->post_type == 'research') {
+            $validationRules['document_file'] = 'nullable|file|mimes:pdf,doc,docx|max:10240';
+        }
+
+        // Validation cho clinic IDs
+        if ($request->has('clinic_ids')) {
+            $validationRules['clinic_ids'] = 'string'; // Chuỗi IDs cách nhau bởi dấu phẩy
+        }
 
         try {
-            $photoUrl = null;
-            if ($request->hasFile('photo')) {
-                $file = $request->file('photo');
-                $fileName = 'posts/' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $validated = $request->validate($validationRules);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
-                Storage::disk('s3')->put($fileName, file_get_contents($file));
-                $photoUrl = Storage::disk('s3')->url($fileName);
+        try {
+            // Xử lý metadata
+            $metaData = $request->meta_data ?? [];
+
+            // Xử lý đặc biệt cho research
+            if ($request->post_type == 'research') {
+                if (isset($metaData['co_authors'])) {
+                    $metaData['co_authors'] = is_string($metaData['co_authors']) 
+                        ? json_decode($metaData['co_authors'], true) 
+                        : $metaData['co_authors'];
+                }
+
+                // Upload document file
+                if ($request->hasFile('document_file')) {
+                    $file = $request->file('document_file');
+                    $fileName = Str::slug($request->title) . '-' . time() . '.' . $file->getClientOriginalExtension();
+                    $filePath = Storage::disk('s3')->putFileAs('documents/research', $file, $fileName, 'public');
+                    $metaData['document_url'] = Storage::disk('s3')->url($filePath);
+                }
             }
 
+            // Xử lý video topics
+            if ($request->post_type == 'video' && isset($metaData['topics'])) {
+                $metaData['topics'] = is_string($metaData['topics']) 
+                    ? json_decode($metaData['topics'], true) 
+                    : $metaData['topics'];
+            }
+
+            // Xử lý ảnh
+            $photoUrl = null;
+            if ($request->image_option == 'upload' && $request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = 'posts/' . Str::slug($request->title) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                
+                Storage::disk('s3')->put($fileName, file_get_contents($file), 'public');
+                $photoUrl = Storage::disk('s3')->url($fileName);
+            } elseif ($request->image_option == 'link' && $request->filled('photo_url')) {
+                $photoUrl = $request->photo_url;
+            }
+
+            // Tạo post
             $post = Post::create([
-                'title'        => $validated['title'],
-                'slug'         => Str::slug($validated['title']) . '-' . uniqid(),
-                'tags'         => $validated['tags'],
-                'summary'      => $validated['summary'],
-                'description'  => $validated['description'],
-                'photo'        => $photoUrl,
-                'quote'        => $validated['quote'] ?? null,
-                'post_cat_id'  => 'required|exists:categories,id',
-                'post_tag_id'  => $validated['post_tag_id'] ?? null,
-                'status'       => $validated['status'],
-                'added_by'     => $doctor->doctorID,
+                'title' => $request->title,
+                'slug' => Str::slug($request->title) . '-' . uniqid(),
+                'summary' => $request->summary,
+                'description' => $request->description,
+                'post_cat_id' => $request->post_cat_id,
+                'status' => $request->status ?? 'active',
+                'added_by' => $doctor->doctorID,
+                'author_type' => 'doctor',
+                'post_type' => $request->post_type,
+                'tags' => $request->tags,
+                'quote' => $request->quote,
+                'photo' => $photoUrl,
+                'meta_data' => $metaData,
             ]);
+
+            // Xử lý clinic relationships
+            if (in_array($post->post_cat_id, range(88, 100)) && $request->has('clinic_ids') && !empty($request->clinic_ids)) {
+                $clinicIds = array_filter(
+                    explode(',', $request->clinic_ids), 
+                    function ($id) {
+                        return is_numeric($id) && $id > 0;
+                    }
+                );
+
+                if (!empty($clinicIds)) {
+                    $post->clinics()->sync($clinicIds);
+                }
+            }
+
+            // Load relationships cho response
+            $post->load(['category', 'clinics']);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Bài viết đã được tạo thành công!',
-                'data'    => $post
+                'data' => $post
             ], 201);
 
         } catch (\Exception $e) {
+            \Log::error('API Create Post Error: ' . $e->getMessage(), [
+                'user_id' => $doctor->doctorID,
+                'request_data' => $request->except(['photo', 'document_file'])
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Tạo bài viết thất bại!',
-                'error'   => $e->getMessage()
+                'error' => config('app.debug') ? $e->getMessage() : 'Lỗi hệ thống'
             ], 500);
         }
     }
