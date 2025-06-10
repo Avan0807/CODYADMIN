@@ -167,27 +167,29 @@
               @endif
               
               {{-- Thông tin GHN địa chỉ --}}
-              @if($order->ghn_to_district_id || $order->ghn_to_ward_code)
-              <tr class="border-top">
-                <td class="font-weight-bold">Địa chỉ GHN:</td>
-                <td>
-                  @if($order->ghn_to_district_id)
-                    <div><strong>Quận/Huyện ID:</strong> {{$order->ghn_to_district_id}}</div>
-                  @endif
-                  @if($order->ghn_to_ward_code)
-                    <div><strong>Phường/Xã Code:</strong> {{$order->ghn_to_ward_code}}</div>
-                  @endif
-                </td>
-              </tr>
-              @endif
+                @php
+                  $ghnLocation = Helper::getOrderGHNAddress($order);
+                @endphp
+
+                <tr>
+                  <td class="font-weight-bold">Tỉnh/Thành phố:</td>
+                  <td>{{ $ghnLocation['province'] }}</td>
+                </tr>
+                <tr>
+                  <td class="font-weight-bold">Quận/Huyện:</td>
+                  <td>{{ $ghnLocation['district'] }}</td>
+                </tr>
+                <tr>
+                  <td class="font-weight-bold">Phường/Xã:</td>
+                  <td>{{ $ghnLocation['ward'] }}</td>
+                </tr>
               
               {{-- Thông tin dịch vụ GHN --}}
               @if($order->ghn_service_id)
               <tr>
                 <td class="font-weight-bold">Dịch vụ GHN:</td>
                 <td>
-                  <span class="badge badge-secondary">{{$order->getGHNServiceName()}}</span>
-                  <small class="text-muted d-block">Service ID: {{$order->ghn_service_id}}</small>
+                  <span class="badge badge-secondary">{{ Helper::getGHNServiceName($order->ghn_service_id) }}</span>
                 </td>
               </tr>
               @endif

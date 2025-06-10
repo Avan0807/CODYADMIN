@@ -194,7 +194,108 @@ class Helper{
             ->limit(50) // hoặc 100
             ->get();
     }
+        /**
+     * Lấy tên địa điểm GHN với cache
+     */
+    public static function getGHNLocationNames($provinceId = null, $districtId = null, $wardCode = null)
+    {
+        if (!$provinceId && !$districtId && !$wardCode) {
+            return [
+                'province' => 'N/A',
+                'district' => 'N/A', 
+                'ward' => 'N/A',
+                'full_address' => 'N/A'
+            ];
+        }
 
+        $cacheKey = "ghn_location_{$provinceId}_{$districtId}_{$wardCode}";
+        
+        return \Cache::remember($cacheKey, 3600, function() use ($provinceId, $districtId, $wardCode) {
+            $ghn = app(\App\Services\GHNService::class);
+            
+            $provinceName = 'N/A';
+            $districtName = 'N/A';
+            $wardName = 'N/A';
+
+            try {
+                // Lấy tên tỉnh
+                if ($provinceId) {
+                    $provinces = $ghn->getProvinces();
+                    $province = collect($provinces)->firstWhere('ProvinceID', $provinceId);
+                    $provinceName = $province['ProvinceName'] ?? 'Unknown Province';
+                }
+
+                // Lấy tên quận/huyện
+                if ($districtId && $provinceId) {
+                    $districts = $ghn->getDistricts($provinceId);
+                    $district = collect($districts)->firstWhere('DistrictID', $districtId);
+                    $districtName = $district['DistrictName'] ?? 'Unknown District';
+                }
+
+                // Lấy tên phường/xã
+                if ($wardCode && $districtId) {
+                    $wards = $ghn->getWards($districtId);
+                    $ward = collect($wards)->firstWhere('WardCode', $wardCode);
+                    $wardName = $ward['WardName'] ?? 'Unknown Ward';
+                }
+
+            } catch (\Exception $e) {
+                \Log::error('Error getting GHN location names: ' . $e->getMessage());
+            }
+
+            return [
+                'province' => $provinceName,
+                'district' => $districtName,
+                'ward' => $wardName,
+                'full_address' => $wardName . ', ' . $districtName . ', ' . $provinceName
+            ];
+        });
+    }
+
+    /**
+     * Shortcut cho Order model
+     */
+    public static function getOrderGHNAddress($order)
+    {
+        if (!$order) return 'N/A';
+        
+        return self::getGHNLocationNames(
+            $order->ghn_to_province_id ?? null,    // Sửa field name
+            $order->ghn_to_district_id ?? null,    // Sửa field name  
+            $order->ghn_to_ward_code ?? null       // Sửa field name
+        );
+    }
+
+    /**
+     * Format địa chỉ đầy đủ cho Order
+     */
+    public static function formatOrderShippingAddress($order)
+    {
+        if (!$order) return 'N/A';
+        
+        $ghnLocation = self::getOrderGHNAddress($order);
+        $shippingAddress = $order->shipping_address ?? '';
+        
+        if ($shippingAddress && $ghnLocation['full_address'] !== 'N/A') {
+            return $shippingAddress . '<br><small class="text-muted">' . $ghnLocation['full_address'] . '</small>';
+        }
+        
+        return $shippingAddress ?: $ghnLocation['full_address'];
+    }
+    
+    public static function getGHNServiceName($serviceId)
+    {
+        if (!$serviceId) return 'N/A';
+        
+        $serviceNames = [
+            53320 => 'Hàng nặng',
+            53321 => 'Giao hàng tiêu chuẩn',
+            53322 => 'Giao hàng nhanh', 
+            100039 => 'Giao hàng hỏa tốc',
+        ];
+        
+        return $serviceNames[$serviceId] ?? 'Service ID: ' . $serviceId;
+    }
 }
 
 ?>
