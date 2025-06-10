@@ -15,43 +15,75 @@
       <div class="table-responsive">
         @if(count($orders)>0)
         <table class="table table-bordered table-hover" id="order-dataTable" width="100%" cellspacing="0">
-          <thead>
-            <tr>
-                <th>#</th>
-                <th>Mã đơn hàng</th>
-                <th>Tên</th>
-                <th>Email</th>
-                <th>Số lượng</th>
-                <th>Phí</th>
-                <th>Tổng cộng</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
+          <thead class="bg-primary text-white">
+    <tr>
+      <th width="5%">#</th>
+      <th width="15%">Đơn hàng</th>
+      <th width="25%">Khách hàng</th>
+      <th width="20%">Sản phẩm</th>
+      <th width="15%">Thanh toán</th>
+      <th width="10%">Trạng thái</th>
+      <th width="10%">Hành động</th>
+    </tr>
           </thead>
           <tbody>
             @foreach($orders as $order)
-            @php
-                $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
-            @endphp
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{$order->order_number}}</td>
-                    <td>{{$order->first_name}} {{$order->last_name}}</td>
-                    <td>{{$order->email}}</td>
-                    <td>{{$order->quantity}}</td>
-                    <td>{{ $order->shipping ? number_format($order->shipping->price, 0, ',', '.') . 'đ' : '0đ' }}</td>
-                    <td>{{number_format($order->total_amount,0,',','.')}}đ</td>
-                    <td>
-                        @if($order->status=='new')
-                          <span class="badge badge-primary">MỚI</span>
-                        @elseif($order->status=='process')
-                          <span class="badge badge-warning">Xử lý</span>
-                        @elseif($order->status=='delivered')
-                          <span class="badge badge-success">Đã giao hàng</span>
-                        @else
-                          <span class="badge badge-danger">{{$order->status}}</span>
-                        @endif
-                    </td>
+            <tr>
+              <td>{{ $loop->iteration }}</td>
+              
+              <!-- Cột Đơn hàng -->
+              <td>
+                <div class="font-weight-bold text-primary">{{ $order->order_number }}</div>
+                <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
+                @if($order->canTrackGHN())
+                  <br><a href="{{ $order->getTrackingUrl() }}" target="_blank" class="badge badge-info">
+                    <i class="fas fa-truck"></i> Track
+                  </a>
+                @endif
+              </td>
+              
+              <!-- Cột Khách hàng -->
+              <td>
+                <div class="font-weight-bold">{{ $order->first_name }} {{ $order->last_name }}</div>
+                <small class="text-muted d-block">{{ $order->email }}</small>
+                <small class="text-muted">{{ $order->phone }}</small>
+              </td>
+              
+              <!-- Cột Sản phẩm -->
+              <td>
+                @foreach($order->cartInfo->take(2) as $cart)
+                  <div class="mb-1">
+                    <span class="badge badge-light">{{ $cart->quantity }}x</span>
+                    {{ Str::limit($cart->product->title ?? 'N/A', 30) }}
+                  </div>
+                @endforeach
+                @if($order->cartInfo->count() > 2)
+                  <small class="text-info">+{{ $order->cartInfo->count() - 2 }} sản phẩm khác</small>
+                @endif
+              </td>
+              
+              <!-- Cột Thanh toán -->
+              <td>
+                <div class="font-weight-bold text-success">{{ number_format($order->total_amount, 0, ',', '.') }}đ</div>
+                @if($order->shipping_cost > 0)
+                  <small class="text-muted">Ship: {{ number_format($order->shipping_cost, 0, ',', '.') }}đ</small>
+                @endif
+              </td>
+              
+              <!-- Cột Trạng thái -->
+              <td>
+                @if($order->status=='new')
+                  <span class="badge badge-primary badge-pill">MỚI</span>
+                @elseif($order->status=='process')
+                  <span class="badge badge-warning badge-pill">XỬ LÝ</span>
+                @elseif($order->status=='delivered')
+                  <span class="badge badge-success badge-pill">ĐÃ GIAO</span>
+                @else
+                  <span class="badge badge-danger badge-pill">{{ strtoupper($order->status) }}</span>
+                @endif
+              </td>
+              
+              <!-- Cột Hành động -->
                     <td>
                         <a href="{{route('order.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
                         <a href="{{route('order.edit',$order->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
@@ -61,7 +93,7 @@
                               <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
                         </form>
                     </td>
-                </tr>
+            </tr>
             @endforeach
           </tbody>
         </table>
@@ -92,28 +124,42 @@
 
   <!-- Page level custom scripts -->
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
-  <script>
-
-      $('#order-dataTable').DataTable( {
-            "paging": true,
-            "pageLength": 10,
-            "lengthMenu": [10, 25, 50, 100], // Cho phép chọn mục hiển thị
-            "ordering": true,
-            "searching": true,
-            "columnDefs":[
-                {
-                    "orderable":false,
-                    "targets":[8]
-                }
-            ]
-        } );
-
-        // Sweet alert
-
-        function deleteData(id){
-
+<script>
+$('#order-dataTable').DataTable({
+    "paging": true,
+    "pageLength": 10,
+    "lengthMenu": [10, 25, 50, 100],
+    "ordering": true,
+    "searching": true,
+    "info": true,
+    "responsive": true,
+    "language": {
+        "lengthMenu": "Hiển thị _MENU_ mục",
+        "zeroRecords": "Không tìm thấy dữ liệu",
+        "info": "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+        "infoEmpty": "Hiển thị 0 đến 0 của 0 mục",
+        "infoFiltered": "(lọc từ _MAX_ tổng số mục)",
+        "search": "Tìm kiếm:",
+        "paginate": {
+            "first": "Đầu",
+            "last": "Cuối", 
+            "next": "Tiếp",
+            "previous": "Trước"
         }
-  </script>
+    },
+    "columnDefs": [
+        {
+            "orderable": false,
+            "targets": [6] // Cột "Hành động" (index 6, không phải 8)
+        },
+        {
+            "searchable": false,
+            "targets": [0, 6] // Không tìm kiếm cột # và Hành động
+        }
+    ],
+    "order": [[1, 'desc']] // Sắp xếp theo cột "Đơn hàng" mới nhất
+});
+</script>
   <script>
       $(document).ready(function(){
         $.ajaxSetup({

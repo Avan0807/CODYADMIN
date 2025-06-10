@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\AffiliateOrder;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\View\View as ViewContract;
 use Exception;
@@ -56,7 +57,8 @@ class ProductController extends Controller
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
             'price'       => 'required|numeric|min:0',
-            'discount'    => 'nullable|numeric|min:0|max:100'
+            'discount'    => 'nullable|numeric|min:0|max:100',
+            'commission_percentage' => 'nullable|numeric|min:0|max:100'
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'summary.required' => 'Tóm tắt là bắt buộc.',
@@ -73,7 +75,10 @@ class ProductController extends Controller
             'price.min' => 'Giá phải lớn hơn 0.',
             'stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
             'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
-            'discount.max' => 'Giảm giá không được lớn hơn 100.'
+            'discount.max' => 'Giảm giá không được lớn hơn 100.',
+            'commission_percentage.min' => 'Hoa hồng không được nhỏ hơn 0%.',
+            'commission_percentage.max' => 'Hoa hồng không được lớn hơn 100%.',
+            'commission_percentage.numeric' => 'Hoa hồng phải là số.'
         ]);
 
         $data = $request->except('categories'); // Loại trừ categories khỏi dữ liệu
@@ -160,7 +165,8 @@ class ProductController extends Controller
             'status'      => 'required|in:active,inactive',
             'condition'   => 'required|in:default,new,hot',
             'price'       => 'required|numeric|min:0',
-            'discount'    => 'nullable|numeric|min:0|max:100'
+            'discount'    => 'nullable|numeric|min:0|max:100',
+            'commission_percentage' => 'nullable|numeric|min:0|max:100'
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'summary.required' => 'Tóm tắt là bắt buộc.',
@@ -177,7 +183,10 @@ class ProductController extends Controller
             'price.min' => 'Giá phải lớn hơn 0.',
             'stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
             'discount.min' => 'Giảm giá không được nhỏ hơn 0.',
-            'discount.max' => 'Giảm giá không được lớn hơn 100.'
+            'discount.max' => 'Giảm giá không được lớn hơn 100.',
+            'commission_percentage.min' => 'Hoa hồng không được nhỏ hơn 0%.',
+            'commission_percentage.max' => 'Hoa hồng không được lớn hơn 100%.',
+            'commission_percentage.numeric' => 'Hoa hồng phải là số.'
         ]);
 
         $data = $request->except('categories'); // Loại trừ categories khỏi dữ liệu
@@ -346,4 +355,99 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * API: Lấy danh sách sản phẩm có hoa hồng
+     */
+    public function getAffiliateProducts(Request $request)
+    {
+        try {
+            $products = Product::with(['categories', 'brand'])
+                ->where('commission_percentage', '>', 0)
+                ->where('status', 'active')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'products' => $products,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy danh sách sản phẩm affiliate.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk update commission cho nhiều sản phẩm
+     */
+    public function bulkUpdateCommission(Request $request)
+    {
+        $request->validate([
+            'product_ids' => 'required|array',
+            'product_ids.*' => 'exists:products,id',
+            'commission_percentage' => 'numeric|min:0|max:100'
+        ]);
+
+        try {
+            DB::beginTransaction();
+            
+            Product::whereIn('id', $request->product_ids)
+                ->update(['commission_percentage' => $request->commission_percentage]);
+            
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật hoa hồng cho ' . count($request->product_ids) . ' sản phẩm thành công!'
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi cập nhật hoa hồng: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Thống kê sản phẩm affiliate
+     */
+    public function getAffiliateStats()
+    {
+        try {
+            $stats = [
+                'total_products' => Product::count(),
+                'affiliate_products' => Product::where('commission_percentage', '>', 0)->count(),
+                'avg_commission' => Product::where('commission_percentage', '>', 0)->avg('commission_percentage'),
+                'total_commission_generated' => AffiliateOrder::sum('commission'),
+                'top_commission_products' => Product::withCommission()
+                    ->with(['affiliateOrders'])
+                    ->get()
+                    ->map(function($product) {
+                        return [
+                            'id' => $product->id,
+                            'title' => $product->title,
+                            'commission_percentage' => $product->commission_percentage,
+                            'total_commission' => $product->getTotalCommissionGenerated(),
+                            'total_sold' => $product->getTotalSold()
+                        ];
+                    })
+                    ->sortByDesc('total_commission')
+                    ->take(10)
+                    ->values()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi lấy thống kê: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

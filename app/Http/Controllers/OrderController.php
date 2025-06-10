@@ -26,17 +26,16 @@ class OrderController extends Controller
 {
     /**
      * Hiển thị danh sách đơn hàng (phía admin).
-     *
-     * @return \Illuminate\Http\Response
+     * 
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
-        // Chỉ load đơn hàng 30 ngày gần nhất thay vì tất cả
-        $orders = Order::with(['shipping:id,price'])
+        $orders = Order::with(['cartInfo.product:id,title', 'shipping:id,price'])
             ->where('created_at', '>=', now()->subDays(30))
-            ->orderBy('id', 'DESC')
-            ->get(); // Không dùng paginate
-        
+            ->latest()
+            ->get();
+            
         return view('backend.order.index')->with('orders', $orders);
     }
 

@@ -2,6 +2,8 @@
 
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AffiliateOrderController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +115,33 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     // Shipping
     Route::resource('/shipping','ShippingController');
 
+    // affilate order 
+    Route::get('/affiliate-orders', [AffiliateOrderController::class, 'index'])->name('admin.affiliate.orders.index');
+    Route::post('/affiliate-orders/{id}/update', [AffiliateOrderController::class, 'update'])->name('admin.affiliate.orders.update');
+    Route::get('/affiliate-orders/stats', [AffiliateOrderController::class, 'stats'])->name('admin.affiliate.orders.stats');
+    Route::get('/affiliate-orders/report', [AffiliateOrderController::class, 'reportByDoctor'])->name('admin.affiliate.orders.report');
+    Route::post('/affiliate-orders/bulk-pay', [AffiliateOrderController::class, 'bulkPay'])->name('admin.affiliate.orders.bulk_pay');
+    Route::get('/affiliate-orders/export', [AffiliateOrderController::class, 'export'])->name('admin.affiliate.orders.export');
+
+    //affile
+    Route::get('/products/affiliate', 'ProductController@getAffiliateProducts')->name('products.affiliate');
+    Route::post('/products/bulk-commission', 'ProductController@bulkUpdateCommission')->name('products.bulk-commission');
+    Route::get('/products/affiliate-stats', 'ProductController@getAffiliateStats')->name('products.affiliate-stats');
+
+    // Dashboard routes
+    Route::get('/stats', [DashboardController::class, 'getStats'])->name('admin.stats');
+
+    // Chart API routes
+    Route::get('/dashboard/top-products', [DashboardController::class, 'topProducts'])->name('admin.dashboard.top-products');
+    Route::get('/dashboard/order-status-trend', [DashboardController::class, 'orderStatusTrend'])->name('admin.dashboard.order-status-trend');
+    Route::get('/dashboard/revenue-vs-commission', [DashboardController::class, 'revenueVsCommission'])->name('admin.dashboard.revenue-vs-commission');
+    Route::get('/dashboard/top-doctors', [DashboardController::class, 'topDoctors'])->name('admin.dashboard.top-doctors');
+    Route::get('/dashboard/order-growth', [DashboardController::class, 'orderGrowth'])->name('admin.dashboard.order-growth');
+
+    // Export routes
+    Route::get('/dashboard/export', [DashboardController::class, 'exportData'])->name('admin.dashboard.export');
+    
+    
     // Thêm routes mới
     Route::get('shipping-provinces', 'ShippingController@provinces')->name('shipping.provinces');
     Route::get('shipping-province/create', 'ShippingController@createProvince')->name('shipping.province.create');
@@ -171,4 +200,5 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
 });
+
 

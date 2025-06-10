@@ -29,8 +29,6 @@ class Order extends Model
         'commission',
         'created_at',
         'updated_at',
-        'from_province_id',
-        'to_province_id',
         'shipping_cost',
         // ✅ GHN Fields mới
         'ghn_order_code',
@@ -118,11 +116,7 @@ class Order extends Model
      */
     public function getShippingMethod()
     {
-        if ($this->isGHNOrder()) {
-            return 'GHN - ' . ucfirst($this->ghn_status ?? 'pending');
-        }
-        
-        return $this->shipping->type ?? 'Legacy Shipping';
+        return 'GHN - ' . ucfirst($this->ghn_status ?? 'pending');
     }
 
     /**

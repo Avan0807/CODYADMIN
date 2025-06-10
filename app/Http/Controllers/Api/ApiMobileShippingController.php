@@ -17,16 +17,25 @@ class ApiMobileShippingController extends Controller
     }
 
     /**
-     * API: Lấy danh sách tỉnh/thành phố
-     * GET /api/mobile/shipping/provinces
+     * API: Lấy danh sách tỉnh/thành phố từ GHN
+     * GET /api/shipping/provinces
      */
     public function getProvinces()
     {
         try {
             $provinces = $this->ghnService->getProvinces();
 
+            // Transform để app dễ sử dụng
+            $transformed = collect($provinces)->map(function($province) {
+                return [
+                    'id' => $province['ProvinceID'],
+                    'name' => $province['ProvinceName'],
+                    'code' => $province['Code'] ?? null
+                ];
+            });
+
             return $this->successResponse([
-                'provinces' => $provinces
+                'provinces' => $transformed
             ], 'Lấy danh sách tỉnh/thành phố thành công');
 
         } catch (\Exception $e) {
@@ -35,8 +44,8 @@ class ApiMobileShippingController extends Controller
     }
 
     /**
-     * API: Lấy danh sách quận/huyện theo tỉnh
-     * GET /api/mobile/shipping/districts?province_id=201
+     * API: Lấy danh sách quận/huyện từ GHN
+     * GET /api/shipping/districts?province_id=269
      */
     public function getDistricts(Request $request)
     {
@@ -51,8 +60,16 @@ class ApiMobileShippingController extends Controller
         try {
             $districts = $this->ghnService->getDistricts($request->province_id);
 
+            $transformed = collect($districts)->map(function($district) {
+                return [
+                    'id' => $district['DistrictID'],
+                    'name' => $district['DistrictName'],
+                    'province_id' => $district['ProvinceID']
+                ];
+            });
+
             return $this->successResponse([
-                'districts' => $districts,
+                'districts' => $transformed,
                 'province_id' => $request->province_id
             ], 'Lấy danh sách quận/huyện thành công');
 
@@ -62,8 +79,8 @@ class ApiMobileShippingController extends Controller
     }
 
     /**
-     * API: Lấy danh sách phường/xã theo quận
-     * GET /api/mobile/shipping/wards?district_id=1442
+     * API: Lấy danh sách phường/xã từ GHN
+     * GET /api/shipping/wards?district_id=1442
      */
     public function getWards(Request $request)
     {
@@ -78,8 +95,16 @@ class ApiMobileShippingController extends Controller
         try {
             $wards = $this->ghnService->getWards($request->district_id);
 
+            $transformed = collect($wards)->map(function($ward) {
+                return [
+                    'id' => $ward['WardCode'],
+                    'name' => $ward['WardName'],
+                    'district_id' => $ward['DistrictID']
+                ];
+            });
+
             return $this->successResponse([
-                'wards' => $wards,
+                'wards' => $transformed,
                 'district_id' => $request->district_id
             ], 'Lấy danh sách phường/xã thành công');
 
@@ -87,7 +112,6 @@ class ApiMobileShippingController extends Controller
             return $this->errorResponse('Lỗi khi lấy danh sách phường/xã', 500);
         }
     }
-
     /**
      * API: Lấy danh sách dịch vụ vận chuyển
      * POST /api/mobile/shipping/services

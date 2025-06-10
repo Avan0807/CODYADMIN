@@ -12,23 +12,33 @@ use Spatie\Activitylog\Models\Activity;
 class AdminController extends Controller
 {
     public function index(){
-        $data = User::select(\DB::raw("COUNT(*) as count"), \DB::raw("DAYNAME(created_at) as day_name"), \DB::raw("DAY(created_at) as day"))
-        ->where('created_at', '>', Carbon::today()->subDays(6))
-        ->groupBy('day_name','day')
-        ->orderBy('day')
-        ->get();
-     $array[] = ['Name', 'Number'];
-     foreach($data as $key => $value)
-     {
-       $array[++$key] = [$value->day_name, $value->count];
-     }
-    //  return $data;
-     return view('backend.index')->with('users', json_encode($array));
+        // Sửa lại method getUserRegistrationData như DashboardController
+        $users = $this->getUserRegistrationData();
+        
+        return view('backend.index')->with('users', $users);
     }
 
+    /**
+     * Get user registration data for pie chart (copy từ DashboardController)
+     */
+    private function getUserRegistrationData()
+    {
+        $users = [];
+        $users[] = ['Day', 'Users'];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dayName = $date->format('D'); // Mon, Tue, Wed...
+            $count = User::whereDate('created_at', $date->toDateString())->count();
+            $users[] = [$dayName, (int)$count];
+        }
+        
+        return json_encode($users);
+    }
+
+    // Giữ nguyên các method khác...
     public function profile(){
         $profile=Auth()->user();
-        // return $profile;
         return view('backend.users.profile')->with('profile',$profile);
     }
 

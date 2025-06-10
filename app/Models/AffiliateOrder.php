@@ -13,45 +13,109 @@ class AffiliateOrder extends Model
 
     protected $fillable = [
         'order_id',
+        'product_id',  // ← Thêm field này
         'doctor_id',
         'commission',
+        'commission_percentage',  // ← Nếu đã thêm vào DB
         'status',
+        'paid_at',  // ← Nếu đã thêm vào DB
     ];
 
-    /**
-     * Định nghĩa quan hệ với bảng `orders`
-     */
+    protected $casts = [
+        'commission' => 'decimal:2',
+        'commission_percentage' => 'decimal:2',
+        'paid_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    // ==================== RELATIONSHIPS ====================
+
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Định nghĩa quan hệ với bảng `doctors`
-     */
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
     }
-    protected $casts = [
-        'status' => 'string', // Chuyển ENUM thành string khi truy xuất
-    ];
 
-    /**
-     * Đếm tổng số đơn hàng tiếp thị
-     */
+    public function product()  // ← Thêm relationship này
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    // ==================== SCOPES ====================
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
+    }
+
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', 'cancelled');
+    }
+
+    // ==================== STATIC METHODS ====================
+
     public static function countAffiliateOrders()
     {
         return self::count();
     }
 
-    /**
-     * Tính tổng hoa hồng từ Affiliate Orders
-     */
-    public static function totalAffiliateCommission()
+    public static function totalAffiliateCommission($status = 'pending')
     {
-        return self::where('status', 'pending')->sum('commission');
+        return self::where('status', $status)->sum('commission');
     }
 
+    public static function totalPendingCommission()
+    {
+        return self::pending()->sum('commission');
+    }
+
+    public static function totalPaidCommission()
+    {
+        return self::paid()->sum('commission');
+    }
+
+    // ==================== INSTANCE METHODS ====================
+
+    public function getFormattedCommission()
+    {
+        return number_format($this->commission, 0, ',', '.') . 'đ';
+    }
+
+    public function getStatusBadge()
+    {
+        $badges = [
+            'pending' => '<span class="badge badge-warning">Chờ thanh toán</span>',
+            'paid' => '<span class="badge badge-success">Đã thanh toán</span>',
+            'cancelled' => '<span class="badge badge-danger">Đã hủy</span>',
+        ];
+
+        return $badges[$this->status] ?? '<span class="badge badge-secondary">Không xác định</span>';
+    }
+
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isPaid()
+    {
+        return $this->status === 'paid';
+    }
+
+    public function isCancelled()
+    {
+        return $this->status === 'cancelled';
+    }
 
 }

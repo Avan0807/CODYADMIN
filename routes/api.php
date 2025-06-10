@@ -41,6 +41,14 @@ use App\Http\Controllers\Api\ApiSpecialtiesController;
 use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiForumThreadController;
 use App\Http\Controllers\Api\ApiMobileShippingController;
+use App\Services\GHNService;
+
+// Shipping APIs fix API GHN
+Route::prefix('ghn')->group(function () {
+    Route::get('/provinces', [ApiMobileShippingController::class, 'getProvinces']);
+    Route::get('/districts', [ApiMobileShippingController::class, 'getDistricts']);
+    Route::get('/wards', [ApiMobileShippingController::class, 'getWards']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -54,11 +62,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Shipping APIs
     Route::prefix('shipping')->group(function () {
-
-        // Master Data
-        Route::get('/provinces', [ApiMobileShippingController::class, 'getProvinces']);
-        Route::get('/districts', [ApiMobileShippingController::class, 'getDistricts']);
-        Route::get('/wards', [ApiMobileShippingController::class, 'getWards']);
 
         // Shipping Services
         Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);

@@ -3,7 +3,7 @@
 @section('main-content')
 
 <div class="card">
-    <h5 class="card-header">Chỉnh sửa bài viết</h5>
+    <h5 class="card-header">Chỉnh sửa profile</h5>
     <div class="card-body">
     <form method="post" action="{{route('settings.update')}}">
         @csrf 

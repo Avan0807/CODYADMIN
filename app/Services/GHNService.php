@@ -21,7 +21,7 @@ class GHNService
 
     /**
      * Lấy danh sách tỉnh/thành phố
-     */
+    */
     public function getProvinces()
     {
         try {
@@ -31,7 +31,12 @@ class GHNService
             ])->get($this->apiUrl . '/master-data/province');
 
             if ($response->successful()) {
-                return $response->json()['data'] ?? [];
+                $data = $response->json()['data'] ?? [];
+                
+                // DEBUG: Log để xem full structure
+                \Log::info('GHN Raw Response:', $data);
+                
+                return $data;
             }
 
             Log::error('GHN Get Provinces Error: ' . $response->body());
@@ -92,71 +97,6 @@ class GHNService
         }
     }
 
-    /**
-     * Lấy danh sách dịch vụ giao hàng
-     */
-    // public function getServices($fromDistrictId, $toDistrictId)
-    // {
-    //     try {
-    //         $response = Http::withHeaders([
-    //             'Token' => $this->token,
-    //             'ShopId' => $this->shopId,
-    //             'Content-Type' => 'application/json'
-    //         ])->get($this->apiUrl . '/shipping-order/available-services', [
-    //             'shop_id' => $this->shopId,
-    //             'from_district' => $fromDistrictId,
-    //             'to_district' => $toDistrictId
-    //         ]);
-
-    //         if ($response->successful()) {
-    //             return $response->json()['data'] ?? [];
-    //         }
-
-    //         Log::error('GHN Get Services Error: ' . $response->body());
-    //         return [];
-    //     } catch (\Exception $e) {
-    //         Log::error('GHN Get Services Exception: ' . $e->getMessage());
-    //         return [];
-    //     }
-    // }
-    /**
-     * Lấy danh sách dịch vụ giao hàng
-     */
-    // public function getServices($fromDistrictId, $toDistrictId)
-    // {
-    //     try {
-
-    //         $response = Http::withHeaders([
-    //             'Token' => $this->token,
-    //             'ShopId' => $this->shopId,
-    //             'Content-Type' => 'application/json'
-    //         ])->post($this->apiUrl . '/shipping-order/available-services', [
-    //             'shop_id' => (int)$this->shopId,
-    //             'from_district' => (int)$fromDistrictId,
-    //             'to_district' => (int)$toDistrictId
-    //         ]);
-
-    //         if ($response->successful()) {
-    //             return $response->json()['data'] ?? [];
-    //         }
-
-    //         Log::error('GHN Get Services Error:', [
-    //             'status' => $response->status(),
-    //             'response' => $response->body(),
-    //             'from_district' => $fromDistrictId,
-    //             'to_district' => $toDistrictId
-    //         ]);
-    //         return [];
-    //     } catch (\Exception $e) {
-    //         Log::error('GHN Get Services Exception:', [
-    //             'message' => $e->getMessage(),
-    //             'from_district' => $fromDistrictId,
-    //             'to_district' => $toDistrictId
-    //         ]);
-    //         return [];
-    //     }
-    // }
-    // Sửa hàm getServices() - bỏ /v2
     /**
      * Lấy danh sách dịch vụ giao hàng - DÙNG V2
      */
