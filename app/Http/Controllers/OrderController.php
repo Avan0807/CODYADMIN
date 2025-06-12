@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Shipping;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\AffiliateOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -53,103 +54,171 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        $this->validate($request, [
-            'first_name' => 'string|required',
-            'last_name'  => 'string|required',
-            'address1'   => 'string|required',
-            'address2'   => 'string|nullable',
-            'coupon'     => 'nullable|numeric',
-            'phone'      => 'numeric|required',
-            'post_code'  => 'string|nullable',
-            'email'      => 'string|required',
+        $request->validate([
+            'first_name'            => 'required|string',
+            'last_name'             => 'required|string',
+            'address1'              => 'required|string',
+            'phone'                 => 'required|string',
+            'email'                 => 'required|email',
+            'ghn_to_province_id'    => 'required|integer',    
+            'ghn_to_district_id'    => 'required|integer',
+            'ghn_to_ward_code'      => 'required|string',
+            'ghn_service_id'        => 'nullable|integer',
+            'shipping_fee'          => 'nullable|numeric|min:0',
+            'payment_method'        => 'required|string',
         ]);
 
-        // Kiểm tra giỏ hàng có trống hay không
-        if (empty(Cart::where('user_id', auth()->user()->id)->where('order_id', null)->first())) {
-            request()->session()->flash('error', 'Giỏ hàng đang trống!');
-            return redirect()->back();
+        $userId = auth()->id();
+        $carts = Cart::where('user_id', $userId)->whereNull('order_id')->get();
+
+        if ($carts->isEmpty()) {
+            return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
         }
 
-        // Tạo đơn hàng
-        $order        = new Order();
-        $order_data   = $request->all();
-        $order_data['order_number'] = 'ORD-' . strtoupper(Str::random(10));
-        $order_data['user_id']      = $request->user()->id;
-        $order_data['shipping_id']  = $request->shipping;
-
-        // Lấy giá ship
-        $shipping = Shipping::where('id', $order_data['shipping_id'])->pluck('price');
-
-        // Tính sub_total, quantity, coupon,...
-        $order_data['sub_total'] = Helper::totalCartPrice();
-        $order_data['quantity']  = Helper::cartCount();
-
-        // Nếu có áp dụng mã giảm giá
-        if (session('coupon')) {
-            $order_data['coupon'] = session('coupon')['value'];
-        }
-
-        // Tính toán total_amount
-        if ($request->shipping) {
-            if (session('coupon')) {
-                $order_data['total_amount'] = Helper::totalCartPrice() + $shipping[0] - session('coupon')['value'];
-            } else {
-                $order_data['total_amount'] = Helper::totalCartPrice() + $shipping[0];
+        // ✅ AUTO CALCULATE SHIPPING FEE nếu chưa có
+        if (!$request->shipping_fee) {
+            $shippingCalculation = $this->calculateShippingForOrder($request, $carts);
+            
+            if (!$shippingCalculation['success']) {
+                return response()->json([
+                    'error' => 'Không thể tính phí vận chuyển: ' . $shippingCalculation['message']
+                ], 400);
             }
+            
+            $shippingFee = $shippingCalculation['shipping_fee'];
+            $serviceId = $shippingCalculation['service_id'];
         } else {
-            if (session('coupon')) {
-                $order_data['total_amount'] = Helper::totalCartPrice() - session('coupon')['value'];
-            } else {
-                $order_data['total_amount'] = Helper::totalCartPrice();
+            // Dùng shipping_fee từ frontend
+            $shippingFee = $request->shipping_fee;
+            $serviceId = $request->ghn_service_id ?? 53321;
+        }
+
+        $subTotal = $carts->sum('amount');
+        $totalAmount = $subTotal + $shippingFee;
+
+        // ✅ Tạo order
+        $order = Order::create([
+            'order_number'          => 'ORD-' . strtoupper(Str::random(10)),
+            'user_id'               => $userId,
+            'first_name'            => $request->first_name,
+            'last_name'             => $request->last_name,
+            'address1'              => $request->address1,
+            'email'                 => $request->email,
+            'phone'                 => $request->phone,
+            'quantity'              => $carts->sum('quantity'),
+            'sub_total'             => $subTotal,
+            'shipping_cost'         => $shippingFee,
+            'total_amount'          => $totalAmount,
+            'payment_method'        => $request->payment_method,
+            'payment_status'        => $request->payment_method == 'cod' ? 'unpaid' : 'paid',
+            'status'                => 'new',
+
+            // GHN fields
+            'ghn_to_province_id'    => $request->ghn_to_province_id,
+            'ghn_to_district_id'    => $request->ghn_to_district_id,
+            'ghn_to_ward_code'      => $request->ghn_to_ward_code,
+            'ghn_service_id'        => $serviceId,
+            'ghn_status'            => 'pending',
+        ]);
+
+        // ✅ TẠO ĐƠN GHN TỰ ĐỘNG (nếu không phải COD)
+        if ($request->payment_method !== 'cod') {
+            try {
+                $ghnResult = $this->createGHNOrderFromOrder($order);
+                
+                if ($ghnResult['success']) {
+                    $order->update([
+                        'ghn_order_code' => $ghnResult['order_code'],
+                        'ghn_status' => 'confirmed',
+                        'ghn_tracking_url' => "https://donhang.ghn.vn/?order_code=" . $ghnResult['order_code']
+                    ]);
+                    
+                    \Log::info('GHN order created for Order #' . $order->id, [
+                        'ghn_order_code' => $ghnResult['order_code']
+                    ]);
+                } else {
+                    \Log::warning('Failed to create GHN order for Order #' . $order->id, [
+                        'error' => $ghnResult['message']
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('GHN order creation exception for Order #' . $order->id, [
+                    'error' => $e->getMessage()
+                ]);
             }
         }
 
-        // Xử lý phương thức thanh toán
-        if (request('payment_method') == 'paypal') {
-            $order_data['payment_method'] = 'paypal';
-            $order_data['payment_status'] = 'paid';
-        } elseif (request('payment_method') == 'cardpay') {
-            $order_data['payment_method'] = 'cardpay';
-            $order_data['payment_status'] = 'paid';
-        } else {
-            $order_data['payment_method'] = 'cod';
-            $order_data['payment_status'] = 'Unpaid';
-        }
+        // ✅ XỬ LÝ AFFILIATE - Thay vì chỉ update order_id
+        $this->processAffiliateAPI($order, $carts);
 
-        // Lưu thông tin đơn hàng
-        $order->fill($order_data);
-        $status = $order->save();
-
-        if ($order) {
-            // Gửi thông báo cho admin
-            $users   = User::where('role', 'admin')->first();
-            $details = [
-                'title'     => 'Đơn hàng mới',
-                'actionURL' => route('order.show', $order->id),
-                'fas'       => 'fa-file-alt'
-            ];
-            Notification::send($users, new StatusNotification($details));
-        }
-
-        // Nếu thanh toán paypal, chuyển hướng sang trang thanh toán
-        if (request('payment_method') == 'paypal') {
-            return redirect()->route('payment')->with(['id' => $order->id]);
-        } else {
-            // Xóa session giỏ hàng, coupon nếu có
-            session()->forget('cart');
-            session()->forget('coupon');
-        }
-
-        // Cập nhật order_id cho giỏ hàng
-        Cart::where('user_id', auth()->user()->id)
-            ->where('order_id', null)
-            ->update(['order_id' => $order->id]);
-
-        request()->session()->flash('success', 'Đơn hàng của bạn đã được tạo. Cảm ơn bạn đã mua sắm!');
-        return redirect()->route('home');
+        return response()->json([
+            'success' => true,
+            'message' => 'Đặt hàng thành công!',
+            'data' => [
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'ghn_status' => $order->ghn_status,
+                    'ghn_order_code' => $order->ghn_order_code,
+                    'tracking_url' => $order->ghn_tracking_url,
+                    'order_date' => $order->created_at->format('d/m/Y H:i'),
+                ],
+                'customer' => [
+                    'name' => $order->first_name . ' ' . $order->last_name,
+                    'email' => $order->email,
+                    'phone' => $order->phone,
+                    'address' => $order->address1,
+                ],
+                'payment' => [
+                    'method' => $order->payment_method,
+                    'status' => $order->payment_status,
+                    'sub_total' => $subTotal,
+                    'shipping_fee' => $shippingFee,
+                    'total_amount' => $totalAmount,
+                    'formatted_sub_total' => number_format($subTotal, 0, ',', '.') . 'đ',
+                    'formatted_shipping_fee' => number_format($shippingFee, 0, ',', '.') . 'đ',
+                    'formatted_total' => number_format($totalAmount, 0, ',', '.') . 'đ',
+                ],
+                'shipping' => [
+                    'service_id' => $serviceId,
+                    'service_name' => $this->getServiceName($serviceId),
+                    'province_id' => $order->ghn_to_province_id,   
+                    'district_id' => $order->ghn_to_district_id,
+                    'ward_code' => $order->ghn_to_ward_code,
+                    'estimated_delivery' => '2-3 ngày làm việc',
+                    'shipping_source' => $request->shipping_fee ? 'manual' : 'auto_calculated'
+                ],
+                'items' => [
+                    'count' => $carts->count(),
+                    'total_quantity' => $carts->sum('quantity'),
+                    'products' => $carts->map(function($cart) {
+                        $product = Product::find($cart->product_id);
+                        return [
+                            'name' => $product ? $product->title : 'Sản phẩm không tồn tại',
+                            'photo' => $product ? $product->photo : 'Ảnh không tồn tại',
+                            'quantity' => $cart->quantity,
+                            'price' => $cart->price,
+                            'amount' => $cart->amount,
+                            'doctor_id' => $cart->doctor_id, // ✅ Thêm thông tin affiliate
+                            'commission' => $cart->commission, // ✅ Thêm commission info
+                            'formatted_price' => number_format($cart->price, 0, ',', '.') . 'đ',
+                            'formatted_amount' => number_format($cart->amount, 0, ',', '.') . 'đ',
+                        ];
+                    })
+                ],
+                // ✅ THÊM AFFILIATE INFO
+                'affiliate' => [
+                    'doctors_count' => $carts->where('doctor_id', '!=', null)->pluck('doctor_id')->unique()->count(),
+                    'total_commission' => $carts->sum('commission'),
+                    'formatted_commission' => number_format($carts->sum('commission'), 0, ',', '.') . 'đ',
+                ]
+            ]
+        ]);
     }
+
 
     /**
      * Hiển thị chi tiết đơn hàng (phía admin).
@@ -412,9 +481,11 @@ class OrderController extends Controller
             'address1' => 'required|string',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:191',
-            'payment_method' => 'required|in:cod,paypal',
+            'payment_method' => 'required|in:cod,paypal,vnpay',
             'shipping_id' => 'nullable|exists:shippings,id',
             'coupon' => 'nullable|numeric|min:0',
+            // ✅ Thêm GHN fields nếu cần
+            'shipping_cost' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -426,13 +497,23 @@ class OrderController extends Controller
         }
 
         try {
+            // ✅ Kiểm tra giỏ hàng
+            $carts = Cart::where('user_id', Auth::id())->whereNull('order_id')->get();
+            if ($carts->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Giỏ hàng đang trống!',
+                ], 400);
+            }
+
+            // ✅ Tạo đơn hàng
             $order = Order::create([
                 'user_id' => Auth::id(),
-                'order_number' => Str::random(10),
-                'sub_total' => number_format($request->sub_total, 3, '.', ''), // Đảm bảo 3 số thập phân
+                'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+                'sub_total' => $request->sub_total,
                 'quantity' => $request->quantity,
-                'total_amount' => number_format($request->total_amount, 3, '.', ''),
-                'status' => 'new', // Trạng thái hợp lệ theo enum
+                'total_amount' => $request->total_amount,
+                'status' => 'new',
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'country' => $request->country,
@@ -443,20 +524,58 @@ class OrderController extends Controller
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'unpaid',
                 'shipping_id' => $request->shipping_id,
-                'coupon' => $request->coupon ?? 0.000,
+                'shipping_cost' => $request->shipping_cost ?? 0,
+                'coupon' => $request->coupon ?? 0,
             ]);
+
+            // ✅ Xử lý affiliate (giống web version)
+            $this->processAffiliateAPI($order, $carts);
+
+            // ✅ Load order với cart items để return
+            $order->load('cartInfo.product', 'cartInfo.doctor');
 
             return response()->json([
                 'success' => true,
                 'message' => 'Đơn hàng đã được tạo thành công!',
                 'order' => $order,
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể tạo đơn hàng.',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * ✅ Xử lý affiliate cho API (giống web version)
+     */
+    private function processAffiliateAPI($order, $carts)
+    {
+        foreach ($carts as $cart) {
+            $product = Product::find($cart->product_id);
+            if ($product) {
+                $commission = $cart->doctor_id 
+                    ? (($cart->price * $cart->quantity) * ($product->commission_percentage / 100))
+                    : 0;
+
+                $cart->update([
+                    'order_id'   => $order->id,
+                    'commission' => $commission,
+                ]);
+            }
+        }
+
+        // ✅ Tạo affiliate_order cho TỪNG doctor riêng biệt
+        $doctorCommissions = $carts->where('doctor_id', '!=', null)->groupBy('doctor_id');
+        
+        foreach ($doctorCommissions as $doctor_id => $doctorCarts) {
+            AffiliateOrder::firstOrCreate(
+                ['order_id' => $order->id, 'doctor_id' => $doctor_id],
+                ['commission' => $doctorCarts->sum('commission'), 'status' => 'new']
+            );
         }
     }
 

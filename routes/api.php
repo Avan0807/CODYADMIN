@@ -43,42 +43,36 @@ use App\Http\Controllers\Api\ApiForumThreadController;
 use App\Http\Controllers\Api\ApiMobileShippingController;
 use App\Services\GHNService;
 
-// Shipping APIs fix API GHN
+// ================== GHN SHIPPING APIs ==================
+
+// ✅ Public GHN APIs (không cần auth)
 Route::prefix('ghn')->group(function () {
     Route::get('/provinces', [ApiMobileShippingController::class, 'getProvinces']);
     Route::get('/districts', [ApiMobileShippingController::class, 'getDistricts']);
     Route::get('/wards', [ApiMobileShippingController::class, 'getWards']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-
-    // ← API TỰ ĐỘNG TÍNH PHÍ KHI ĐIỀN ĐỊA CHỈ
-    Route::post('/shipping/auto-calculate', [ApiOrderController::class, 'autoCalculateShipping']);
-
-    // Các API khác...
-    Route::post('/shipping/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
-    Route::post('/order/store', [ApiOrderController::class, 'store']);
+// ✅ Protected Shipping APIs (cần auth)
+Route::middleware('auth:sanctum')->prefix('shipping')->group(function () {
+    // Shipping Services & Calculation
+    Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);
+    Route::post('/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
+    Route::post('/auto-calculate', [ApiOrderController::class, 'autoCalculateShipping']);
+    
+    // Order Management
+    Route::post('/create-order', [ApiMobileShippingController::class, 'createShippingOrder']);
+    Route::get('/track', [ApiMobileShippingController::class, 'trackOrder']);
 });
 
-// Shipping APIs
-    Route::prefix('shipping')->group(function () {
+// ================== ORDER APIs ==================
 
-        // Shipping Services
-        Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);
-        Route::post('/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
-
-        // Order Management
-        Route::post('/create-order', [ApiMobileShippingController::class, 'createShippingOrder']);
-        Route::get('/track', [ApiMobileShippingController::class, 'trackOrder']);
-    });
-
-// ================== ĐƠN HÀNG  ==================
-
-// Các route liên quan đến đơn hàng  yêu cầu xác thực bằng Sanctum
-Route::middleware('auth:sanctum')->post('/order/store', [ApiOrderController::class, 'store']);
-Route::middleware('auth:sanctum')->post('/order/track-ghn', [ApiOrderController::class, 'trackGHNOrder']);
-// Lấy danh sách đơn hàng theo trạng thái
-Route::middleware('auth:sanctum')->get('/order/status', [ApiOrderController::class, 'getOrdersByStatus']);
+// ✅ Protected Order APIs (cần auth)
+Route::middleware('auth:sanctum')->prefix('order')->group(function () {
+    // Order Management
+    Route::post('/store', [ApiOrderController::class, 'store']);
+    Route::post('/track-ghn', [ApiOrderController::class, 'trackGHNOrder']);
+    Route::get('/status', [ApiOrderController::class, 'getOrdersByStatus']);
+});
 
 Route::prefix('forum')->group(function () {
 

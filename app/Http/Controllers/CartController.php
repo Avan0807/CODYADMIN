@@ -326,19 +326,18 @@ class CartController extends Controller
             $doctor_id = null;
             $commission = 0;
             if ($request->filled('ref')) {
-                $affiliate = AffiliateLink::where('hash_ref', $request->ref)
-                          ->where('product_id', $productId)
-                          ->first();
+                $affiliate = AffiliateLink::where('hash_ref', $request->ref)->first(); // ✅ Bỏ product_id constraint
                 if ($affiliate) {
                     $doctor_id = $affiliate->doctor_id;
                     $commission = $totalAmount * ($product->commission_percentage / 100);
                 }
             }
 
-            // ✅ Kiểm tra giỏ hàng đã có sản phẩm chưa
+            // ✅ Kiểm tra giỏ hàng CÙNG doctor_id
             $existingCart = Cart::where('user_id', $userID)
                                 ->whereNull('order_id')
                                 ->where('product_id', $productId)
+                                ->where('doctor_id', $doctor_id) // ✅ THÊM điều kiện này
                                 ->first();
 
             if ($existingCart) {
@@ -352,12 +351,9 @@ class CartController extends Controller
 
                 $existingCart->quantity = $newQuantity;
                 $existingCart->amount = $newQuantity * $price;
-
-                // ✅ Cập nhật ref nếu chưa có
-                if ($doctor_id && !$existingCart->doctor_id) {
-                    $existingCart->doctor_id = $doctor_id;
-                    $existingCart->commission = $existingCart->amount * ($product->commission_percentage / 100);
-                }
+                $existingCart->commission = $doctor_id 
+                    ? ($existingCart->amount * ($product->commission_percentage / 100))
+                    : 0;
 
                 $existingCart->save();
 
@@ -368,15 +364,7 @@ class CartController extends Controller
                 ]);
             }
 
-            // ✅ Kiểm tra tồn kho trước khi tạo mới
-            if ($product->stock < $request->quantity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Số lượng tồn kho không đủ.',
-                ], 400);
-            }
-
-            // ✅ Tạo mới giỏ hàng
+            // ✅ Tạo mới giỏ hàng - code giữ nguyên
             $cartItem = Cart::create([
                 'user_id'    => $userID,
                 'product_id' => $productId,
@@ -402,8 +390,6 @@ class CartController extends Controller
             ], 500);
         }
     }
-
-
 
     public function apiRemoveFromCartByUser(Request $request, $userId, $productId)
     {
