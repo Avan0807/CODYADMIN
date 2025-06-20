@@ -67,6 +67,6 @@ class Kernel extends HttpKernel
         'user' => \App\Http\Middleware\User::class,
         'doctor' => \App\Http\Middleware\Doctor::class,
         'verify.csrf.ajax' => \App\Http\Middleware\VerifyCsrfTokenForAjax::class,
-
+        'check.agent' => \App\Http\Middleware\CheckAgentLogin::class,
     ];
 }

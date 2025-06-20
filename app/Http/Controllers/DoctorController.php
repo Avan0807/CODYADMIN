@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
 
 class DoctorController extends Controller
@@ -16,14 +17,14 @@ class DoctorController extends Controller
 
     public function create()
     {
-        return view('backend.doctor.create');
+        $categories = Category::all(); // hoặc where type='specialization' nếu có loại
+        return view('backend.doctor.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'specialization' => 'required',
             'experience' => 'required|integer',
             'email' => 'required|email|unique:doctors',
             'phone' => 'required',
@@ -32,14 +33,10 @@ class DoctorController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $data = $request->only([
-            'name', 'specialization', 'services', 'experience',
-            'working_hours', 'location', 'workplace', 'phone',
-            'email', 'status', 'rating', 'consultation_fee',
-            'bio', 'points'
-        ]);
+        // Loại bỏ specialization và services khỏi insert trực tiếp
+        $data = $request->except(['specialization', 'services']);
 
-        // Xử lý mật khẩu
+        // Mã hóa mật khẩu
         $data['password'] = bcrypt($request->password);
 
         // Xử lý ảnh nếu có
@@ -47,7 +44,15 @@ class DoctorController extends Controller
             $data['photo'] = $request->file('photo')->store('photos', 'public');
         }
 
-        Doctor::create($data);
+        // Tạo bác sĩ
+        $doctor = Doctor::create($data);
+
+        // Gán chuyên khoa (nhiều-nhiều)
+        if ($request->has('specialization')) {
+            $doctor->specializations()->sync($request->specialization);
+        }
+
+        // (Tùy chọn) Nếu có quan hệ services thì xử lý tương tự
 
         return redirect()->route('doctor.index')->with('success', 'Bác sĩ đã được thêm thành công');
     }

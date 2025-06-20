@@ -9,7 +9,7 @@
     <title>CODY || TRANG TỔNG QUAN</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="">
+    <link rel="icon" type="image/png" href="{{ asset('backend/img/logo.png') }}">
 
     <!-- Custom fonts for this template-->
     <link href="{{asset('backend/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">

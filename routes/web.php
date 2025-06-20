@@ -4,6 +4,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AffiliateOrderController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Agent\LoginController;
+use App\Http\Controllers\Agent\LinkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +23,34 @@ Auth::routes(['register'=>false]);
 // Reset password
 Route::post('password-reset', 'FrontendController@showResetForm')->name('password-reset-form');
 
+// Root redirect 
 Route::get('/', function () {
-    return redirect('/login');
+    // Kiểm tra đã login chưa và redirect về đúng dashboard
+    if (Auth::guard('web')->check() || Auth::guard('admin')->check()) {
+        return redirect('/admin');
+    }
+    
+    if (Auth::guard('agent')->check()) {
+        return redirect()->route('agent.dashboard');
+    }
+    
+    // Chưa login → về admin login (default)
+    return redirect('/admin/login');
 });
+
+// Admin login routes
+Route::get('/admin/login', 'Auth\LoginController@showLoginForm')
+    ->middleware('guest:web,admin')
+    ->name('admin.login.form');
+Route::post('/admin/login', 'Auth\LoginController@login')
+    ->middleware('guest:web,admin')
+    ->name('admin.login');
+
+// Alias cho compatibility (nếu cần)
+Route::get('/login', function() {
+    return redirect('/admin/login');
+})->name('login');
+
 
 
 Route::get('/cart',function(){
@@ -193,12 +220,65 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     Route::get('/commissions', 'CommissionController@index')->name('commissions.index');
     Route::get('/commissions/{doctor_id}', 'CommissionController@show')->name('commission.detail');
 
+
+    // Agent routes - tương tự như Doctor
+    Route::resource('agent','AgentController');
+
+    
+    // Agent Orders - tương tự như Affiliate Orders  
+    Route::get('/agent-orders', 'AgentOrderController@index')->name('agent.orders.index');
+    Route::post('/agent-orders/{id}/update', 'AgentOrderController@update')->name('agent.orders.update');
+    Route::get('/agent-orders/stats', 'AgentOrderController@stats')->name('agent.orders.stats');
+    Route::get('/agent-orders/report', 'AgentOrderController@reportByAgent')->name('agent.orders.report');
+    Route::post('/agent-orders/bulk-pay', 'AgentOrderController@bulkPay')->name('agent.orders.bulk_pay');
+    Route::get('/agent-orders/export', 'AgentOrderController@export')->name('agent.orders.export');
+
+    // Agent Links - quản lý affiliate links của agents
+    Route::get('/agent-links', 'AgentLinkController@index')->name('adminagent.links.index');
+    Route::get('/agent-links/create', 'AgentLinkController@create')->name('agent.links.create');
+    Route::post('/agent-links', 'AgentLinkController@store')->name('agent.links.store');
+    Route::get('/agent-links/{id}/edit', 'AgentLinkController@edit')->name('agent.links.edit');
+    Route::patch('/agent-links/{id}', 'AgentLinkController@update')->name('agent.links.update');
+    Route::delete('/agent-links/{id}', 'AgentLinkController@destroy')->name('agent.links.destroy');
+    Route::post('/agent-links/bulk-delete', 'AgentLinkController@bulkDelete')->name('agent.links.bulk-delete');
+    Route::post('/agent-links/export', 'AgentLinkController@export')->name('agent.links.export');
+    Route::post('/agent-links/generate/{product_slug}', 'AgentLinkController@generateLink')->name('agent.links.generate');
+
+    // Agent status update - tương tự như affiliate orders
+    Route::post('/agent/{id}/update-status', 'AgentController@updateStatus')->name('agent.update-status');
+    Route::post('/agents/bulk-action', 'AgentController@bulkAction')->name('agents.bulk-action');
+
+    // Agent commissions - tương tự commission hiện tại
+    Route::get('/agent-commissions', 'AgentCommissionController@index')->name('agent.commissions.index');
+    Route::get('/agent-commissions/{agent_id}', 'AgentCommissionController@show')->name('agent.commission.detail');
+
 });
 
 
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
+});
+
+// Agent section start
+
+Route::prefix('agent')->group(function () {
+
+    Route::get('/login', [LoginController::class, 'showLoginForm'])
+        ->middleware('guest:agent')
+        ->name('agent.login.form');
+    Route::post('/login', [LoginController::class, 'login'])
+        ->middleware('guest:agent')
+        ->name('agent.login');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('agent.logout');
+
+    // Protected routes
+    Route::middleware('auth:agent')->group(function () {
+        Route::get('/links', [LinkController::class, 'myLinks'])->name('agent.links.index');
+        Route::post('/links/generate/{slug}', [LinkController::class, 'generateLink'])->name('agent.links.generate');
+        Route::get('/links/create', [LinkController::class, 'availableProducts'])->name('agent.links.create');
+        Route::get('/dashboard', [\App\Http\Controllers\Agent\DashboardController::class, 'index'])->name('agent.dashboard');
+    });
 });
 
 

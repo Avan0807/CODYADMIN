@@ -152,7 +152,28 @@
 
     <!-- Divider -->
 
-    <hr class="sidebar-divider">
+  <hr class="sidebar-divider">
+
+  <!-- Agent -->
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#agentCollapse" aria-expanded="true" aria-controls="agentCollapse">
+        <i class="fas fa-user-tie"></i>
+        <span>Đại Lý</span>
+      </a>
+      <div id="agentCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <h6 class="collapse-header">Quản Lý Đại Lý:</h6>
+          <a class="collapse-item" href="{{route('agent.index')}}">Danh Sách Đại Lý</a>
+          <a class="collapse-item" href="{{route('agent.create')}}">Thêm Đại Lý</a>
+          <a class="collapse-item" href="{{route('agent.orders.index')}}">Đơn Hàng Đại Lý</a>
+          <a class="collapse-item" href="{{route('adminagent.links.index')}}">Link Affiliate</a>
+          <a class="collapse-item" href="{{route('agent.commissions.index')}}">Hoa Hồng</a>
+        </div>
+      </div>
+    </li>
+
+
+  <hr class="sidebar-divider">
 
     <!-- Heading -->
     <div class="sidebar-heading">

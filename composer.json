@@ -21,6 +21,7 @@
         "laravel/ui": "^3.0",
         "league/flysystem-aws-s3-v3": "^1.0",
         "mews/captcha": "^3.3",
+        "propaganistas/laravel-phone": "^4.4",
         "pusher/pusher-php-server": "^5.0",
         "spatie/image": "^1.10",
         "spatie/laravel-newsletter": "^4.11",

@@ -17,14 +17,6 @@
         </div>
 
         <div class="form-group">
-          <label for="specialization" class="col-form-label">Chuyên Môn <span class="text-danger">*</span></label>
-          <input id="specialization" type="text" name="specialization" placeholder="Nhập chuyên môn" value="{{old('specialization')}}" class="form-control">
-          @error('specialization')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
-
-        <div class="form-group">
           <label for="experience" class="col-form-label">Kinh Nghiệm (năm) <span class="text-danger">*</span></label>
           <input id="experience" type="number" name="experience" min="0" placeholder="Nhập số năm kinh nghiệm" value="{{old('experience')}}" class="form-control">
           @error('experience')
@@ -81,6 +73,15 @@
         </div>
 
         <div class="form-group">
+          <label for="password" class="col-form-label">Mật Khẩu <span class="text-danger">*</span></label>
+          <input id="password" type="password" name="password" placeholder="Nhập mật khẩu" class="form-control">
+          @error('password')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
+        </div>
+
+
+        <div class="form-group">
           <label for="status" class="col-form-label">Trạng Thái <span class="text-danger">*</span></label>
           <select name="status" class="form-control">
               <option value="active" {{old('status')=='active' ? 'selected' : ''}}>Hoạt Động</option>
@@ -90,6 +91,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
+
 
         <div class="form-group mb-3">
           <button type="reset" class="btn btn-warning">Đặt Lại</button>

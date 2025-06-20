@@ -40,25 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
-        'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
-            'hash' => false,
-        ],
-
-        // Thêm guard cho user
-        'user' => [
+        'admin' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'users', // dùng chung bảng users
         ],
-
-        // Thêm guard cho doctor
-        'doctor' => [
+        'agent' => [
             'driver' => 'session',
-            'provider' => 'doctors',
+            'provider' => 'agents',
         ],
-            
     ],
 
     /*
@@ -83,15 +72,10 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
-        'doctors' => [
+        'agents' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Doctor::class,
+            'model' => App\Models\Agent::class,
         ],
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*
