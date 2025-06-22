@@ -27,7 +27,7 @@ class OrderController extends Controller
 {
     /**
      * Hiển thị danh sách đơn hàng (phía admin).
-     * 
+     *
      * @return \Illuminate\Contracts\View\View
      */
     public function index()
@@ -36,7 +36,7 @@ class OrderController extends Controller
             ->where('created_at', '>=', now()->subDays(30))
             ->latest()
             ->get();
-            
+
         return view('backend.order.index')->with('orders', $orders);
     }
 
@@ -62,7 +62,7 @@ class OrderController extends Controller
             'address1'              => 'required|string',
             'phone'                 => 'required|string',
             'email'                 => 'required|email',
-            'ghn_to_province_id'    => 'required|integer',    
+            'ghn_to_province_id'    => 'required|integer',
             'ghn_to_district_id'    => 'required|integer',
             'ghn_to_ward_code'      => 'required|string',
             'ghn_service_id'        => 'nullable|integer',
@@ -80,13 +80,13 @@ class OrderController extends Controller
         // ✅ AUTO CALCULATE SHIPPING FEE nếu chưa có
         if (!$request->shipping_fee) {
             $shippingCalculation = $this->calculateShippingForOrder($request, $carts);
-            
+
             if (!$shippingCalculation['success']) {
                 return response()->json([
                     'error' => 'Không thể tính phí vận chuyển: ' . $shippingCalculation['message']
                 ], 400);
             }
-            
+
             $shippingFee = $shippingCalculation['shipping_fee'];
             $serviceId = $shippingCalculation['service_id'];
         } else {
@@ -127,14 +127,14 @@ class OrderController extends Controller
         if ($request->payment_method !== 'cod') {
             try {
                 $ghnResult = $this->createGHNOrderFromOrder($order);
-                
+
                 if ($ghnResult['success']) {
                     $order->update([
                         'ghn_order_code' => $ghnResult['order_code'],
                         'ghn_status' => 'confirmed',
                         'ghn_tracking_url' => "https://donhang.ghn.vn/?order_code=" . $ghnResult['order_code']
                     ]);
-                    
+
                     \Log::info('GHN order created for Order #' . $order->id, [
                         'ghn_order_code' => $ghnResult['order_code']
                     ]);
@@ -185,7 +185,7 @@ class OrderController extends Controller
                 'shipping' => [
                     'service_id' => $serviceId,
                     'service_name' => $this->getServiceName($serviceId),
-                    'province_id' => $order->ghn_to_province_id,   
+                    'province_id' => $order->ghn_to_province_id,
                     'district_id' => $order->ghn_to_district_id,
                     'ward_code' => $order->ghn_to_ward_code,
                     'estimated_delivery' => '2-3 ngày làm việc',
@@ -256,12 +256,12 @@ class OrderController extends Controller
 
         // ✅ Chỉ xử lý stock khi trạng thái thực sự thay đổi
         if ($oldStatus !== $newStatus) {
-            
+
             // Trường hợp chuyển sang 'delivered' (trừ stock)
             if ($newStatus == 'delivered' && $oldStatus != 'delivered') {
                 foreach ($order->cart as $cart) {
                     $product = $cart->product;
-                    
+
                     // ✅ Kiểm tra stock trước khi trừ
                     if ($product->stock >= $cart->quantity) {
                         $product->stock -= $cart->quantity;
@@ -271,7 +271,7 @@ class OrderController extends Controller
                     }
                 }
             }
-            
+
             // Trường hợp chuyển từ 'delivered' sang trạng thái khác (hoàn stock)
             if ($oldStatus == 'delivered' && $newStatus != 'delivered') {
                 foreach ($order->cart as $cart) {
@@ -433,39 +433,74 @@ class OrderController extends Controller
 
     //API section
 
-    public function apiGetUserOrders()
-    {
-        try {
-            // Lấy danh sách đơn hàng của user với thông tin cần thiết
-            $orders = Order::where('user_id', Auth::id())
-                ->with([
-                    'cart_info.product:id,title,photo,price,discount,stock',
-                    'shipping:id,type,price'
-                ])
-                ->orderBy('created_at', 'desc')
-                ->get();
+public function apiGetUserOrders()
+{
+   try {
+       // Lấy danh sách đơn hàng của user với thông tin cần thiết
+       $orders = Order::where('user_id', Auth::id())
+           ->with([
+               'cartInfo.product:id,title,photo,price,discount,stock',
+               'shipping:id,type,price',
+               'user:id,name'
+           ])
+           ->orderBy('created_at', 'desc')
+           ->get();
 
-            if ($orders->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không tìm thấy đơn hàng nào.',
-                ], 404);
-            }
+       if ($orders->isEmpty()) {
+           return response()->json([
+               'success' => false,
+               'message' => 'Không tìm thấy đơn hàng nào.',
+           ], 404);
+       }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Danh sách đơn hàng của user.',
-                'orders' => $orders,
-            ], 200);
+       // Format lại data để hiển thị tên khách hàng rõ ràng
+       $ordersFormatted = $orders->map(function ($order) {
+           return [
+               'id' => $order->id,
+               'order_number' => $order->order_number,
+               'user_id' => $order->user_id,
+               'customer_name' => $order->user->name ?? ($order->first_name . ' ' . $order->last_name),
+               'customer_email' => $order->user->email ?? $order->email,
+               'sub_total' => $order->sub_total,
+               'shipping_cost' => $order->shipping_cost,
+               'total_amount' => $order->total_amount,
+               'quantity' => $order->quantity,
+               'status' => $order->status,
+               'payment_method' => $order->payment_method,
+               'payment_status' => $order->payment_status,
+               'phone' => $order->phone,
+               'address' => $order->getFullAddress(),
+               'country' => $order->country,
+               'post_code' => $order->post_code,
+               'coupon' => $order->coupon,
+               'created_at' => $order->created_at,
+               'updated_at' => $order->updated_at,
+               // GHN fields
+               'ghn_order_code' => $order->ghn_order_code,
+               'ghn_status' => $order->ghn_status,
+               'tracking_url' => $order->getTrackingUrl(),
+               'shipping_method' => $order->getShippingMethod(),
+               // Related data
+               'cart_info' => $order->cartInfo,
+               'shipping' => $order->shipping,
+               'user' => $order->user,
+           ];
+       });
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi khi lấy danh sách đơn hàng.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+       return response()->json([
+           'success' => true,
+           'message' => 'Danh sách đơn hàng của người dùng.',
+           'orders' => $ordersFormatted,
+       ], 200);
+
+   } catch (\Exception $e) {
+       return response()->json([
+           'success' => false,
+           'message' => 'Lỗi khi lấy danh sách đơn hàng.',
+           'error' => $e->getMessage(),
+       ], 500);
+   }
+}
 
     public function apiCreateOrder(Request $request)
     {
@@ -557,7 +592,7 @@ class OrderController extends Controller
         foreach ($carts as $cart) {
             $product = Product::find($cart->product_id);
             if ($product) {
-                $commission = $cart->doctor_id 
+                $commission = $cart->doctor_id
                     ? (($cart->price * $cart->quantity) * ($product->commission_percentage / 100))
                     : 0;
 
@@ -570,7 +605,7 @@ class OrderController extends Controller
 
         // ✅ Tạo affiliate_order cho TỪNG doctor riêng biệt
         $doctorCommissions = $carts->where('doctor_id', '!=', null)->groupBy('doctor_id');
-        
+
         foreach ($doctorCommissions as $doctor_id => $doctorCarts) {
             AffiliateOrder::firstOrCreate(
                 ['order_id' => $order->id, 'doctor_id' => $doctor_id],

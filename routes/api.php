@@ -58,7 +58,7 @@ Route::middleware('auth:sanctum')->prefix('shipping')->group(function () {
     Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);
     Route::post('/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
     Route::post('/auto-calculate', [ApiOrderController::class, 'autoCalculateShipping']);
-    
+
     // Order Management
     Route::post('/create-order', [ApiMobileShippingController::class, 'createShippingOrder']);
     Route::get('/track', [ApiMobileShippingController::class, 'trackOrder']);
