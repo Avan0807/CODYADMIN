@@ -461,7 +461,6 @@ Route::middleware('auth:sanctum')->put('/posts/{postId}/comments/{commentId}', [
 // Trả lời bình luận (yêu cầu xác thực)
 Route::middleware('auth:sanctum')->post('/comments/reply', [PostCommentController::class, 'apiReplyComment']);
 
-
 // ================== ORDER ROUTES ==================
 
 // Lấy tất cả đơn hàng của người dùng (yêu cầu xác thực)
