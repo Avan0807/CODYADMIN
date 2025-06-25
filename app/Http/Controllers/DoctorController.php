@@ -9,109 +9,128 @@ use Illuminate\Support\Facades\Storage;
 
 class DoctorController extends Controller
 {
+    /**
+     * Danh sách bác sĩ
+     */
     public function index()
     {
-        $doctors = Doctor::orderBy('id', 'DESC')->get(); // Lấy danh sách với phân trang
+        $doctors = Doctor::orderBy('id', 'DESC')->get();
         return view('backend.doctor.index', compact('doctors'));
     }
 
+    /**
+     * Form thêm bác sĩ
+     */
     public function create()
     {
-        $categories = Category::all(); // hoặc where type='specialization' nếu có loại
+        $categories = Category::where('status', 'active')->get();
         return view('backend.doctor.create', compact('categories'));
     }
 
+    /**
+     * Lưu bác sĩ mới
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'experience' => 'required|integer',
-            'email' => 'required|email|unique:doctors',
-            'phone' => 'required',
-            'status' => 'required',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password' => 'required|min:6',
+            'name'               => 'required|string|max:255',
+            'services'           => 'nullable|string',
+            'experience'         => 'required|integer|min:0',
+            'working_hours'      => 'nullable|string',
+            'location'           => 'nullable|string',
+            'workplace'          => 'nullable|string',
+            'phone'              => 'required|string|max:20',
+            'email'              => 'required|email|unique:doctors',
+            'photo'              => 'nullable|string',
+            'status'             => 'required|in:active,inactive',
+            'rating'             => 'nullable|numeric|min:0|max:5',
+            'consultation_fee'   => 'nullable|numeric|min:0',
+            'bio'                => 'nullable|string',
+            'short_bio'          => 'nullable|string|max:255',
+            'points'             => 'nullable|integer',
+            'total_commission'   => 'nullable|numeric',
+            'password'           => 'required|min:6',
+            'specialization'     => 'required|exists:categories,id',
         ]);
 
-        // Loại bỏ specialization và services khỏi insert trực tiếp
-        $data = $request->except(['specialization', 'services']);
+        $data = $request->only([
+            'name', 'services', 'experience', 'working_hours',
+            'location', 'workplace', 'phone', 'email', 'photo', 'status',
+            'rating', 'consultation_fee', 'bio', 'points',
+            'short_bio', 'total_commission'
+        ]);
 
-        // Mã hóa mật khẩu
         $data['password'] = bcrypt($request->password);
 
-        // Xử lý ảnh nếu có
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('photos', 'public');
-        }
-
-        // Tạo bác sĩ
         $doctor = Doctor::create($data);
-
-        // Gán chuyên khoa (nhiều-nhiều)
-        if ($request->has('specialization')) {
-            $doctor->specializations()->sync($request->specialization);
-        }
-
-        // (Tùy chọn) Nếu có quan hệ services thì xử lý tương tự
+        $doctor->specializations()->sync([$request->specialization]);
 
         return redirect()->route('doctor.index')->with('success', 'Bác sĩ đã được thêm thành công');
     }
 
+    /**
+     * Form chỉnh sửa bác sĩ
+     */
     public function edit(Doctor $doctor)
     {
-        return view('backend.doctor.edit', compact('doctor'));
+        $categories = Category::where('status', 'active')->get();
+        return view('backend.doctor.edit', compact('doctor', 'categories'));
     }
 
+    /**
+     * Cập nhật bác sĩ
+     */
     public function update(Request $request, Doctor $doctor)
     {
         $request->validate([
-            'name' => 'required',
-            'specialization' => 'required',
-            'experience' => 'required|integer',
-            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
-            'phone' => 'required',
-            'status' => 'required',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password' => 'nullable|min:6',
+            'name'               => 'required|string|max:255',
+            'services'           => 'nullable|string',
+            'experience'         => 'required|integer|min:0',
+            'working_hours'      => 'nullable|string',
+            'location'           => 'nullable|string',
+            'workplace'          => 'nullable|string',
+            'phone'              => 'required|string|max:20',
+            'email'              => 'required|email|unique:doctors,email,' . $doctor->id,
+            'photo'              => 'nullable|string',
+            'status'             => 'required|in:active,inactive',
+            'rating'             => 'nullable|numeric|min:0|max:5',
+            'consultation_fee'   => 'nullable|numeric|min:0',
+            'bio'                => 'nullable|string',
+            'short_bio'          => 'nullable|string|max:255',
+            'points'             => 'nullable|integer',
+            'total_commission'   => 'nullable|numeric',
+            'password'           => 'nullable|min:6',
+            'specialization'     => 'required|exists:categories,id',
         ]);
 
         $data = $request->only([
-            'name', 'specialization', 'services', 'experience',
-            'working_hours', 'location', 'workplace', 'phone',
-            'email', 'status', 'rating', 'consultation_fee',
-            'bio', 'points'
+            'name', 'services', 'experience', 'working_hours',
+            'location', 'workplace', 'phone', 'email', 'photo', 'status',
+            'rating', 'consultation_fee', 'bio', 'points',
+            'short_bio', 'total_commission'
         ]);
 
-        // Xử lý mật khẩu nếu có cập nhật
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);
         }
 
-        // Xử lý ảnh nếu có
-        if ($request->hasFile('photo')) {
-            // Xóa ảnh cũ nếu tồn tại
-            if ($doctor->photo && Storage::exists('public/' . $doctor->photo)) {
-                Storage::delete('public/' . $doctor->photo);
-            }
-            // Lưu ảnh mới
-            $data['photo'] = $request->file('photo')->store('photos', 'public');
-        }
-
         $doctor->update($data);
+        $doctor->specializations()->sync([$request->specialization]);
 
-        return redirect()->route('doctor.index')->with('success', 'Thông tin bác sĩ đã được cập nhật');
+        return redirect()->route('doctor.index')->with('success', 'Cập nhật bác sĩ thành công');
     }
 
+    /**
+     * Xóa bác sĩ
+     */
     public function destroy(Doctor $doctor)
     {
-        // Xóa ảnh khi xóa bác sĩ
         if ($doctor->photo && Storage::exists('public/' . $doctor->photo)) {
             Storage::delete('public/' . $doctor->photo);
         }
 
         $doctor->delete();
 
-        return redirect()->route('doctor.index')->with('success', 'Bác sĩ đã được xóa');
+        return redirect()->route('doctor.index')->with('success', 'Đã xóa bác sĩ thành công');
     }
-
 }

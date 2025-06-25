@@ -36,7 +36,13 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{$doctor->name}}</td>
-                    <td>{{$doctor->specialization}}</td>
+                    <td>
+                      @if($doctor->specializations)
+                          @foreach($doctor->specializations as $spec)
+                              <span class="badge badge-info">{{ $spec->name }}</span>
+                          @endforeach
+                      @endif
+                    </td>
                     <td>{{$doctor->experience}} năm</td>
                     <td>{{$doctor->working_hours}}</td>
                     <td>{{$doctor->location}}</td>

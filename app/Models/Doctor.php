@@ -14,15 +14,14 @@ class Doctor extends Authenticatable
     protected $table = 'doctors';
 
     protected $fillable = [
-        'name', 'specialization', 'services', 'experience', 'working_hours',
+        'name', 'services', 'experience', 'working_hours',
         'location', 'workplace', 'phone', 'email', 'photo', 'status',
-        'rating', 'consultation_fee', 'bio', 'password', 'points', 'short_bio',
-        'total_commission'
+        'rating', 'consultation_fee', 'bio', 'password', 'points',
+        'short_bio', 'total_commission',
+        'api_token', 'api_token_expires_at', 'last_api_access'
     ];
 
-    protected $hidden = [
-        'password',
-    ];
+    protected $hidden = ['password'];
 
     protected $casts = [
         'rating' => 'decimal:2',
@@ -32,7 +31,10 @@ class Doctor extends Authenticatable
         'total_commission' => 'double',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'api_token_expires_at' => 'datetime',
+        'last_api_access' => 'datetime',
     ];
+
 
     // 🔹 Quan hệ với lịch hẹn
     public function appointments()
@@ -66,8 +68,10 @@ class Doctor extends Authenticatable
     // 🔹 Quan hệ với các chuyên khoa (nhiều-nhiều với categories)
     public function specializations()
     {
-        return $this->belongsToMany(Category::class, 'doctor_specializations', 'doctor_id', 'specialization_id');
+        return $this->belongsToMany(Category::class, 'doctor_specializations', 'doctor_id', 'specialization_id')
+                    ->withTimestamps();
     }
+
 
 
     // 🔹 Quan hệ các buổi tư vấn / meeting

@@ -1,107 +1,147 @@
 @extends('backend.layouts.master')
 
 @section('main-content')
-
 <div class="card">
     <h5 class="card-header">Chỉnh Sửa Bác Sĩ</h5>
     <div class="card-body">
-      <form method="post" action="{{route('doctor.update',$doctor->id)}}">
-        @csrf
-        @method('PATCH')
-        <div class="form-group">
-          <label for="inputName" class="col-form-label">Tên <span class="text-danger">*</span></label>
-          <input id="inputName" type="text" name="name" placeholder="Nhập tên bác sĩ" value="{{$doctor->name}}" class="form-control">
-          @error('name')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+        <form method="post" action="{{route('doctor.update',$doctor->id)}}">
+            @csrf
+            @method('PATCH')
 
-        <div class="form-group">
-          <label for="specialization" class="col-form-label">Chuyên Môn <span class="text-danger">*</span></label>
-          <input id="specialization" type="text" name="specialization" placeholder="Nhập chuyên môn" value="{{$doctor->specialization}}" class="form-control">
-          @error('specialization')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Tên bác sĩ --}}
+            <div class="form-group">
+                <label for="name">Tên Bác Sĩ <span class="text-danger">*</span></label>
+                <input type="text" name="name" value="{{ old('name', $doctor->name) }}" class="form-control">
+                @error('name') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
 
-        <div class="form-group">
-          <label for="experience" class="col-form-label">Kinh Nghiệm (năm) <span class="text-danger">*</span></label>
-          <input id="experience" type="number" name="experience" min="0" placeholder="Nhập số năm kinh nghiệm" value="{{$doctor->experience}}" class="form-control">
-          @error('experience')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Chuyên khoa (dùng category) --}}
+            <div class="form-group">
+                <label for="specialization">Chuyên Khoa <span class="text-danger">*</span></label>
+                <select name="specialization" class="form-control">
+                    <option value="">-- Chọn chuyên khoa --</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}"
+                            {{ $doctor->specializations->first()?->id == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('specialization') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
 
-        <div class="form-group">
-          <label for="working_hours" class="col-form-label">Giờ Làm Việc</label>
-          <input id="working_hours" type="text" name="working_hours" placeholder="Nhập giờ làm việc" value="{{$doctor->working_hours}}" class="form-control">
-          @error('working_hours')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Nơi làm việc --}}
+            <div class="form-group">
+                <label for="workplace">Nơi Làm Việc</label>
+                <input type="text" name="workplace" value="{{ old('workplace', $doctor->workplace) }}" class="form-control">
+            </div>
 
-        <div class="form-group">
-          <label for="location" class="col-form-label">Địa Điểm</label>
-          <input id="location" type="text" name="location" placeholder="Nhập địa điểm làm việc" value="{{$doctor->location}}" class="form-control">
-          @error('location')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Kinh nghiệm --}}
+            <div class="form-group">
+                <label for="experience">Kinh Nghiệm (năm)</label>
+                <input type="number" name="experience" value="{{ old('experience', $doctor->experience) }}" class="form-control">
+            </div>
 
-        <div class="form-group">
-          <label for="phone" class="col-form-label">Số Điện Thoại</label>
-          <input id="phone" type="text" name="phone" placeholder="Nhập số điện thoại" value="{{$doctor->phone}}" class="form-control">
-          @error('phone')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Giờ làm việc --}}
+            <div class="form-group">
+                <label for="working_hours">Giờ Làm Việc</label>
+                <input type="text" name="working_hours" value="{{ old('working_hours', $doctor->working_hours) }}" class="form-control">
+            </div>
 
-        <div class="form-group">
-          <label for="email" class="col-form-label">Email</label>
-          <input id="email" type="email" name="email" placeholder="Nhập email" value="{{$doctor->email}}" class="form-control">
-          @error('email')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Địa điểm --}}
+            <div class="form-group">
+                <label for="location">Địa Điểm</label>
+                <input type="text" name="location" value="{{ old('location', $doctor->location) }}" class="form-control">
+            </div>
 
-        <div class="form-group">
-            <label for="inputPhoto" class="col-form-label">Hình Ảnh <span class="text-danger">*</span></label>
-            <div class="input-group">
-                <span class="input-group-btn">
+            {{-- Dịch vụ --}}
+            <div class="form-group">
+                <label for="services">Dịch Vụ</label>
+                <textarea name="services" class="form-control" rows="3">{{ old('services', $doctor->services) }}</textarea>
+            </div>
+
+            {{-- Email --}}
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" value="{{ old('email', $doctor->email) }}" class="form-control">
+            </div>
+
+            {{-- Số điện thoại --}}
+            <div class="form-group">
+                <label for="phone">Số Điện Thoại</label>
+                <input type="text" name="phone" value="{{ old('phone', $doctor->phone) }}" class="form-control">
+            </div>
+
+            {{-- Hình ảnh --}}
+            <div class="form-group">
+                <label for="photo">Hình Ảnh</label>
+                <div class="input-group">
                     <a id="lfm" data-input="doctor_photo" data-preview="holder" class="btn btn-primary text-white">
                         <i class="fas fa-image"></i> Chọn
                     </a>
-                </span>
-                <input id="doctor_photo" class="form-control" type="text" name="photo" value="{{$doctor->photo}}">
+                    <input id="doctor_photo" class="form-control" type="text" name="photo" value="{{ old('photo', $doctor->photo) }}">
+                </div>
+                <div id="holder" style="margin-top:15px;max-height:100px;">
+                    @if($doctor->photo)
+                        <img src="{{ asset('storage/'.$doctor->photo) }}" style="height: 5rem;">
+                    @endif
+                </div>
             </div>
-            <div id="holder" style="margin-top:15px;max-height:100px;">
-                @if($doctor->photo)
-                    <img src="{{$doctor->photo}}" style="height: 5rem;">
-                @endif
+
+            {{-- Mật khẩu --}}
+            <div class="form-group">
+                <label for="password">Mật Khẩu (để trống nếu không đổi)</label>
+                <input type="password" name="password" class="form-control">
             </div>
-            @error('photo')
-            <span class="text-danger">{{$message}}</span>
-            @enderror
-        </div>
 
-        <div class="form-group">
-          <label for="status" class="col-form-label">Trạng Thái <span class="text-danger">*</span></label>
-          <select name="status" class="form-control">
-            <option value="active" {{(($doctor->status=='active')? 'selected' : '')}}>Hoạt Động</option>
-            <option value="inactive" {{(($doctor->status=='inactive')? 'selected' : '')}}>Không Hoạt Động</option>
-          </select>
-          @error('status')
-          <span class="text-danger">{{$message}}</span>
-          @enderror
-        </div>
+            {{-- Trạng thái --}}
+            <div class="form-group">
+                <label for="status">Trạng Thái</label>
+                <select name="status" class="form-control">
+                    <option value="active" {{ $doctor->status == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                    <option value="inactive" {{ $doctor->status == 'inactive' ? 'selected' : '' }}>Không hoạt động</option>
+                </select>
+            </div>
 
-        <div class="form-group mb-3">
-           <button class="btn btn-success" type="submit">Cập Nhật</button>
-        </div>
-      </form>
+            {{-- Điểm thưởng --}}
+            <div class="form-group">
+                <label for="points">Điểm Thưởng</label>
+                <input type="number" name="points" value="{{ old('points', $doctor->points) }}" class="form-control">
+            </div>
+
+            {{-- Tổng hoa hồng --}}
+            <div class="form-group">
+                <label for="total_commission">Tổng Hoa Hồng</label>
+                <input type="number" name="total_commission" value="{{ old('total_commission', $doctor->total_commission) }}" class="form-control">
+            </div>
+
+            {{-- Giá khám --}}
+            <div class="form-group">
+                <label for="consultation_fee">Phí Tư Vấn</label>
+                <input type="number" name="consultation_fee" value="{{ old('consultation_fee', $doctor->consultation_fee) }}" class="form-control">
+            </div>
+
+            {{-- Mô tả ngắn --}}
+            <div class="form-group">
+                <label for="short_bio">Tiểu sử ngắn</label>
+                <textarea name="short_bio" class="form-control" rows="2">{{ old('short_bio', $doctor->short_bio) }}</textarea>
+            </div>
+
+            {{-- Mô tả dài --}}
+            <div class="form-group">
+                <label for="bio">Tiểu sử chi tiết</label>
+                <textarea name="bio" class="form-control" rows="5">{{ old('bio', $doctor->bio) }}</textarea>
+            </div>
+
+            {{-- Rating (ẩn nếu không dùng form input) --}}
+            <input type="hidden" name="rating" value="{{ old('rating', $doctor->rating) }}">
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-success">Cập Nhật</button>
+            </div>
+        </form>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
