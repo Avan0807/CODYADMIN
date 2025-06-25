@@ -44,11 +44,12 @@ class Order extends Model
      * ✅ Data type casting
      */
     protected $casts = [
-        'shipping_cost' => 'decimal:2',
-        'sub_total' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'coupon' => 'decimal:2',
-        'commission' => 'decimal:2',
+        'shipping_cost' => 'float',    // Đổi từ decimal:2 sang float
+        'sub_total' => 'float',        // Đổi từ decimal:2 sang float  
+        'total_amount' => 'float',     // Đổi từ decimal:2 sang float
+        'coupon' => 'float',           // Đổi từ decimal:2 sang float
+        'commission' => 'float',       // Đổi từ decimal:2 sang float
+        'quantity' => 'integer',       // Thêm quantity
         'ghn_to_district_id' => 'integer',
         'ghn_service_id' => 'integer',
     ];

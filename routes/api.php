@@ -302,7 +302,7 @@ Route::middleware('auth:sanctum')->delete('/user/notifications/{notificationID}'
 // Lấy danh sách bác sĩ (yêu cầu xác thực)
 Route::get('/doctors', [GetdoctorsController::class, 'apiHome']);
 
-// Lấy toàn bộ danh sách bác sĩ (public, không yêu cầu xác thực)
+// Lấy toàn bộ danh sách bác sĩ (public, không yêu cầu xác thực)s
 Route::get('/alldoctors', [DoctorsController::class, 'apiGetAllDoctors']);
 
 // Lấy thông tin chi tiết của một bác sĩ theo ID (public, không yêu cầu xác thực)

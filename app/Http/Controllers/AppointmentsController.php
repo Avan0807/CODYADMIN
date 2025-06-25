@@ -441,7 +441,6 @@ class AppointmentsController extends Controller
 
     // Lấy toàn bộ lịch hẹn của bác sĩ
 
-
     public function apiGetAllAppointmentsByDoctor(Request $request, $doctor_id)
     {
         // Lấy thông tin bác sĩ đang đăng nhập
@@ -454,8 +453,9 @@ class AppointmentsController extends Controller
             ], 403);
         }
 
-        // Lấy danh sách lịch hẹn của bác sĩ
+        // Lấy danh sách lịch hẹn của bác sĩ kèm thông tin user
         $appointments = Appointment::where('doctor_id', $doctor_id)
+            ->with('user:id,name') // Chỉ lấy id và name của user
             ->orderBy('date', 'asc')
             ->orderBy('time', 'asc')
             ->get();
@@ -465,7 +465,6 @@ class AppointmentsController extends Controller
             'appointments' => $appointments
         ]);
     }
-
 
 
     // Xóa lịch hẹn

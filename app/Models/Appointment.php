@@ -9,10 +9,16 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    protected $table = 'appointments'; // Tên bảng trong DB
+    protected $table = 'appointments';
 
     protected $fillable = [
         'doctor_id',
+        'service_id',           // ✅ Thêm
+        'guest_name',           // ✅ Thêm
+        'guest_phone',          // ✅ Thêm
+        'guest_email',          // ✅ Thêm
+        'guest_address',        // ✅ Thêm
+        'specialization_id',    // ✅ Thêm
         'user_id',
         'date',
         'time',
@@ -24,9 +30,9 @@ class Appointment extends Model
 
     protected $casts = [
         'date' => 'date',
-        'time' => 'datetime:H:i:s',
         'status' => 'string',
         'approval_status' => 'string',
+        'consultation_type' => 'string',
     ];
 
     /**
@@ -34,7 +40,7 @@ class Appointment extends Model
      */
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class);
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
     /**
@@ -42,6 +48,15 @@ class Appointment extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * ✅ Mối quan hệ với bảng Services
+     */
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'service_id');
+    }
+    
 }

@@ -433,74 +433,77 @@ class OrderController extends Controller
 
     //API section
 
-public function apiGetUserOrders()
-{
-   try {
-       // Lấy danh sách đơn hàng của user với thông tin cần thiết
-       $orders = Order::where('user_id', Auth::id())
-           ->with([
-               'cartInfo.product:id,title,photo,price,discount,stock',
-               'shipping:id,type,price',
-               'user:id,name'
-           ])
-           ->orderBy('created_at', 'desc')
-           ->get();
+    public function apiGetUserOrders()
+    {
+        try {
+            $orders = Order::where('user_id', Auth::id())
+                ->with([
+                    'cartInfo.product:id,title,photo,price,discount,stock',
+                    'shipping:id,type,price',
+                    'user:id,name'
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-       if ($orders->isEmpty()) {
-           return response()->json([
-               'success' => false,
-               'message' => 'Không tìm thấy đơn hàng nào.',
-           ], 404);
-       }
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy đơn hàng nào.',
+                ], 404);
+            }
 
-       // Format lại data để hiển thị tên khách hàng rõ ràng
-       $ordersFormatted = $orders->map(function ($order) {
-           return [
-               'id' => $order->id,
-               'order_number' => $order->order_number,
-               'user_id' => $order->user_id,
-               'customer_name' => $order->user->name ?? ($order->first_name . ' ' . $order->last_name),
-               'customer_email' => $order->user->email ?? $order->email,
-               'sub_total' => $order->sub_total,
-               'shipping_cost' => $order->shipping_cost,
-               'total_amount' => $order->total_amount,
-               'quantity' => $order->quantity,
-               'status' => $order->status,
-               'payment_method' => $order->payment_method,
-               'payment_status' => $order->payment_status,
-               'phone' => $order->phone,
-               'address' => $order->getFullAddress(),
-               'country' => $order->country,
-               'post_code' => $order->post_code,
-               'coupon' => $order->coupon,
-               'created_at' => $order->created_at,
-               'updated_at' => $order->updated_at,
-               // GHN fields
-               'ghn_order_code' => $order->ghn_order_code,
-               'ghn_status' => $order->ghn_status,
-               'tracking_url' => $order->getTrackingUrl(),
-               'shipping_method' => $order->getShippingMethod(),
-               // Related data
-               'cart_info' => $order->cartInfo,
-               'shipping' => $order->shipping,
-               'user' => $order->user,
-           ];
-       });
+            $ordersFormatted = $orders->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_id' => $order->user_id,
+                    'customer_name' => $order->user->name ?? ($order->first_name . ' ' . $order->last_name),
+                    'customer_email' => $order->user->email ?? $order->email,
+                    
+                    // ✅ Ép kiểu số rõ ràng
+                    'sub_total' => floatval($order->sub_total ?? 0),
+                    'shipping_cost' => floatval($order->shipping_cost ?? 0),
+                    'total_amount' => floatval($order->total_amount ?? 0),
+                    'quantity' => intval($order->quantity ?? 0),
+                    'coupon' => floatval($order->coupon ?? 0),
+                    
+                    'status' => $order->status,
+                    'payment_method' => $order->payment_method,
+                    'payment_status' => $order->payment_status,
+                    'phone' => $order->phone,
+                    'address' => $order->getFullAddress(),
+                    'country' => $order->country,
+                    'post_code' => $order->post_code,
+                    'created_at' => $order->created_at,
+                    'updated_at' => $order->updated_at,
+                    
+                    // GHN fields
+                    'ghn_order_code' => $order->ghn_order_code,
+                    'ghn_status' => $order->ghn_status,
+                    'tracking_url' => $order->getTrackingUrl(),
+                    'shipping_method' => $order->getShippingMethod(),
+                    
+                    // Related data
+                    'cart_info' => $order->cartInfo,
+                    'shipping' => $order->shipping,
+                    'user' => $order->user,
+                ];
+            });
 
-       return response()->json([
-           'success' => true,
-           'message' => 'Danh sách đơn hàng của người dùng.',
-           'orders' => $ordersFormatted,
-       ], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Danh sách đơn hàng của người dùng.',
+                'orders' => $ordersFormatted,
+            ], 200);
 
-   } catch (\Exception $e) {
-       return response()->json([
-           'success' => false,
-           'message' => 'Lỗi khi lấy danh sách đơn hàng.',
-           'error' => $e->getMessage(),
-       ], 500);
-   }
-}
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi lấy danh sách đơn hàng.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function apiCreateOrder(Request $request)
     {
