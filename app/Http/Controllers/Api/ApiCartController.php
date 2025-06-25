@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Cart;
 use App\Models\AffiliateLink;
 use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Log;
 
 class ApiCartController extends Controller
 {
@@ -247,73 +248,96 @@ class ApiCartController extends Controller
     /**
      * Kiểm tra số lượng tồn kho của sản phẩm trước khi thanh toán (API).
      */
-    public function checkoutNow(Request $request, $slug)
-    {
-        $product = Product::where('slug', $slug)->first();
+ 
 
-        if (!$product) {
-            return response()->json(['error' => 'Sản phẩm không hợp lệ'], 400);
-        }
+public function checkoutNow(Request $request, $slug)
+{
+    $userId = auth()->id();
 
-        $userId = auth()->id();
-        $price = $product->price - ($product->price * $product->discount / 100);
-
-        $hash_ref = $request->query('ref');
-        $doctor_id = null;
-        $affiliate_hash_ref = null;
-
-        if ($hash_ref) {
-            $affiliate = AffiliateLink::where('hash_ref', $hash_ref)->first();
-            if ($affiliate) {
-                $doctor_id = $affiliate->doctor_id;
-                $affiliate_hash_ref = $affiliate->hash_ref;
-            }
-        }
-
-        // ✅ Kiểm tra cart CÙNG doctor_id
-        $cart = Cart::where('user_id', $userId)
-                    ->whereNull('order_id')
-                    ->where('product_id', $product->id)
-                    ->where('doctor_id', $doctor_id) // ✅ THÊM điều kiện này
-                    ->first();
-
-        if ($cart) {
-            // Check stock
-            if ($product->stock < ($cart->quantity + 1)) {
-                return response()->json(['error' => 'Số lượng tồn kho không đủ'], 400);
-            }
-            
-            $cart->quantity += 1;
-            $cart->amount = $cart->quantity * $price;
-            $cart->commission = $doctor_id 
-                ? ($cart->amount * ($product->commission_percentage / 100))
-                : 0;
-        } else {
-            if ($product->stock <= 0) {
-                return response()->json(['error' => 'Sản phẩm đã hết hàng'], 400);
-            }
-
-            $cart = new Cart([
-                'user_id' => $userId,
-                'product_id' => $product->id,
-                'price' => $price,
-                'quantity' => 1,
-                'amount' => $price,
-                'doctor_id' => $doctor_id, // ✅ Set ngay khi tạo
-                'commission' => $doctor_id 
-                    ? ($price * ($product->commission_percentage / 100))
-                    : 0,
-            ]);
-        }
-
-        $cart->save();
-
+    // ✅ Tìm sản phẩm theo slug
+    $product = Product::where('slug', $slug)->first();
+    if (!$product) {
         return response()->json([
-            'success' => true,
-            'message' => 'Sản phẩm đã được thêm vào giỏ hàng',
-            'cart' => $cart,
-            'hash_ref' => $affiliate_hash_ref,
+            'success' => false,
+            'error' => 'Sản phẩm không tồn tại!'
+        ], 404);
+    }
+
+    // ✅ Lấy ref từ query string
+    $hash_ref = $request->query('ref');
+    $doctor_id = null;
+    $commissionPercentage = $product->commission_percentage;
+
+    if ($hash_ref) {
+        $affiliate = AffiliateLink::where('hash_ref', $hash_ref)->first();
+
+        Log::info('API Checkout - Hash ref:', ['hash_ref' => $hash_ref]);
+        Log::info('API Checkout - Affiliate record:', $affiliate ? $affiliate->toArray() : ['affiliate' => null]);
+
+        if ($affiliate && $affiliate->doctor_id) {
+            $doctor_id = $affiliate->doctor_id;
+            $commissionPercentage = $affiliate->commission_percentage ?? $product->commission_percentage;
+        }
+    }
+
+    // ✅ Tính giá cuối cùng (có discount)
+    $final_price = $product->price - ($product->price * $product->discount / 100);
+
+    // ✅ Tìm cart có sản phẩm + doctor_id tương ứng
+    $cart = Cart::where('user_id', $userId)
+                ->whereNull('order_id')
+                ->where('product_id', $product->id)
+                ->where('doctor_id', $doctor_id)
+                ->first();
+
+    if ($cart) {
+        $cart->quantity += 1;
+        $cart->amount = $cart->quantity * $final_price;
+    } else {
+        $cart = new Cart([
+            'user_id'    => $userId,
+            'product_id' => $product->id,
+            'price'      => $final_price,
+            'quantity'   => 1,
+            'amount'     => $final_price,
+            'doctor_id'  => $doctor_id,
         ]);
     }
-    
+
+    // ✅ Gán commission theo doctor_id nếu có
+    $cart->commission = $doctor_id
+        ? ($cart->amount * ($commissionPercentage / 100))
+        : 0;
+
+    // ✅ Check tồn kho
+    if ($product->stock < $cart->quantity) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Số lượng tồn kho không đủ!'
+        ], 400);
+    }
+
+    $cart->save();
+    Log::info('✅ Cart đã lưu:', $cart->toArray());
+
+    // ✅ Trả về JSON API
+    return response()->json([
+        'success'   => true,
+        'message'   => 'Sản phẩm đã được thêm vào giỏ hàng',
+        'cart'      => [
+            'id'          => $cart->id,
+            'user_id'     => $cart->user_id,
+            'product_id'  => $cart->product_id,
+            'price'       => $cart->price,
+            'quantity'    => $cart->quantity,
+            'amount'      => $cart->amount,
+            'commission'  => $cart->commission,
+            'doctor_id'   => $cart->doctor_id,
+            'created_at'  => $cart->created_at,
+            'updated_at'  => $cart->updated_at,
+        ],
+        'hash_ref'  => $hash_ref,
+    ]);
+}
+
 }

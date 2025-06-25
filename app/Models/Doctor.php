@@ -72,8 +72,6 @@ class Doctor extends Authenticatable
                     ->withTimestamps();
     }
 
-
-
     // 🔹 Quan hệ các buổi tư vấn / meeting
     public function meetings()
     {

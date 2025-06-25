@@ -18,8 +18,8 @@ class AffiliateLink extends Model
     protected $fillable = [
         'doctor_id',
         'product_id',
-        'hash_ref',
-        'product_link',  // ✅ Thêm trường lưu link sản phẩm
+        'product_link', // ✅ Thêm trường product_link 
+        'hash_ref' // ✅ Đã có trong bảng
     ];
 
     /**
@@ -39,24 +39,17 @@ class AffiliateLink extends Model
     }
 
     /**
-     * Tạo link affiliate mới với mã hash bảo mật + lưu link + % hoa hồng
+     * Tạo link affiliate mới với mã hash bảo mật
      */
     public static function createAffiliateLink($doctorId, $productId)
     {
-        $product = Product::find($productId);
-        if (!$product) {
-            return null; // Nếu không tìm thấy sản phẩm, không tạo link
-        }
-
         $hashRef = hash('sha256', $doctorId . $productId . time()); // Mã hash an toàn
-        $productLink = url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$hashRef}");
-        $commissionPercentage = 10.00; // Giá trị mặc định, có thể thay đổi nếu cần
 
         return self::create([
             'doctor_id' => $doctorId,
             'product_id' => $productId,
+            'product_link' => url("http://toikhoe.vn/product-detail/{$productId}?ref={$hashRef}"), // ✅ Thêm product_link
             'hash_ref' => $hashRef,
-            'product_link' => $productLink,
         ]);
     }
 
@@ -68,13 +61,5 @@ class AffiliateLink extends Model
         return self::where('doctor_id', $doctorId)
             ->where('product_id', $productId)
             ->exists();
-    }
-
-    /**
-     * Tìm Affiliate theo hash_ref
-     */
-    public static function findByHash($hashRef)
-    {
-        return self::where('hash_ref', $hashRef)->first();
     }
 }
