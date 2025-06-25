@@ -382,6 +382,9 @@ Route::middleware('auth:sanctum')->get('/appointment-info/{appointmentID}', [App
 // Tạo lịch hẹn mới (chỉ user đã xác thực mới được phép tạo)
 Route::middleware('auth:sanctum')->post('/create/appointments', [AppointmentsController::class, 'apiCreateAppointment']);
 
+// Sửa lịch hẹ hẹn mới (chỉ user đã xác thực)
+Route::middleware('auth:sanctum')->put('/appointments/{appointmentID}/reschedule', [AppointmentsController::class, 'apiRescheduleAppointment']);
+
 // Xác nhận lịch hẹn (chỉ bác sĩ xác thực mới được phép xác nhận)
 Route::middleware('auth:sanctum')->put('/appointments/{appointmentID}/confirm', [AppointmentsController::class, 'apiConfirmAppointment']);
 

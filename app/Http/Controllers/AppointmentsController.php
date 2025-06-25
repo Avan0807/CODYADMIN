@@ -100,6 +100,77 @@ class AppointmentsController extends Controller
         }
     }
 
+    public function apiRescheduleAppointment(Request $request, $appointmentID)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+            'consultation_type' => 'required|in:Online,Offline,At Home',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $user = Auth::user();
+            $appointment = Appointment::findOrFail($appointmentID);
+
+            // ✅ Chỉ người tạo lịch mới được chỉnh sửa
+            if ($appointment->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền sửa lịch hẹn này.',
+                ], 403);
+            }
+
+            // ✅ Chỉ cho sửa nếu trạng thái là "Chờ duyệt"
+            if ($appointment->status !== 'Chờ duyệt') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chỉ được chỉnh sửa lịch hẹn ở trạng thái Chờ duyệt.',
+                ], 400);
+            }
+
+            // ✅ Cập nhật các trường được phép
+            $appointment->update([
+                'date' => $request->date,
+                'time' => $request->time,
+                'consultation_type' => $request->consultation_type,
+                'notes' => $request->notes,
+            ]);
+
+            // Gửi thông báo cho bác sĩ
+            $doctor = Doctor::find($appointment->doctor_id);
+            if ($doctor) {
+                $doctor->notify(new StatusNotification([
+                    'title' => 'Lịch hẹn đã được cập nhật',
+                    'message' => "Bệnh nhân {$user->name} đã cập nhật lịch hẹn: {$appointment->date} lúc {$appointment->time}.",
+                    'appointment_id' => $appointment->id,
+                    'type' => 'appointment_rescheduled',
+                ]));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lịch hẹn đã được cập nhật thành công.',
+                'appointment' => $appointment,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể cập nhật lịch hẹn.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     /**
      * Lấy danh sách tất cả các cuộc hẹn.
      *
