@@ -8,16 +8,26 @@ class Post extends Model
 {
     protected $fillable = [
         'title', 'tags', 'summary', 'slug', 'description', 'photo', 'quote',
-        'post_cat_id', 'post_tag_id', 'added_by', 'status'
+        'post_cat_id', 'post_tag_id', 'added_by', 'status', 'is_featured', 'author_type', 'post_type', 'meta_data', 'views'
     ];
+
+    protected $casts = [
+        'is_featured' => 'boolean',
+        'meta_data' => 'array',
+    ];
+
 
     /**
      * Quan hệ đến danh mục (sử dụng bảng categories).
-     */
+    */
     public function category()
     {
-        return $this->belongsTo(Category::class, 'post_cat_id');
+        return $this->belongsTo(Category::class, 'post_cat_id')->withDefault([
+            'name' => 'Không có danh mục'
+        ]);
     }
+
+
 
     /**
      * Alias cho category nếu cần dùng tên cũ.
@@ -162,4 +172,10 @@ class Post extends Model
     {
         return $query->where('status', 'active')->whereNotNull('published_at');
     }
+
+    public function clinics()
+    {
+        return $this->belongsToMany(Clinic::class, 'clinic_post', 'post_id', 'clinic_id');
+    }
+
 }

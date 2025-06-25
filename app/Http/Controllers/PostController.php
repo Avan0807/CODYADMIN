@@ -185,7 +185,7 @@ class PostController extends Controller
     {
         $doctor = $request->user();
 
-        if (!$doctor || !$doctor->doctorID) {
+        if (!$doctor || !$doctor->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền thực hiện thao tác này.',
