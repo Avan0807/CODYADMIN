@@ -404,7 +404,7 @@ Route::middleware('auth:sanctum')->get('/appointments/doctor/{doctorID}/all', [A
 // Lấy các lịch hẹn gần đây của bác sĩ (yêu cầu xác thực)
 Route::middleware('auth:sanctum')->get('/appointments/doctor/recent', [AppointmentsController::class, 'apiGetRecentAppointments']);
 
-// Bác sĩ từ chối lịch hẹn (yêu cầu xác thực)
+// Bác sĩ xóa (yêu cầu xác thực)
 Route::middleware('auth:sanctum')->delete('/appointments/doctor/{appointmentID}/reject', [AppointmentsController::class, 'apiDeleteAppointment']);
 
 

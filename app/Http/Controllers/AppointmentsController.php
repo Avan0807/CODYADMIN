@@ -295,18 +295,19 @@ class AppointmentsController extends Controller
             ], 400);
         }
 
+        // Chỉ cập nhật status, không đụng approval_status
         $appointment->update([
             'status' => 'Đã hủy',
-            'approval_status' => 'Đã hủy',
         ]);
 
-        // Notify bác sĩ & user (giữ nguyên đoạn notify của bạn)
-        
+        // Gửi thông báo nếu cần...
+
         return response()->json([
             'message' => 'Lịch khám đã được hủy thành công.',
             'appointment' => $appointment
         ], 200);
     }
+
 
 
     // Xác nhận lịch hẹn
