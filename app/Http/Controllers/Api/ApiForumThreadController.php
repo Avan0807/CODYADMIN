@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ForumThread;
 use App\Models\Category;
+use App\Models\ForumPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -367,4 +368,59 @@ class ApiForumThreadController extends Controller
             ], 500);
         }
     }
+
+    public function commentOnThread(Request $request, $threadId)
+    {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
+            }
+
+            $request->validate([
+                'content' => 'required|string',
+                'parent_id' => 'nullable|exists:forum_posts,id'
+            ]);
+
+            $thread = ForumThread::findOrFail($threadId);
+
+            $post = ForumPost::create([
+                'content' => $request->input('content'),
+                'thread_id' => $thread->id,
+                'user_id' => $user->id,
+                'parent_id' => $request->input('parent_id'),
+                'like_count' => 0,
+            ]);
+
+            $thread->increment('reply_count');
+            $thread->update([
+                'last_posted_at' => now(),
+                'last_posted_by' => $user->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bình luận thành công',
+                'data' => [
+                    'id' => $post->id,
+                    'content' => $post->content,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name
+                    ],
+                    'created_at' => $post->created_at->format('Y-m-d H:i:s')
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi bình luận',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

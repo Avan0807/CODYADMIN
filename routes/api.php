@@ -93,6 +93,10 @@ Route::prefix('forum')->group(function () {
 
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/forum/threads/{thread}/comment', [ApiForumThreadController::class, 'commentOnThread']);
+});
+
 // Route lấy 6 danh mục, mỗi danh mục có 3 bài viết mới nhất
 Route::get('/categories/with-posts', [ApiCategoryController::class, 'getCategoriesWithLatestPosts']);
 
