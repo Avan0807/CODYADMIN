@@ -286,7 +286,7 @@ class PostController extends Controller
                 'description' => $request->description,
                 'post_cat_id' => $request->post_cat_id,
                 'status' => $request->status ?? 'active',
-                'added_by' => $doctor->doctorID,
+                'added_by' => $doctor->id,
                 'author_type' => 'doctor',
                 'post_type' => $request->post_type,
                 'tags' => $request->tags,
@@ -310,7 +310,17 @@ class PostController extends Controller
             }
 
             // Load relationships cho response
-            $post->load(['category', 'clinics']);
+            $relations = ['category', 'clinics'];
+
+            if ($post->author_type === 'doctor') {
+                $relations[] = 'doctor';
+            } elseif ($post->author_type === 'user') {
+                $relations[] = 'user';
+            }
+
+            $post->load($relations);
+
+
 
             return response()->json([
                 'success' => true,
