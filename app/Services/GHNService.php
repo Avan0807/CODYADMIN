@@ -102,51 +102,28 @@ class GHNService
      */
     public function getServices($shopId, $fromDistrictId, $toDistrictId)
     {
-        try {
-            $response = Http::withHeaders([
-                'Token' => $this->token,
-                'ShopId' => $shopId,
-                'Content-Type' => 'application/json'
-            ])->post($this->apiUrl . '/v2/shipping-order/available-services', [  // ← GIỮ /v2
-                'shop_id' => (int)$shopId,
-                'from_district' => (int)$fromDistrictId,
-                'to_district' => (int)$toDistrictId
-            ]);
+        $response = Http::withHeaders([
+            'Token' => $this->token,
+            'ShopId' => $shopId,
+            'Content-Type' => 'application/json'
+        ])->post($this->apiUrl . '/v2/shipping-order/available-services', [
+            'shop_id' => (int)$shopId,
+            'from_district' => (int)$fromDistrictId,
+            'to_district' => (int)$toDistrictId
+        ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if (empty($data['data'])) {
-                    Log::warning('GHN Services empty data', [
-                        'request' => [
-                            'shop_id' => $shopId,
-                            'from_district' => $fromDistrictId,
-                            'to_district' => $toDistrictId
-                        ],
-                        'response' => $data
-                    ]);
-                }
-                return $data['data'] ?? [];
-            }
-
-            Log::error('GHN Get Services Error:', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-                'shop_id' => $shopId,
-                'from_district' => $fromDistrictId,
-                'to_district' => $toDistrictId
-            ]);
-
-            return [];
-        } catch (\Exception $e) {
-            Log::error('GHN Get Services Exception:', [
-                'message' => $e->getMessage(),
-                'shop_id' => $shopId,
-                'from_district' => $fromDistrictId,
-                'to_district' => $toDistrictId
-            ]);
-            return [];
+        if ($response->successful()) {
+            return $response->json()['data'] ?? [];
         }
+
+        \Log::error('GHN Get Services Failed:', [
+            'status' => $response->status(),
+            'body' => $response->body()
+        ]);
+
+        return [];
     }
+
 
     /**
      * Tính phí vận chuyển - DÙNG V2 VÀ FALLBACK V1

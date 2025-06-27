@@ -42,6 +42,47 @@ use App\Http\Controllers\Api\ApiCategoryController;
 use App\Http\Controllers\Api\ApiForumThreadController;
 use App\Http\Controllers\Api\ApiMobileShippingController;
 use App\Services\GHNService;
+use App\Models\Cart;
+use App\Services\ShippingService;
+
+Route::post('/shipping/services', function (Request $request, GHNService $ghn) {
+    $request->validate([
+        'to_district_id' => 'required|integer',
+        'from_district_id' => 'nullable|integer',
+    ]);
+
+    $fromDistrictId = $request->from_district_id ?? 1493;
+    $toDistrictId = $request->to_district_id;
+
+    $services = $ghn->getServices(config('services.ghn.shop_id'), $fromDistrictId, $toDistrictId);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Lấy danh sách dịch vụ vận chuyển thành công',
+        'data' => [
+            'services' => collect($services)->map(fn($s) => [
+                'service_id' => $s['service_id'],
+                'name' => $s['short_name'] ?? $s['name'] ?? 'GHN',
+                'service_type_id' => $s['service_type_id'] ?? null,
+            ]),
+            'from_district_id' => $fromDistrictId,
+            'to_district_id' => $toDistrictId,
+            'total_services' => count($services)
+        ],
+        'timestamp' => now()
+    ]);
+});
+
+Route::middleware('auth:sanctum')->post('/test-shipping-fee', function (Request $request, ShippingService $shippingService) {
+    $userId = auth()->id();
+    $carts = Cart::where('user_id', $userId)->whereNull('order_id')->get();
+
+    if ($carts->isEmpty()) {
+        return response()->json(['success' => false, 'message' => 'Giỏ hàng trống'], 400);
+    }
+
+    return $shippingService->calculate($request, $carts);
+});
 
 // ================== GHN SHIPPING APIs ==================
 
@@ -55,7 +96,6 @@ Route::prefix('ghn')->group(function () {
 // ✅ Protected Shipping APIs (cần auth)
 Route::middleware('auth:sanctum')->prefix('shipping')->group(function () {
     // Shipping Services & Calculation
-    Route::post('/services', [ApiMobileShippingController::class, 'getShippingServices']);
     Route::post('/calculate', [ApiMobileShippingController::class, 'calculateShippingFee']);
     Route::post('/auto-calculate', [ApiOrderController::class, 'autoCalculateShipping']);
 

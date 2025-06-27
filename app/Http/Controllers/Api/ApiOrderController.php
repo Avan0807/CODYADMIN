@@ -226,61 +226,34 @@ public function store(Request $request)
 /**
  * ✅ Helper: Tính shipping fee cho order
  */
-private function calculateShippingForOrder($request, $carts)
+private function calculateShippingForOrder(Request $request, $carts)
 {
-    try {
-        // Tính trọng lượng
-        $totalWeight = $carts->sum('quantity') * 200; // 200g/sản phẩm
-        
-        // Chọn service tối ưu
-        $serviceId = $request->ghn_service_id ?? $this->selectOptimalService($carts, $totalWeight);
-        
-        // Params để tính phí
-        $params = [
-            'service_id' => $serviceId,
-            'from_district_id' => 1493, // District shop của bạn
-            'to_district_id' => $request->ghn_to_district_id,
-            'to_ward_code' => $request->ghn_to_ward_code,
-            'weight' => $totalWeight,
-            'length' => 20,
-            'width' => 20,
-            'height' => 10,
-            'insurance_value' => 0
-        ];
+    $weight = $carts->sum('quantity') * 200;
 
-        \Log::info('Calculating shipping for order with params:', $params);
+    $params = [
+        'from_district_id' => 1493, // ID quận cửa hàng
+        'to_district_id' => $request->ghn_to_district_id,
+        'to_ward_code' => $request->ghn_to_ward_code,
+        'weight' => $weight,
+        'service_id' => $request->ghn_service_id ?? 53321,
+    ];
 
-        // Gọi GHN service
-        $result = $this->ghnService->calculateShippingFee($params);
+    $result = app(GHNService::class)->calculateShippingFee($params);
 
-        if ($result['success']) {
-            return [
-                'success' => true,
-                'shipping_fee' => $result['total_fee'],
-                'service_id' => $serviceId,
-                'source' => 'ghn'
-            ];
-        } else {
-            // Fallback to fixed fee
-            return [
-                'success' => true,
-                'shipping_fee' => $this->calculateFixedFee($params),
-                'service_id' => $serviceId,
-                'source' => 'fixed'
-            ];
-        }
-        
-    } catch (\Exception $e) {
-        \Log::error('Calculate shipping for order exception:', [
-            'message' => $e->getMessage()
-        ]);
-        
+    if (!$result['success']) {
         return [
             'success' => false,
-            'message' => $e->getMessage()
+            'message' => $result['message'] ?? 'Không thể tính phí vận chuyển'
         ];
     }
+
+    return [
+        'success' => true,
+        'shipping_fee' => $result['total_fee'],
+        'service_id' => $params['service_id'],
+    ];
 }
+
 
 /**
  * ✅ Helper: Chọn service tối ưu
