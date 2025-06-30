@@ -57,6 +57,7 @@ class AppointmentsController extends Controller
             // Tạo lịch hẹn mới
             $appointment = Appointment::create([
                 'doctor_id' => $request->doctor_id,
+                'specialization_id' => $request->specialization_id,
                 'user_id' => $userId,
                 'date' => $request->date,
                 'time' => $request->time,
