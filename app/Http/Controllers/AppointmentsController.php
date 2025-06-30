@@ -19,7 +19,6 @@ class AppointmentsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'doctor_id' => 'required|exists:doctors,id',
-            'specialization_id' => 'required|exists:categories,id',
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i',
             'consultation_type' => 'required|in:Online,Offline,At Home',
@@ -58,7 +57,6 @@ class AppointmentsController extends Controller
             // Tạo lịch hẹn mới
             $appointment = Appointment::create([
                 'doctor_id' => $request->doctor_id,
-                'specialization_id' => $request->specialization_id,
                 'user_id' => $userId,
                 'date' => $request->date,
                 'time' => $request->time,
