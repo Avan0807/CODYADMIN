@@ -45,14 +45,6 @@ class AppointmentsController extends Controller
 
             // ✅ Kiểm tra bác sĩ có thuộc chuyên khoa được chọn không
             $doctor = Doctor::with('specializations')->findOrFail($request->doctor_id);
-            $isValidSpecialization = $doctor->specializations->contains('id', $request->specialization_id);
-
-            if (!$isValidSpecialization) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bác sĩ không thuộc chuyên khoa được chọn.',
-                ], 422);
-            }
 
             // Tạo lịch hẹn mới
             $appointment = Appointment::create([
