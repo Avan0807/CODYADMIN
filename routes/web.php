@@ -9,9 +9,9 @@ use App\Http\Controllers\Agent\LoginController;
 use App\Http\Controllers\Agent\LinkController;
 use App\Http\Controllers\Agent\OrderAgentController;
 use App\Http\Controllers\Agent\CommissionAgentController;
-use App\Http\Controllers\AgentProductStockController;
+use App\Http\Controllers\Agent\AgentProductStockController;
 use App\Http\Controllers\Agent\AgentStockHistoryController;
-
+use App\Http\Controllers\AdminAgentProductStockController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -255,12 +255,26 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     Route::get('/agent-commissions/{agent_id}', 'AgentCommissionController@show')->name('agent.commission.detail');
 
 
-    // quản lý xuất nhập kho cho đại lí 
-    Route::get('agents/{agent}/stocks', [AgentProductStockController::class, 'index'])->name('admin.agent.stocks.index');
-    Route::get('stocks/create', [AgentProductStockController::class, 'create'])->name('admin.agent.stocks.create');
-    Route::post('stocks/store', [AgentProductStockController::class, 'store'])->name('admin.agent.stocks.store');
+    // Tồn kho của đại lý
+    Route::get('agent-stocks', [AdminAgentProductStockController::class, 'index'])
+        ->name('agent.stocks.index');
 
-    Route::get('agents/{agent}/stocks/history', [AgentStockHistoryController::class, 'index'])->name('admin.agent.stocks.history');
+    // Thu hồi hàng 
+    Route::post('/admin/agent-stocks/{id}/revoke', [AdminAgentProductStockController::class, 'revoke'])
+        ->name('agent.stocks.revoke');
+
+    // Form nhập hàng cho đại lý
+    Route::get('agent-stocks/create', [AdminAgentProductStockController::class, 'create'])
+        ->name('agent.stocks.create');
+
+    // Xử lý nhập hàng
+    Route::post('agent-stocks/store', [AdminAgentProductStockController::class, 'store'])
+        ->name('agent.stocks.store');
+        
+    // Lịch sử nhập hàng
+    Route::get('agent-stocks/history', [AdminAgentProductStockController::class, 'history'])
+    ->name('agent.stocks.history');
+
 });
 
 

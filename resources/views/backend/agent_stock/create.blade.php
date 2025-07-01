@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <h4 class="mb-4">➕ Nhập hàng cho đại lý</h4>
 
-    <form action="{{ route('admin.agent.stocks.store') }}" method="POST">
+    <form action="{{ route('agent.stocks.store') }}" method="POST">
         @csrf
         <div class="card shadow">
             <div class="card-body">
@@ -38,7 +38,7 @@
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-check mr-1"></i> Nhập hàng
                 </button>
-                <a href="{{ route('admin.agent.stocks.index', 1) }}" class="btn btn-secondary">Quay lại</a>
+                <a href="{{ route('agent.stocks.index', 1) }}" class="btn btn-secondary">Quay lại</a>
             </div>
         </div>
     </form>

@@ -4,6 +4,9 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Agent Dashboard')</title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ asset('backend/img/logo.png') }}">
+  
   <!-- Font Awesome -->
   <link href="{{ asset('backend/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
   <!-- Google Fonts -->

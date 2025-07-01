@@ -325,5 +325,13 @@ class Product extends Model
         return $this->hasMany(AgentStockHistory::class);
     }
 
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo) {
+            return \Storage::disk('s3')->url($this->photo);
+        }
+        return null;
+    }
+
 
 }

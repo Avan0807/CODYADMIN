@@ -154,6 +154,13 @@
 
   <hr class="sidebar-divider">
 
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Đại lý
+    </div>
+
+
   <!-- Agent -->
     <li class="nav-item">
       <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#agentCollapse" aria-expanded="true" aria-controls="agentCollapse">
@@ -172,29 +179,27 @@
       </div>
     </li>
 
-  <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-      Đại lý
-    </div>
-
-    <li class="nav-item has-submenu">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#stockSubmenu" aria-expanded="false">
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#agentStockMenu" aria-expanded="false" aria-controls="agentStockMenu">
             <i class="fas fa-warehouse"></i>
             <span>Kho đại lý</span>
         </a>
-        <div id="stockSubmenu" class="collapse" data-parent="#accordionSidebar">
+        <div id="agentStockMenu" class="collapse" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item" href="{{ route('admin.agent.stocks.index') }}">
+                <a class="collapse-item" href="{{ route('agent.stocks.index') }}">
                     📦 Xem tồn kho
                 </a>
-                <a class="collapse-item" href="{{ route('admin.agent.stocks.create') }}">
+                <a class="collapse-item" href="{{ route('agent.stocks.create') }}">
                     ➕ Nhập hàng
+                </a>
+                <a class="collapse-item" href="{{ route('agent.stocks.history') }}">
+                    🕘 Lịch sử nhập kho
                 </a>
             </div>
         </div>
     </li>
+
+
 
 
 

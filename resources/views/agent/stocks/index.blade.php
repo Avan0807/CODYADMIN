@@ -31,7 +31,7 @@
                     <table class="table table-modern">
                         <thead>
                             <tr>
-                                <th><i class="fas fa-hashtag mr-2"></i>#</th>
+                                <th><i class="fas fa-hashtag mr-2"></i></th>
                                 <th><i class="fas fa-box-open mr-2"></i>Sản phẩm</th>
                                 <th><i class="fas fa-image mr-2"></i>Ảnh</th>
                                 <th><i class="fas fa-layer-group mr-2"></i>Tồn kho</th>
@@ -43,19 +43,25 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>
                                     <strong>{{ $stock->product->title ?? 'Không rõ' }}</strong><br>
-                                    <small class="text-muted">ID: {{ $stock->product_id }}</small>
                                 </td>
-                                <td>
-                                    @if($stock->product->photo)
-                                        <img src="{{ asset('storage/' . $stock->product->photo) }}"
-                                             alt="Ảnh" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                                    @else
-                                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center"
-                                             style="width: 40px; height: 40px;">
-                                            <i class="fas fa-box"></i>
-                                        </div>
-                                    @endif
-                                </td>
+<td>
+    @php
+        $photos = explode(',', $stock->product->photo);
+        $firstPhoto = $photos[0] ?? null;
+        $photoUrl = $firstPhoto
+            ? (Str::startsWith($firstPhoto, 'http') 
+                ? $firstPhoto 
+                : Storage::disk('s3')->url($firstPhoto))
+            : asset('backend/img/thumbnail-default.jpg');
+    @endphp
+
+    <img src="{{ $photoUrl }}"
+         alt="Ảnh sản phẩm"
+         class="rounded"
+         style="width: 60px; height: 60px; object-fit: cover;">
+</td>
+
+
                                 <td>
                                     <span class="badge badge-modern badge-{{ $stock->quantity > 10 ? 'success' : ($stock->quantity > 0 ? 'warning' : 'danger') }}">
                                         {{ $stock->quantity }} cái

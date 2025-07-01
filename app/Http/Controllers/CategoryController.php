@@ -176,4 +176,98 @@ class CategoryController extends Controller
         }
     }
 
+    public function getTreatmentMethodDropdown()
+        {
+            try {
+
+                $categoryIds = [92, 115, 116, 117];
+
+                $categories = Category::with([
+                    'children' => function ($query) {
+                        $query->where('status', 'active')
+                            ->orderBy('display_order', 'asc')
+                            ->orderBy('name', 'asc')
+                            ->with(['posts' => function ($postQuery) {
+                                $postQuery->where('status', 'active')
+                                    ->select('id', 'title', 'slug', 'photo', 'summary', 'description', 'post_cat_id', 'created_at')
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit(5); // Giới hạn 5 bài viết mới nhất cho mỗi subcategory
+                            }]);
+                    },
+                    'posts' => function ($query) {
+                        $query->where('status', 'active')
+                            ->select('id', 'title', 'slug', 'photo', 'summary', 'description', 'post_cat_id', 'created_at')
+                            ->orderBy('created_at', 'desc')
+                            ->limit(5); // 5 bài viết mới nhất cho parent category
+                    }
+                ])
+                    ->where('status', 'active')
+                    ->whereIn('id', $categoryIds)
+                    ->orderByRaw("FIELD(id, " . implode(',', $categoryIds) . ")")
+                    ->get();
+
+                // Format data cho frontend
+                $formattedCategories = $categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                        'icon' => $category->icon ?: 'fas fa-stethoscope',
+                        'summary' => $category->summary,
+                        'photo' => $category->photo,
+                        'url' => "/specialties/{$category->slug}",
+                        'has_children' => $category->children->count() > 0,
+                        'posts_count' => $category->posts->count(),
+                        'posts' => $category->posts->map(function ($post) {
+                            return [
+                                'id' => $post->id,
+                                'title' => $post->title,
+                                'slug' => $post->slug,
+                                'summary' => $post->summary,
+                                'description' => $post->description,
+                                'photo' => $post->photo,
+                                'url' => "/posts/{$post->slug}",
+                                'created_at' => $post->created_at->format('d/m/Y')
+                            ];
+                        }),
+                        'children' => $category->children->map(function ($child) {
+                            return [
+                                'id' => $child->id,
+                                'name' => $child->name,
+                                'slug' => $child->slug,
+    'summary' => $child->summary,
+                                'url' => "/specialties/{$child->slug}",
+                                'posts_count' => $child->posts->count(),
+                                'posts' => $child->posts->map(function ($post) {
+                                    return [
+                                        'id' => $post->id,
+                                        'title' => $post->title,
+                                        'slug' => $post->slug,
+                                        'summary' => $post->summary,
+                                        'description' => $post->description,
+                                        'photo' => $post->photo,
+                                        'url' => "/posts/{$post->slug}",
+                                        'created_at' => $post->created_at->format('d/m/Y')
+                                    ];
+                                })
+                            ];
+                        })
+                    ];
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $formattedCategories,
+                    'total' => $categories->count(),
+                    'message' => 'Lấy dữ liệu dropdown phương pháp chữa bệnh thành công'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Có lỗi xảy ra khi lấy dữ liệu dropdown',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+
 }

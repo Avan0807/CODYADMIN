@@ -31,7 +31,7 @@
                     <table class="table table-modern">
                         <thead>
                             <tr>
-                                <th><i class="fas fa-hashtag mr-2"></i>#</th>
+                                <th><i class="fas fa-hashtag mr-2"></i></th>
                                 <th><i class="fas fa-box mr-2"></i>Sản phẩm</th>
                                 <th><i class="fas fa-random mr-2"></i>Loại</th>
                                 <th><i class="fas fa-layer-group mr-2"></i>Số lượng</th>
@@ -45,7 +45,6 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>
                                     <strong>{{ $item->product->title ?? 'Không rõ' }}</strong><br>
-                                    <small class="text-muted">ID: {{ $item->product_id }}</small>
                                 </td>
                                 <td>
                                     <span class="badge badge-modern badge-{{ $item->action == 'import' ? 'success' : 'danger' }}">

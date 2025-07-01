@@ -10,7 +10,7 @@
             <h4 class="mb-0">📦 Tồn kho đại lý</h4>
             <small class="text-muted">Quản lý số lượng hàng đã chia cho từng đại lý</small>
         </div>
-        <a href="{{ route('admin.agent.stocks.create') }}" class="btn btn-primary">
+        <a href="{{ route('agent.stocks.create') }}" class="btn btn-primary">
             <i class="fas fa-plus mr-1"></i> Nhập hàng cho đại lý
         </a>
     </div>
@@ -26,6 +26,7 @@
                             <th>Đại lý</th>
                             <th>Sản phẩm</th>
                             <th>Tồn kho</th>
+                            <th>Thu hôi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,6 +45,14 @@
                                     {{ $stock->quantity }} cái
                                 </span>
                             </td>
+                            <td>
+                                <form action="{{ route('agent.stocks.revoke', $stock->id) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn thu hồi hàng?')">
+                                    @csrf
+                                    <input type="number" name="quantity" value="1" min="1" style="width: 60px;" required>
+                                    <button type="submit" class="btn btn-sm btn-danger">Thu hồi</button>
+                                </form>
+                            </td>
+
                         </tr>
                         @endforeach
                     </tbody>

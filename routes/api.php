@@ -44,6 +44,9 @@ use App\Http\Controllers\Api\ApiMobileShippingController;
 use App\Services\GHNService;
 use App\Models\Cart;
 use App\Services\ShippingService;
+use App\Http\Controllers\CategoryController;
+
+Route::get('/dropdown/treatment-method', [CategoryController::class, 'getTreatmentMethodDropdown']);
 
 Route::post('/shipping/services', function (Request $request, GHNService $ghn) {
     $request->validate([
