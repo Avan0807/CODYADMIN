@@ -14,6 +14,9 @@
 
   <!-- Agent Dashboard CSS riêng -->
   <link href="{{ asset('backend/css/agent-dashboard.css') }}" rel="stylesheet">
+  
+  <link href="{{asset('backend/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
 
   @stack('styles')
+
 </head>

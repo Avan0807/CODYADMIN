@@ -4,9 +4,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AffiliateOrderController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Agent\DashboardAgentController;
 use App\Http\Controllers\Agent\LoginController;
 use App\Http\Controllers\Agent\LinkController;
-
+use App\Http\Controllers\Agent\OrderAgentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -261,7 +262,6 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
 });
 
 // Agent section start
-
 Route::prefix('agent')->group(function () {
 
     Route::get('/login', [LoginController::class, 'showLoginForm'])
@@ -277,8 +277,22 @@ Route::prefix('agent')->group(function () {
         Route::get('/links', [LinkController::class, 'myLinks'])->name('agent.links.index');
         Route::post('/links/generate/{slug}', [LinkController::class, 'generateLink'])->name('agent.links.generate');
         Route::get('/links/create', [LinkController::class, 'availableProducts'])->name('agent.links.create');
-        Route::get('/dashboard', [\App\Http\Controllers\Agent\DashboardController::class, 'index'])->name('agent.dashboard');
+        Route::get('/dashboard', [DashboardAgentController::class, 'index'])->name('agent.dashboard');
+        
+        // Profile routes
+        Route::get('/profile', [DashboardAgentController::class, 'profile'])->name('agent.profile');
+        Route::put('/profile', [DashboardAgentController::class, 'updateProfile'])->name('agent.profile.update');
+
+        // Orders routes - DI CHUYỂN VÀO ĐÂY
+        Route::prefix('orders')->name('agentorder.')->group(function () {
+            Route::get('/', [OrderAgentController::class, 'index'])->name('index');
+            Route::get('/{id}', [OrderAgentController::class, 'show'])->name('show');
+            Route::get('/export/csv', [OrderAgentController::class, 'export'])->name('export');
+            Route::get('/chart/commission', [OrderAgentController::class, 'getCommissionChart'])->name('chart.commission');
+            Route::get('/widgets/data', [OrderAgentController::class, 'getWidgetData'])->name('widgets.data');
+        });
     });
+
 });
 
 

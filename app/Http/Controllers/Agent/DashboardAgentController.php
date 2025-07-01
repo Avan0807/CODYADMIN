@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\AgentOrder;
 use App\Models\AgentLink;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
-class DashboardController extends Controller
+class DashboardAgentController extends Controller
 {
     public function index()
     {
@@ -49,4 +51,39 @@ class DashboardController extends Controller
             'newLinksThisWeek', 'pendingNotifications'
         ));
     }
+
+    public function profile()
+    {
+        $agent = Auth::guard('agent')->user();
+        return view('agent.profile', compact('agent'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $agent = Auth::guard('agent')->user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:agents,email,' . $agent->id,
+            'phone' => 'required|string|max:20',
+            'location' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
+
+        $data = $request->only(['name', 'email', 'phone', 'location', 'company', 'bio']);
+        
+        if ($request->hasFile('photo')) {
+            // Upload photo logic
+            $photoPath = $request->file('photo')->store('agents', 'public');
+            $data['photo'] = $photoPath;
+        }
+        
+        $agent->update($data);
+        
+        return redirect()->route('agent.profile')->with('success', 'Cập nhật hồ sơ thành công!');
+    }
+
+
 }

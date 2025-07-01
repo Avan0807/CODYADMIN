@@ -9,3 +9,4 @@
 <script src="{{ asset('backend/js/sb-admin-2.min.js') }}"></script>
 
 @stack('scripts')
+

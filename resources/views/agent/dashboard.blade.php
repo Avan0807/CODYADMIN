@@ -261,6 +261,7 @@
 </style>
 @endpush
 
+
 @section('main-content')
 <div class="dashboard-container">
     <div class="container-fluid">
@@ -332,7 +333,7 @@
                     <div class="stats-value">
                         <span class="animate-counter">₫{{ number_format($totalCommission ?? 0) }}</span>
                     </div>
-                    <div class="stats-label">Tổng Hoa Hồng</div>
+                    <div class="stats-label">Tổng Chiết Khấu</div>
                     <div class="stats-change">
                         <i class="fas fa-arrow-up mr-1"></i>+15.7% tháng này
                     </div>
@@ -416,7 +417,7 @@
         <!-- Charts Row -->
 
 
-        <!-- Recent Orders Table -->
+<!-- Recent Orders Table -->
         <div class="row">
             <div class="col-12">
                 <div class="recent-orders-card animate__animated animate__fadeInUp">
@@ -425,115 +426,116 @@
                             <h6 class="mb-0">
                                 <i class="fas fa-list-alt mr-2"></i>Đơn Hàng Gần Đây
                             </h6>
-                            <a href="#" class="text-white">
+                            <a href="{{ route('agentorder.index') }}" class="text-white">
                                 <i class="fas fa-external-link-alt mr-1"></i>Xem tất cả
                             </a>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-    <table class="table table-modern">
-        <thead>
-            <tr>
-                <th><i class="fas fa-hashtag mr-2"></i>Mã Đơn</th>
-                <th><i class="fas fa-box mr-2"></i>Sản Phẩm</th>
-                <th><i class="fas fa-user mr-2"></i>Khách Hàng</th>
-                <th><i class="fas fa-calendar mr-2"></i>Ngày Tạo</th>
-                <th><i class="fas fa-coins mr-2"></i>Hoa Hồng</th>
-                <th><i class="fas fa-info-circle mr-2"></i>Trạng Thái</th>
-                <th><i class="fas fa-cog mr-2"></i>Thao Tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($recentOrders ?? [] as $agentOrder)
-            <tr>
-                <td>
-                    <strong class="text-primary">#{{ $agentOrder->order->order_number ?? 'ORD001' }}</strong>
-                    <br><small class="text-muted">ID: {{ $agentOrder->order_id }}</small>
-                </td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="mr-3">
-                            @if($agentOrder->product->photo ?? false)
-                                <img src="{{ $agentOrder->product->photo }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                            @else
-                                <div class="bg-primary rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-box text-white"></i>
-                                </div>
-                            @endif
-                        </div>
-                        <div>
-                            <div class="font-weight-bold">{{ Str::limit($agentOrder->product->title ?? 'Sản phẩm mẫu', 30) }}</div>
-                            <small class="text-muted">{{ number_format($agentOrder->product->price ?? 0, 0, ',', '.') }}đ</small>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="font-weight-bold">{{ $agentOrder->order->first_name ?? '' }} {{ $agentOrder->order->last_name ?? '' }}</div>
-                    <small class="text-muted">{{ $agentOrder->order->email ?? 'N/A' }}</small>
-                </td>
-                <td>
-                    <div>{{ $agentOrder->created_at->format('d/m/Y') }}</div>
-                    <small class="text-muted">{{ $agentOrder->created_at->format('H:i') }}</small>
-                </td>
-                <td>
-                    <div class="font-weight-bold text-success">
-                        ₫{{ number_format($agentOrder->commission, 0, ',', '.') }}
-                    </div>
-                    <small class="text-muted">{{ $agentOrder->commission_percentage }}%</small>
-                </td>
-                <td>
-                    @if($agentOrder->status == 'paid')
-                        <span class="badge badge-modern badge-success">
-                            <i class="fas fa-check mr-1"></i>Đã thanh toán
-                        </span>
-                        @if($agentOrder->paid_at)
-                            <br><small class="text-muted">{{ $agentOrder->paid_at->format('d/m/Y') }}</small>
-                        @endif
-                    @elseif($agentOrder->status == 'cancelled')
-                        <span class="badge badge-modern badge-danger">
-                            <i class="fas fa-times mr-1"></i>Đã hủy
-                        </span>
-                    @else
-                        <span class="badge badge-modern badge-warning">
-                            <i class="fas fa-clock mr-1"></i>Chờ thanh toán
-                        </span>
-                    @endif
-                </td>
-                <td>
-                    <div class="btn-group">
-                        <button class="btn btn-outline-primary btn-sm" title="Xem chi tiết đơn hàng" onclick="viewOrder({{ $agentOrder->order_id }})">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        @if($agentOrder->status == 'paid')
-                            <button class="btn btn-outline-success btn-sm" title="Đã thanh toán" disabled>
-                                <i class="fas fa-check"></i>
-                            </button>
-                        @endif
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="7" class="text-center py-5">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <div class="text-muted">
-                        <h6>Chưa có đơn hàng nào</h6>
-                        <p>Hãy tạo link affiliate đầu tiên để bắt đầu kiếm hoa hồng!</p>
-                        <a href="{{ route('agent.links.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Tạo Link Ngay
-                        </a>
-                    </div>
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+                            <table class="table table-modern">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-hashtag mr-2"></i>Mã Đơn</th>
+                                        <th><i class="fas fa-box mr-2"></i>Sản Phẩm</th>
+                                        <th><i class="fas fa-user mr-2"></i>Khách Hàng</th>
+                                        <th><i class="fas fa-calendar mr-2"></i>Ngày Tạo</th>
+                                        <th><i class="fas fa-coins mr-2"></i>Chiết Khấu</th>
+                                        <th><i class="fas fa-info-circle mr-2"></i>Trạng Thái</th>
+                                        <th><i class="fas fa-cog mr-2"></i>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($recentOrders ?? [] as $agentOrder)
+                                    <tr>
+                                        <td>
+                                            <strong class="text-primary">#{{ $agentOrder->order->order_number ?? 'ORD' . str_pad($agentOrder->order_id, 4, '0', STR_PAD_LEFT) }}</strong>
+                                            <br><small class="text-muted">ID: {{ $agentOrder->order_id }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="mr-3">
+                                                    @if($agentOrder->product->photo ?? false)
+                                                        <img src="{{ $agentOrder->product->photo }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                                    @else
+                                                        <div class="bg-primary rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-box text-white"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <div class="font-weight-bold">{{ Str::limit($agentOrder->product->title ?? 'Sản phẩm', 25) }}</div>
+                                                    <small class="text-muted">₫{{ number_format($agentOrder->product->price ?? 0, 0, ',', '.') }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="font-weight-bold">{{ $agentOrder->order->first_name ?? '' }} {{ $agentOrder->order->last_name ?? '' }}</div>
+                                            <small class="text-muted">{{ $agentOrder->order->email ?? 'N/A' }}</small>
+                                        </td>
+                                        <td>
+                                            <div>{{ $agentOrder->created_at->format('d/m/Y') }}</div>
+                                            <small class="text-muted">{{ $agentOrder->created_at->format('H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="font-weight-bold text-success">
+                                                ₫{{ number_format($agentOrder->commission, 0, ',', '.') }}
+                                            </div>
+                                            <small class="text-muted">{{ $agentOrder->commission_percentage }}%</small>
+                                        </td>
+                                        <td>
+                                            @if($agentOrder->status == 'paid')
+                                                <span class="badge badge-modern badge-success">
+                                                    <i class="fas fa-check mr-1"></i>Đã thanh toán
+                                                </span>
+                                                @if($agentOrder->paid_at)
+                                                    <br><small class="text-muted">{{ $agentOrder->paid_at->format('d/m/Y') }}</small>
+                                                @endif
+                                            @elseif($agentOrder->status == 'cancelled')
+                                                <span class="badge badge-modern badge-danger">
+                                                    <i class="fas fa-times mr-1"></i>Đã hủy
+                                                </span>
+                                            @else
+                                                <span class="badge badge-modern badge-warning">
+                                                    <i class="fas fa-clock mr-1"></i>Chờ thanh toán
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ route('agentorder.show', $agentOrder->id) }}" class="btn btn-outline-primary btn-sm" title="Xem chi tiết đơn hàng">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if($agentOrder->status == 'paid')
+                                                    <button class="btn btn-outline-success btn-sm" title="Đã thanh toán" disabled>
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                            <div class="text-muted">
+                                                <h6>Chưa có đơn hàng nào</h6>
+                                                <p>Hãy tạo link affiliate đầu tiên để bắt đầu kiếm chiết khấu!</p>
+                                                <a href="{{ route('agent.links.create') }}" class="btn btn-primary">
+                                                    <i class="fas fa-plus mr-2"></i>Tạo Link Ngay
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
 
     </div>
 </div>
