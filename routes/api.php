@@ -134,6 +134,11 @@ Route::prefix('forum')->group(function () {
     // Lấy chi tiết thread theo slug
     Route::get('/threads/{slug}', [ApiForumThreadController::class, 'getThreadBySlug']);
 
+    
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/forum/create-threads', [ApiForumThreadController::class, 'apiStoreThread']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

@@ -140,4 +140,20 @@ class ForumThread extends Model
     {
         return $this->last_posted_at ? $this->last_posted_at->diffForHumans() : null;
     }
+
+    // ===== SLUG HELPER =====
+    public static function createSlug($title)
+    {
+        $slug = \Str::slug($title);
+        $originalSlug = $slug;
+        $i = 1;
+
+        // Kiểm tra và đảm bảo slug là duy nhất
+        while (self::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $i++;
+        }
+
+        return $slug;
+    }
+
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ForumThread;
 use App\Models\Category;
 use App\Models\ForumPost;
+use App\Models\ForumStats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -422,5 +423,111 @@ class ApiForumThreadController extends Controller
             ], 500);
         }
     }
+
+    public function apiStoreThread(Request $request)
+    {
+        try {
+            // Lấy user từ token
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xác thực người dùng.',
+                ], 401);
+            }
+
+            // Validation
+            $validated = $request->validate([
+                'title' => 'required|string|min:5|max:255',
+                'content' => 'required|string|min:10',
+                'category_id' => 'required|exists:categories,id'
+            ]);
+
+            // Kiểm tra danh mục có hợp lệ không
+            $category = Category::where('id', $validated['category_id'])
+                ->where('type', 'forum')
+                ->where('status', 'active')
+                ->first();
+
+            if (!$category) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Danh mục không hợp lệ hoặc không tồn tại'
+                ], 400);
+            }
+
+            // Tạo slug unique
+            $slug = ForumThread::createSlug($validated['title']);
+
+            // Tạo thread mới
+            $thread = ForumThread::create([
+                'title' => $validated['title'],
+                'slug' => $slug,
+                'content' => $validated['content'],
+                'category_id' => $category->id,
+                'user_id' => $user->id,
+                'last_posted_at' => now(),
+                'last_posted_by' => $user->id
+            ]);
+
+            // Cập nhật hoặc tạo forum stats
+            ForumStats::updateOrCreate(
+                ['category_id' => $category->id],
+                [
+                    'thread_count' => \DB::raw('thread_count + 1'),
+                    'last_thread_id' => $thread->id,
+                    'last_posted_at' => now(),
+                    'last_posted_by' => $user->id
+                ]
+            );
+
+            // Load relationships
+            $thread->load(['user', 'category']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo chủ đề thành công!',
+                'data' => [
+                    'thread' => [
+                        'id' => $thread->id,
+                        'title' => $thread->title,
+                        'slug' => $thread->slug,
+                        'content' => $thread->content,
+                        'category_id' => $thread->category_id,
+                        'user_id' => $thread->user_id,
+                        'view_count' => $thread->view_count,
+                        'reply_count' => $thread->reply_count,
+                        'is_sticky' => $thread->is_sticky,
+                        'is_locked' => $thread->is_locked,
+                        'created_at' => $thread->created_at->format('Y-m-d H:i:s'),
+                        'last_posted_at' => $thread->last_posted_at->format('Y-m-d H:i:s'),
+                    ],
+                    'category' => [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug
+                    ],
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'photo' => $user->photo ?? asset('images/avatar-placeholder.png')
+                    ]
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tạo chủ đề',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }
