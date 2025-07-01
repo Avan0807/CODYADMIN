@@ -141,8 +141,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/forum/create-threads', [ApiForumThreadController::class, 'apiStoreThread']);
 });
 
+
+Route::get('/forum/threads/{threadId}/comments', [ApiForumThreadController::class, 'getThreadComments']);
+
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/forum/threads/{thread}/comment', [ApiForumThreadController::class, 'commentOnThread']);
+    Route::post('/forum/threads/{threadId}/comments', [ApiForumThreadController::class, 'apiAddComment']);
 });
 
 // Route lấy 6 danh mục, mỗi danh mục có 3 bài viết mới nhất
