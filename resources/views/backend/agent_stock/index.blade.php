@@ -25,6 +25,7 @@
                             <th>#</th>
                             <th>Đại lý</th>
                             <th>Sản phẩm</th>
+                            <th>Ảnh</th>
                             <th>Tồn kho</th>
                             <th>Thu hôi</th>
                         </tr>
@@ -40,6 +41,11 @@
                             <td>
                                 {{ $stock->product->title ?? 'Không rõ' }}
                             </td>
+                            <td class="d-flex align-items-center gap-2">
+                                @php $photos = explode(',', $stock->product->photo ?? ''); @endphp
+                                <img src="{{ $photos[0] ?? asset('backend/img/thumbnail-default.jpg') }}"
+                                    alt="Ảnh" style="width: 40px; height: 40px; object-fit: cover;" class="rounded">
+                            </td>
                             <td>
                                 <span class="badge badge-{{ $stock->quantity > 10 ? 'success' : 'warning' }}">
                                     {{ $stock->quantity }} cái
@@ -49,7 +55,9 @@
                                 <form action="{{ route('agent.stocks.revoke', $stock->id) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn thu hồi hàng?')">
                                     @csrf
                                     <input type="number" name="quantity" value="1" min="1" style="width: 60px;" required>
-                                    <button type="submit" class="btn btn-sm btn-danger">Thu hồi</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-undo-alt"></i> Thu hồi
+                                    </button>
                                 </form>
                             </td>
 
