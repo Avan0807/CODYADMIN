@@ -48,10 +48,7 @@ class ApiSpecialtiesController extends Controller
             ->where('products.status', 'active')
             ->orderBy('products.id')
             ->limit(10)
-            ->get([
-                'products.id', 'products.title', 'products.slug', 'products.summary', 'products.photo'
-            ]);
-
+            ->get(); // lấy toàn bộ cột
 
 
         return response()->json([

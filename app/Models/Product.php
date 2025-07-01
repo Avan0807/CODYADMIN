@@ -314,4 +314,16 @@ class Product extends Model
         }
         return 'in_stock';
     }
+    
+    public function agentStocks()
+    {
+        return $this->hasMany(AgentProductStock::class);
+    }
+
+    public function agentStockHistories()
+    {
+        return $this->hasMany(AgentStockHistory::class);
+    }
+
+
 }

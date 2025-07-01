@@ -76,4 +76,15 @@ class Agent extends Authenticatable
     {
         return $query->where('rating', '>=', $minRating);
     }
+    
+    public function stocks()
+    {
+        return $this->hasMany(AgentProductStock::class);
+    }
+
+    public function stockHistories()
+    {
+        return $this->hasMany(AgentStockHistory::class);
+    }
+
 }

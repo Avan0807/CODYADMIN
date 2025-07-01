@@ -14,7 +14,7 @@
                     <p class="mb-0 opacity-75">Theo dõi và quản lý tất cả đơn hàng của bạn</p>
                 </div>
                 <div class="d-flex">
-                    <a href="{{ route('agent.orders.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" 
+                    <a href="{{ route('agentorder.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" 
                        class="quick-action-btn mr-2">
                         <i class="fas fa-download mr-2"></i>Xuất Excel
                     </a>
@@ -29,7 +29,7 @@
         <!-- Filters -->
         <div class="chart-card animate__animated animate__fadeInUp mb-4">
             <div class="p-3">
-                <form method="GET" action="{{ route('agent.orders.index') }}" id="filterForm">
+                <form method="GET" action="{{ route('agentorder.index') }}" id="filterForm">
                     <div class="row align-items-end">
                         <div class="col-md-3">
                             <label for="search" class="form-label text-white">Tìm kiếm</label>
@@ -69,7 +69,7 @@
                                 <button type="submit" class="btn btn-light btn-sm">
                                     <i class="fas fa-filter mr-1"></i>Lọc
                                 </button>
-                                <a href="{{ route('agent.orders.index') }}" class="btn btn-outline-light btn-sm">
+                                <a href="{{ route('agentorder.index') }}" class="btn btn-outline-light btn-sm">
                                     <i class="fas fa-times mr-1"></i>Xóa lọc
                                 </a>
                             </div>
@@ -165,7 +165,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('agent.orders.show', $agentOrder->id) }}" 
+                                        <a href="{{ route('agentorder.show', $agentOrder->id) }}" 
                                            class="btn btn-outline-primary btn-sm" title="Xem chi tiết">
                                             <i class="fas fa-eye"></i>
                                         </a>

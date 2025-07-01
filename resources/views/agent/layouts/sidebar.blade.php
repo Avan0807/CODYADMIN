@@ -25,6 +25,14 @@
     </a>
   </li>
 
+  <!-- Commission - MỚI -->
+  <li class="nav-item {{ request()->routeIs('agent.commissions*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('agentcommissions.index') }}">
+          <i class="fas fa-coins"></i>
+          <span>Thống kê hoa hồng</span>
+      </a>
+  </li>
+
   <!-- Orders -->
   <li class="nav-item {{ request()->routeIs('agentorder*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('agentorder.index') }}">
@@ -35,10 +43,23 @@
 
   <!-- Affiliate Links -->
   <li class="nav-item {{ request()->routeIs('agent.links*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('agent.links.index') }}">
-      <i class="fas fa-link"></i>
-      <span>Link tiếp thị</span>
-    </a>
+      <a class="nav-link" href="{{ route('agent.links.index') }}">
+        <i class="fas fa-link"></i>
+        <span>Link tiếp thị</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{ route('agent.stocks.my') }}">
+          <i class="fas fa-box"></i>
+          <span>Tồn kho của tôi</span>
+      </a>
+  </li>
+  <li class="nav-item">
+      <a class="nav-link" href="{{ route('agent.stocks.myHistory') }}">
+          <i class="fas fa-history"></i>
+          <span>Lịch sử kho</span>
+      </a>
   </li>
 
   <!-- Logout -->

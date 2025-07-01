@@ -172,6 +172,31 @@
       </div>
     </li>
 
+  <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Đại lý
+    </div>
+
+    <li class="nav-item has-submenu">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#stockSubmenu" aria-expanded="false">
+            <i class="fas fa-warehouse"></i>
+            <span>Kho đại lý</span>
+        </a>
+        <div id="stockSubmenu" class="collapse" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="{{ route('admin.agent.stocks.index') }}">
+                    📦 Xem tồn kho
+                </a>
+                <a class="collapse-item" href="{{ route('admin.agent.stocks.create') }}">
+                    ➕ Nhập hàng
+                </a>
+            </div>
+        </div>
+    </li>
+
+
 
   <hr class="sidebar-divider">
 
