@@ -18,7 +18,7 @@ class ApiCategoryController extends Controller
         try {
             // Danh sách ID categories cần lấy
             $categoryIds = [76, 79, 83, 86, 115, 116];
-            
+
             // Lấy các categories với 3 bài viết mới nhất của mỗi category
             $categories = Category::whereIn('id', $categoryIds)
                 ->where('status', 'active')
@@ -80,7 +80,7 @@ class ApiCategoryController extends Controller
         try {
             // Danh sách ID categories cần lấy (Dịch vụ y tế)
             $medicalServiceIds = [88, 92, 96, 100, 115, 116];
-            
+
             // Lấy các categories với 3 bài viết mới nhất của mỗi category
             $categories = Category::whereIn('id', $medicalServiceIds)
                 ->where('status', 'active')
@@ -199,6 +199,7 @@ class ApiCategoryController extends Controller
                     'title' => $post->title,
                     'slug' => $post->slug,
                     'summary' => $post->summary,
+                    'description' => $post->description ?? '',
                     'short_desc' => $post->short_desc,
                     'photo' => $post->photo,
                     'is_featured' => $post->is_featured,
