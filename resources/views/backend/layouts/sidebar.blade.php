@@ -39,6 +39,19 @@
         </a>
     </li>
 
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Hỗ Trợ 
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('phone_support.index') }}">
+            <i class="fas fa-link"></i>
+            <span>Số điện thoại hỗ trợ</span>
+        </a>
+    </li>
+
     <!-- Heading -->
     <hr class="sidebar-divider">
     <!-- Heading -->

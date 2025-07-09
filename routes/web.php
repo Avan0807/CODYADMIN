@@ -12,6 +12,8 @@ use App\Http\Controllers\Agent\CommissionAgentController;
 use App\Http\Controllers\Agent\AgentProductStockController;
 use App\Http\Controllers\Agent\AgentStockHistoryController;
 use App\Http\Controllers\AdminAgentProductStockController;
+use App\Http\Controllers\PhoneSupportController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -274,6 +276,8 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     // Lịch sử nhập hàng
     Route::get('agent-stocks/history', [AdminAgentProductStockController::class, 'history'])
     ->name('agent.stocks.history');
+
+    Route::get('/phone-support', [PhoneSupportController::class, 'index'])->name('phone_support.index');
 
 });
 
